@@ -1,2 +1,2 @@
-# Roomora-AirbnbClone
+# Bookly-AirbnbClone
 
