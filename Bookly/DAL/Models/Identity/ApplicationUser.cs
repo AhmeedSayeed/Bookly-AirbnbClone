@@ -1,3 +1,4 @@
+using DAL.Models.Common;
 using DAL.Models.Interactions;
 using DAL.Models.Property;
 using DAL.Models.Reservations;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 
 namespace DAL.Models.Identity
 {
-    public class ApplicationUser : IdentityUser<int>
+    public class ApplicationUser : IdentityUser<int>, ISoftDeletable
     {
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
@@ -15,6 +16,8 @@ namespace DAL.Models.Identity
         public string? ProfilePhotoUrl { get; set; }
         public bool IsHost { get; set; }
         public DateTime CreatedAt { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
 
         // Navigation Properties
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new HashSet<RefreshToken>();
