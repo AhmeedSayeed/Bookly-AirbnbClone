@@ -1,10 +1,11 @@
+using DAL.Models.Common;
 using DAL.Models.Identity;
 using DAL.Models.Reservations;
 using System;
 
 namespace DAL.Models.Interactions
 {
-    public class Message
+    public class Message : ISoftDeletable
     {
         public int Id { get; set; }
 
@@ -16,6 +17,8 @@ namespace DAL.Models.Interactions
         public string Content { get; set; } = string.Empty;
         public DateTime SentAt { get; set; }
         public bool IsRead { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime? DeletedAt { get; set; }
 
         // Navigation Properties
         public ApplicationUser Sender { get; set; } = null!;
