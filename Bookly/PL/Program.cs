@@ -1,8 +1,19 @@
+using BLL.Interfaces;
+using BLL.Mapping;
+using BLL.Services;
+using BLL.Services.Implementation;
+using BLL.Services.Interfaces;
+using BLL.Settings;
 using DAL;
 using DAL.Models.Identity;
+using DAL.Repository.Implementation;
+using DAL.Repository.Interfaces;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace PL
 {
@@ -18,6 +29,8 @@ namespace PL
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorageSettings"));
+            builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
             {
@@ -35,23 +48,72 @@ namespace PL
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
 
-            builder.Services.ConfigureApplicationCookie(options =>
+            var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+
+            builder.Services.AddAuthentication(options =>
             {
-                options.LoginPath = "/Account/Login";
-                options.LogoutPath = "/Account/Logout";
-                options.AccessDeniedPath = "/Account/AccessDenied";
-                options.Cookie.HttpOnly = true;
-                options.ExpireTimeSpan = TimeSpan.FromDays(14);
-                options.SlidingExpiration = true;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false; // Set to true in production
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtSettings.Issuer,
+                    ValidAudience = jwtSettings.Audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.SigningKey)),
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context.Request.Cookies.ContainsKey("access_token"))
+                        {
+                            context.Token = context.Request.Cookies["access_token"];
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
+
+            builder.Services.ConfigureApplicationCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+                    options.Cookie.HttpOnly = true;
+                    options.ExpireTimeSpan = TimeSpan.FromDays(14);
+                    options.SlidingExpiration = true;
+                });
 
             builder.Services.AddAutoMapper(config =>
             {
-
+                config.AddProfile<BookingProfile>();
+                config.AddProfile<ListingProfile>();
+                config.AddProfile<MessageProfile>();
+                config.AddProfile<NotificationProfile>();
+                config.AddProfile<PaymentProfile>();
+                config.AddProfile<ReviewProfile>();
+                config.AddProfile<UserProfile>();
             });
 
             builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+            builder.Services.AddScoped<IFileUploader, FileUploader>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped<IHomeService, HomeService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
 
             var app = builder.Build();

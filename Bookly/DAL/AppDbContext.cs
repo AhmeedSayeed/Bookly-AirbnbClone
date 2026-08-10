@@ -1,4 +1,5 @@
-﻿using DAL.Models.Common;
+﻿using DAL.Constants;
+using DAL.Models.Common;
 using DAL.Models.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -18,6 +19,13 @@ namespace DAL
             base.OnModelCreating(builder);
 
             builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+
+            builder.Entity<IdentityRole<int>>().HasData(
+                new IdentityRole<int> { Id = 1, Name = AppRoles.Admin, NormalizedName = "ADMIN", ConcurrencyStamp = "1" },
+                new IdentityRole<int> { Id = 2, Name = AppRoles.Host, NormalizedName = "HOST", ConcurrencyStamp = "2" },
+                new IdentityRole<int> { Id = 3, Name = AppRoles.Guest, NormalizedName = "GUEST", ConcurrencyStamp = "3" }
+            );
+
             foreach (var entityType in builder.Model.GetEntityTypes())
             {
                 if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))

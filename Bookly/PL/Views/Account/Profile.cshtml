@@ -1,0 +1,113 @@
+@model BLL.ViewModels.Account.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Personal Info";
+
+    // Safely extract initials
+    var firstInitial = !string.IsNullOrEmpty(Model.FirstName) ? Model.FirstName.Substring(0, 1) : "";
+    var lastInitial = !string.IsNullOrEmpty(Model.LastName) ? Model.LastName.Substring(0, 1) : "";
+    var initials = $"{firstInitial}{lastInitial}".ToUpper();
+
+    var hasPhoto = !string.IsNullOrEmpty(Model.ProfilePhotoUrl);
+}
+
+<div class="auth-container" style="max-width: 640px;">
+
+    <form asp-controller="Account" asp-action="Profile" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="form-error" style="margin-bottom: var(--space-4);"></div>
+
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="CreatedAt" />
+        <input type="hidden" asp-for="IsHost" />
+        <input type="hidden" asp-for="ProfilePhotoUrl" />
+
+        <!-- Interactive Image Uploader -->
+        <div style="text-align: center;">
+            <label for="ProfilePhoto" class="profile-upload-wrapper">
+
+                <!-- The Image Element -->
+                <img src="@(hasPhoto ? Model.ProfilePhotoUrl : "#")"
+                     alt="Profile Photo"
+                     class="profile-upload-image"
+                     id="profileImagePreview"
+                     style="display: @(hasPhoto ? "block" : "none");" />
+
+                <!-- The Initials Fallback Element -->
+                <div class="avatar-initials"
+                     id="profileInitialsPreview"
+                     style="width: 100%; height: 100%; font-size: var(--fs-2xl); display: @(hasPhoto ? "none" : "flex"); border: none;">
+                    @initials
+                </div>
+
+                <!-- Hover Overlay -->
+                <div class="profile-upload-overlay">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                        <circle cx="12" cy="13" r="4"></circle>
+                    </svg>
+                </div>
+            </label>
+
+            <!-- Hidden File Input -->
+            <input type="file" asp-for="ProfilePhoto" id="ProfilePhoto" style="display: none;" accept="image/png, image/jpeg, image/webp" onchange="previewImage(event)" />
+            <span asp-validation-for="ProfilePhoto" class="form-error"></span>
+        </div>
+
+        <h1 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-6); text-align: center;">Personal info</h1>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+            <div class="form-group">
+                <label asp-for="FirstName" class="form-label">First Name</label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="form-error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="LastName" class="form-label">Last Name</label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="form-error"></span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Email" class="form-label">Email address</label>
+            <input asp-for="Email" class="form-control" readonly style="background: var(--color-surface-sunk); color: var(--color-text-muted); cursor: not-allowed;" />
+        </div>
+
+        <div class="form-group" style="margin-top: var(--space-4);">
+            <label asp-for="Bio" class="form-label">About</label>
+            <textarea asp-for="Bio" class="form-control" rows="5" placeholder="Tell hosts and guests about yourself"></textarea>
+            <span asp-validation-for="Bio" class="form-error"></span>
+        </div>
+
+        <div style="margin-top: var(--space-6); display: flex; justify-content: flex-end; gap: var(--space-3);">
+            <a asp-controller="Home" asp-action="Index" class="btn-primary" style="background: transparent; border: 1px solid var(--color-border-strong); color: var(--color-text);">Cancel</a>
+            <button type="submit" class="btn-primary">Save changes</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(event) {
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgPreview = document.getElementById('profileImagePreview');
+                    const initialsPreview = document.getElementById('profileInitialsPreview');
+
+                    // Inject the new image source
+                    imgPreview.src = e.target.result;
+
+                    // Toggle visibility
+                    imgPreview.style.display = 'block';
+                    if (initialsPreview) {
+                        initialsPreview.style.display = 'none';
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
