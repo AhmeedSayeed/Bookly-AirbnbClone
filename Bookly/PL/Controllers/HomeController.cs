@@ -1,25 +1,36 @@
+using BLL.Interfaces;
+using BLL.ViewModels.Home;
 using Microsoft.AspNetCore.Mvc;
-using PL.Models;
-using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace PL.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly IHomeService _homeService;
+
+        public HomeController(IHomeService homeService)
         {
-            return View();
+            _homeService = homeService;
         }
 
-        public IActionResult Privacy()
+        [HttpGet]
+        public async Task<IActionResult> Index()
         {
-            return View();
+            var response = await _homeService.GetHomeDataAsync();
+
+            if (!response.Succeeded)
+            {
+                return View(new HomeViewModel());
+            }
+
+            return View(response.Data);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
     }
 }

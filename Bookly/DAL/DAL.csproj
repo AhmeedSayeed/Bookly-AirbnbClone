@@ -18,7 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Constants\" />
     <Folder Include="Repository\Implementation\" />
     <Folder Include="Repository\Interfaces\" />
     <Folder Include="Specification\Implementation\" />
