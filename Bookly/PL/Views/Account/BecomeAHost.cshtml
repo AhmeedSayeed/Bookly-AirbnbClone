@@ -1,0 +1,58 @@
+@model BecomeAHostViewModel
+
+@{
+    ViewData["Title"] = "Become a Host";
+    var currentStatus = ViewBag.VerificationStatus as string;
+}
+
+<div style="max-width: 600px; margin: 0 auto; padding: var(--space-8) var(--gutter);">
+    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-4);">Become a Host</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="padding: var(--space-4); background: var(--color-surface-sunk); color: var(--color-success); border-radius: var(--radius-sm); margin-bottom: var(--space-5);">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div style="padding: var(--space-4); background: var(--color-surface-sunk); color: var(--color-navy); border-radius: var(--radius-sm); margin-bottom: var(--space-5); border: 1px solid var(--color-border-strong);">
+            @TempData["InfoMessage"]
+        </div>
+    }
+
+    @if (currentStatus == "Pending")
+    {
+        <!-- Pending State -->
+        <div style="padding: var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); text-align: center;">
+            <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-2);">Application Under Review</h2>
+            <p style="color: var(--color-text-muted); margin-bottom: 0;">Our team is currently reviewing your ID document. We will notify you once your account has been upgraded to a Host profile.</p>
+        </div>
+    }
+    else
+    {
+        <!-- Form State (New or Rejected) -->
+        <p style="font-size: var(--fs-base); color: var(--color-text-muted); margin-bottom: var(--space-6);">To ensure the safety of our community, we require a valid government-issued ID before you can list a property.</p>
+
+        @if (currentStatus == "Rejected")
+        {
+            <div style="padding: var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); margin-bottom: var(--space-5);">
+                Your previous application was rejected. Please ensure your ID is clear, readable, and valid before applying again.
+            </div>
+        }
+
+        <form asp-action="BecomeAHost" method="post" enctype="multipart/form-data" style="background: var(--color-surface); border: 1px solid var(--color-border); padding: var(--space-5); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);">
+            <div asp-validation-summary="ModelOnly" style="color: var(--color-danger); margin-bottom: var(--space-4);"></div>
+
+            <div class="form-group" style="margin-bottom: var(--space-6);">
+                <label asp-for="IdDocument" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">Upload Government ID</label>
+                <input type="file" asp-for="IdDocument" accept="image/*,.pdf" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+                <span asp-validation-for="IdDocument" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
+                <p style="font-size: var(--fs-xs); color: var(--color-text-muted); margin-top: var(--space-2);">Accepted formats: JPG, PNG, PDF.</p>
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; padding: var(--space-4); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface);">Submit for Verification</button>
+        </form>
+    }
+</div>

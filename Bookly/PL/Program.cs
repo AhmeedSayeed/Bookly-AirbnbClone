@@ -30,6 +30,7 @@ namespace PL
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorageSettings"));
+            builder.Services.Configure<BLL.Settings.VerificationSettings>(builder.Configuration.GetSection("VerificationSettings"));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
@@ -114,6 +115,9 @@ namespace PL
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IHomeService, HomeService>();
             builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IListingService, ListingService>();
+            builder.Services.AddScoped<IAmenityService, AmenityService>();
+            builder.Services.AddScoped<IVerificationService, VerificationService>();
 
 
             var app = builder.Build();
