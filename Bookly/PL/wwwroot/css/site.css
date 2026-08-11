@@ -438,3 +438,18 @@ h1, h2, h3, .font-display {
 .profile-upload-wrapper:hover .profile-upload-overlay {
     opacity: 1;
 }
+
+.nav-host-link {
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    transition: background var(--duration-fast) var(--ease-smooth);
+}
+
+    .nav-host-link:hover {
+        background: var(--color-surface-sunk);
+    }

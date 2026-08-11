@@ -3,10 +3,13 @@ using BLL.DTOs.Account;
 using BLL.DTOs.Auth;
 using BLL.Interfaces;
 using BLL.Services;
+using BLL.Services.Implementation;
 using BLL.Services.Interfaces;
 using BLL.ViewModels.Account;
+using DAL.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
@@ -19,11 +22,16 @@ namespace PL.Controllers
         private readonly IUserService _userService;
         private readonly IAuthService _authService;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IVerificationService _verificationService;
 
-        public AccountController(IUserService userService, IAuthService authService, IMapper mapper)
+        public AccountController(UserManager<ApplicationUser> userManager,
+            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper)
         {
+            _userManager = userManager;
             _userService = userService;
             _authService = authService;
+            _verificationService = verificationService;
             _mapper = mapper;
         }
 
@@ -161,6 +169,62 @@ namespace PL.Controllers
             Response.Cookies.Delete("refresh_token");
 
             return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> BecomeAHost()
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user != null && user.IsHost)
+            {
+                return RedirectToAction("MyListings", "Listings");
+            }
+
+            var verificationResponse = await _verificationService.GetVerificationByUserIdAsync(userId);
+            var verification = verificationResponse.Data;
+
+            if (verification != null)
+            {
+                ViewBag.VerificationStatus = verification.Status.ToString();
+            }
+
+            return View(new BecomeAHostViewModel());
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BecomeAHost(BecomeAHostViewModel model)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
+
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user != null && user.IsHost) return RedirectToAction("MyListings", "Listings");
+
+            if (!ModelState.IsValid)
+            {
+                var verificationResponse = await _verificationService.GetVerificationByUserIdAsync(userId);
+                if (verificationResponse.Data != null)
+                    ViewBag.VerificationStatus = verificationResponse.Data.Status.ToString();
+
+                return View(model);
+            }
+
+            var response = await _verificationService.SubmitVerificationAsync(userId, model);
+
+            if (!response.Succeeded)
+            {
+                ModelState.AddModelError(string.Empty, response.Message ?? "Failed to submit application.");
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Your ID has been submitted and is under review.";
+            return RedirectToAction(nameof(BecomeAHost));
         }
 
         private void SetTokenCookies(AuthResultDto data, bool rememberMe)
