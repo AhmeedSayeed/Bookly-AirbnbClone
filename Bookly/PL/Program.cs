@@ -1,3 +1,4 @@
+using BLL.Hubs;
 using BLL.Interfaces;
 using BLL.Mapping;
 using BLL.Services;
@@ -30,7 +31,6 @@ namespace PL
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorageSettings"));
-            builder.Services.Configure<BLL.Settings.VerificationSettings>(builder.Configuration.GetSection("VerificationSettings"));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
@@ -109,6 +109,8 @@ namespace PL
 
             builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
+            builder.Services.AddSignalR();
+
             builder.Services.AddScoped<IFileUploader, FileUploader>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
@@ -118,6 +120,8 @@ namespace PL
             builder.Services.AddScoped<IListingService, ListingService>();
             builder.Services.AddScoped<IAmenityService, AmenityService>();
             builder.Services.AddScoped<IVerificationService, VerificationService>();
+            builder.Services.AddScoped<IAdminService, AdminService>();
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
             var app = builder.Build();
@@ -140,6 +144,8 @@ namespace PL
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
+
+            app.MapHub<NotificationHub>("/hubs/notifications");
 
             app.Run();
         }

@@ -1,0 +1,87 @@
+@model NotificationsViewModel
+
+@{
+    ViewData["Title"] = "Notifications";
+}
+
+<div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
+        <h1 class="font-display" style="font-size: var(--fs-xl); margin: 0;">Notifications</h1>
+        
+        @if (Model.UnreadCount > 0)
+        {
+            <form asp-action="MarkAllAsRead" method="post">
+                <button type="submit" style="background: transparent; border: none; color: var(--color-navy); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; text-decoration: underline;">
+                    Mark all as read
+                </button>
+            </form>
+        }
+    </div>
+
+    <div style="background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); overflow: hidden;">
+        @if (Model.Notifications.Any())
+        {
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                @foreach (var notification in Model.Notifications)
+                {
+                    <li style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); background: @(notification.IsRead ? "transparent" : "var(--color-surface-sunk)"); display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4);">
+                        
+                        <!-- Notification Content -->
+                        <div style="flex-grow: 1;">
+                            <p style="margin: 0 0 var(--space-1) 0; font-size: var(--fs-sm); color: var(--color-text); font-weight: @(notification.IsRead ? "400" : "600");">
+                                @notification.Message
+                            </p>
+                            <span style="font-size: var(--fs-xs); color: var(--color-text-muted);">
+                                @notification.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
+                            </span>
+                        </div>
+
+                        <!-- Actions (Link / Mark Read) -->
+                        <div style="display: flex; gap: var(--space-3); align-items: center;">
+                            @if (!string.IsNullOrEmpty(notification.Link))
+                            {
+                                <a href="@notification.Link" style="color: var(--color-brass); font-size: var(--fs-sm); font-weight: 600; text-decoration: none;">View</a>
+                            }
+                            
+                            @if (!notification.IsRead)
+                            {
+                                <form asp-action="MarkAsRead" method="post">
+                                    <input type="hidden" name="id" value="@notification.Id" />
+                                    <button type="submit" style="background: var(--color-surface); border: 1px solid var(--color-border-strong); color: var(--color-navy); font-size: var(--fs-xs); font-weight: 600; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); cursor: pointer;">
+                                        Mark Read
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+
+            <!-- Pagination Controls -->
+            @if (Model.PageInfo.TotalPages > 1)
+            {
+                <div style="padding: var(--space-4); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-surface-sunk);">
+                    <p style="margin: 0; font-size: var(--fs-xs); color: var(--color-text-muted);">
+                        Showing page @Model.PageInfo.PageNumber of @Model.PageInfo.TotalPages
+                    </p>
+                    <div style="display: flex; gap: var(--space-2);">
+                        @if (Model.PageInfo.PageNumber > 1)
+                        {
+                            <a href="?pageNumber=@(Model.PageInfo.PageNumber - 1)&pageSize=@Model.PageInfo.PageSize" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-text); text-decoration: none; font-size: var(--fs-sm); background: var(--color-surface);">Prev</a>
+                        }
+                        @if (Model.PageInfo.PageNumber < Model.PageInfo.TotalPages)
+                        {
+                            <a href="?pageNumber=@(Model.PageInfo.PageNumber + 1)&pageSize=@Model.PageInfo.PageSize" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-text); text-decoration: none; font-size: var(--fs-sm); background: var(--color-surface);">Next</a>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="padding: var(--space-6); text-align: center; color: var(--color-text-muted);">
+                <p style="margin: 0; font-size: var(--fs-sm);">You're all caught up. No notifications yet.</p>
+            </div>
+        }
+    </div>
+</div>

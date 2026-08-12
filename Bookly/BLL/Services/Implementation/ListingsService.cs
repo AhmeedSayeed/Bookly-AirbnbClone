@@ -105,7 +105,15 @@ namespace BLL.Services.Implementation
                 int displayOrder = 1;
                 foreach (var photo in model.NewPhotos)
                 {
-                    var photoUrl = await _fileUploader.SaveFileAsync(photo, "listings");
+                    var uploadResponse = await _fileUploader.SaveFileAsync(photo, "listings", true);
+
+                    if (!uploadResponse.Succeeded)
+                    {
+                        return Response<int>.Fail(ResponseStatus.Error, $"Failed to upload photo: {uploadResponse.Message}");
+                    }
+
+
+                    var photoUrl = uploadResponse.Data;
 
                     listing.Photos.Add(new ListingPhoto
                     {

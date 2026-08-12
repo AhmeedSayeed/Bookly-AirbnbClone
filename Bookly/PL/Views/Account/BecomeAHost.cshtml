@@ -46,8 +46,39 @@
             <div asp-validation-summary="ModelOnly" style="color: var(--color-danger); margin-bottom: var(--space-4);"></div>
 
             <div class="form-group" style="margin-bottom: var(--space-6);">
-                <label asp-for="IdDocument" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">Upload Government ID</label>
-                <input type="file" asp-for="IdDocument" accept="image/*,.pdf" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+                <label style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">Government ID</label>
+
+                <!-- Custom File Upload Container -->
+                <div style="position: relative; border: 2px dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-6); text-align: center; transition: border-color var(--duration-fast); background: var(--color-surface-sunk); overflow: hidden;">
+
+                    <!-- The invisible file input overlaying the container -->
+                    <input type="file" asp-for="IdDocument" id="id-upload" accept="image/*,.pdf" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;" onchange="handleFilePreview(event)" />
+
+                    <!-- Placeholder UI (Visible initially) -->
+                    <div id="upload-placeholder" style="pointer-events: none;">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-navy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: var(--space-3);">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                            <polyline points="21 15 16 10 5 21"></polyline>
+                        </svg>
+                        <p style="margin: 0; font-weight: 600; color: var(--color-navy); font-size: var(--fs-md);">Upload your ID</p>
+                        <p style="margin: var(--space-1) 0 0 0; font-size: var(--fs-xs); color: var(--color-text-muted);">Click or drag to select</p>
+                    </div>
+
+                    <!-- Image Preview (Hidden initially) -->
+                    <img id="image-preview" src="" alt="ID Preview" style="display: none; max-width: 100%; max-height: 250px; margin: 0 auto; border-radius: var(--radius-sm); position: relative; z-index: 1;" />
+
+                    <!-- PDF/File Name Preview (Hidden initially) -->
+                    <div id="file-name-preview" style="display: none; position: relative; z-index: 1;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-brass)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: var(--space-2);">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        <p id="file-name-text" style="margin: 0; font-weight: 600; color: var(--color-navy); font-size: var(--fs-sm); word-break: break-all;"></p>
+                        <p style="margin: var(--space-1) 0 0 0; font-size: var(--fs-xs); color: var(--color-text-muted);">Click to change file</p>
+                    </div>
+                </div>
+
                 <span asp-validation-for="IdDocument" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
                 <p style="font-size: var(--fs-xs); color: var(--color-text-muted); margin-top: var(--space-2);">Accepted formats: JPG, PNG, PDF.</p>
             </div>
@@ -56,3 +87,41 @@
         </form>
     }
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function handleFilePreview(event) {
+            const file = event.target.files[0];
+            const placeholder = document.getElementById('upload-placeholder');
+            const imagePreview = document.getElementById('image-preview');
+            const filePreview = document.getElementById('file-name-preview');
+            const fileNameText = document.getElementById('file-name-text');
+
+            // Reset UI states
+            placeholder.style.display = 'none';
+            imagePreview.style.display = 'none';
+            filePreview.style.display = 'none';
+
+            if (file) {
+                // If the file is an image, use FileReader to generate a preview
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                }
+                // If it's a PDF, display the icon and file name
+                else {
+                    fileNameText.textContent = file.name;
+                    filePreview.style.display = 'block';
+                }
+            } else {
+                // Restore placeholder if the user cancels file selection
+                placeholder.style.display = 'block';
+            }
+        }
+    </script>
+}
