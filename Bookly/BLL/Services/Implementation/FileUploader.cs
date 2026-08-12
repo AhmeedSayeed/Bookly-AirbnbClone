@@ -1,4 +1,5 @@
-﻿using BLL.Services.Interfaces;
+﻿using BLL.DTOs;
+using BLL.Services.Interfaces;
 using BLL.Settings;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -20,18 +21,26 @@ namespace BLL.Services.Implementation
             _env = env;
         }
 
-        public async Task<string> SaveFileAsync(IFormFile file, string subFolder)
+        public async Task<Response<string>> SaveFileAsync(IFormFile file, string subFolder, bool isImage = false)
         {
             if (file is null || file.Length == 0)
-                throw new ArgumentException("No file was provided.");
+                return Response<string>.Fail(ResponseStatus.ValidationError, "No file was provided.");
 
             var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!_settings.AllowedExtensions.Contains(extension))
-                throw new InvalidOperationException($"File type '{extension}' is not allowed.");
+            if (isImage)
+            {
+                if (!_settings.AllowedImageExtensions.Contains(extension))
+                    return Response<string>.Fail(ResponseStatus.ValidationError, $"Image type '{extension}' is not allowed.");
+            }
+            else
+            {
+                if (!_settings.AllowedFileExtensions.Contains(extension))
+                    return Response<string>.Fail(ResponseStatus.ValidationError, $"File type '{extension}' is not allowed.");
+            }
 
             var maxBytes = _settings.MaxFileSizeMB * 1024 * 1024;
             if (file.Length > maxBytes)
-                throw new InvalidOperationException($"File exceeds the {_settings.MaxFileSizeMB} MB limit.");
+                return Response<string>.Fail(ResponseStatus.ValidationError, $"File exceeds the {_settings.MaxFileSizeMB} MB limit.");
 
             var fileName = $"{Guid.NewGuid()}{extension}";
             var folderPath = Path.Combine(_env.WebRootPath, "uploads", subFolder);
@@ -41,7 +50,7 @@ namespace BLL.Services.Implementation
             await using var stream = new FileStream(fullPath, FileMode.Create);
             await file.CopyToAsync(stream);
 
-            return $"/uploads/{subFolder}/{fileName}";
+            return Response<string>.Success($"/uploads/{subFolder}/{fileName}");
         }
 
         public void DeleteFile(string relativeUrl)

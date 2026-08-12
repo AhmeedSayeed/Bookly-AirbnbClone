@@ -1,0 +1,74 @@
+@model IEnumerable<HostVerificationRequestViewModel>
+
+@{
+    ViewData["Title"] = "Verification Queue";
+}
+
+<div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
+    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6);">Pending Host Verifications</h1>
+
+    <!-- Display system feedback messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="padding: var(--space-3); background: var(--color-surface-sunk); color: var(--color-success); border-radius: var(--radius-sm); margin-bottom: var(--space-4);">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="padding: var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); margin-bottom: var(--space-4);">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div style="background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--color-border);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background: var(--color-surface-sunk); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">
+                <tr>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">User Name</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">Submitted At</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">Document</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr style="border-bottom: 1px solid var(--color-border);">
+                            <td style="padding: var(--space-4); font-size: var(--fs-sm); font-weight: 600;">@item.HostName</td>
+                            <td style="padding: var(--space-4); font-size: var(--fs-sm); color: var(--color-text-muted);">@item.SubmittedAt.ToString("MMM dd, yyyy HH:mm")</td>
+                            <td style="padding: var(--space-4);">
+                                <!-- Force the document to open in a new tab so the admin doesn't lose their place in the queue -->
+                                <a asp-action="ViewDocument" asp-route-url="@item.DocumentUrl" target="_blank" style="color: var(--color-brass); font-size: var(--fs-sm); font-weight: 600; text-decoration: none;">View ID</a>
+                            </td>
+                            <td style="padding: var(--space-4); text-align: right; display: flex; justify-content: flex-end; gap: var(--space-3); align-items: flex-start;">
+                                
+                                <!-- Approve Action -->
+                                <form asp-action="ApproveVerification" method="post" onsubmit="return confirm('Approve this host?');">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" style="background: var(--color-success); color: white; border: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm); font-size: var(--fs-sm); font-weight: 600; cursor: pointer;">Approve</button>
+                                </form>
+
+                                <!-- Reject Action with Reason Input -->
+                                <form asp-action="RejectVerification" method="post" style="display: flex; gap: var(--space-2); align-items: center;" onsubmit="return confirm('Reject this host application?');">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <!-- Input for the rejection reason that will be sent via SignalR -->
+                                    <input type="text" name="reason" placeholder="Reason (e.g. Blurry ID)" required style="padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: var(--fs-sm);" />
+                                    <button type="submit" style="background: transparent; color: var(--color-danger); border: 1px solid var(--color-danger); padding: var(--space-2) var(--space-4); border-radius: var(--radius-sm); font-size: var(--fs-sm); font-weight: 600; cursor: pointer;">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="4" style="padding: var(--space-6); text-align: center; color: var(--color-text-muted);">No pending verifications to review.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

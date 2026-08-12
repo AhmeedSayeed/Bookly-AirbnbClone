@@ -55,7 +55,14 @@ namespace BLL.Services
                         _fileUploader.DeleteFile(user.ProfilePhotoUrl);
                     }
 
-                    var newPhotoUrl = await _fileUploader.SaveFileAsync(updatedData.ProfilePhoto, "profile-photos");
+                    var uploadResponse = await _fileUploader.SaveFileAsync(updatedData.ProfilePhoto, "profile-photos", true);
+
+                    if (!uploadResponse.Succeeded)
+                    {
+                        return Response<bool>.Fail(ResponseStatus.Error, $"File upload failed: {uploadResponse.Message}");
+                    }
+
+                    var newPhotoUrl = uploadResponse.Data;
                     user.ProfilePhotoUrl = newPhotoUrl;
                 }
                 catch (Exception ex)

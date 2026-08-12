@@ -17,16 +17,13 @@ namespace BLL.Services.Implementation
     {
         private readonly IRepository<HostVerification> _verificationRepo;
         private readonly IFileUploader _fileUploader;
-        private readonly VerificationSettings _settings;
 
         public VerificationService(
             IRepository<HostVerification> verificationRepo,
-            IFileUploader fileUploader,
-            IOptions<VerificationSettings> settings)
+            IFileUploader fileUploader)
         {
             _verificationRepo = verificationRepo;
             _fileUploader = fileUploader;
-            _settings = settings.Value;
         }
 
         public async Task<Response<HostVerification>> GetVerificationByUserIdAsync(int userId)
@@ -40,20 +37,6 @@ namespace BLL.Services.Implementation
 
         public async Task<Response<bool>> SubmitVerificationAsync(int userId, BecomeAHostViewModel model)
         {
-            var extension = Path.GetExtension(model.IdDocument.FileName).ToLowerInvariant();
-            if (!_settings.AllowedExtensions.Contains(extension))
-            {
-                return Response<bool>.Fail(ResponseStatus.ValidationError,
-                    $"Invalid file type. Allowed extensions are: {string.Join(", ", _settings.AllowedExtensions)}");
-            }
-
-            var maxBytes = _settings.MaxFileSizeMb * 1024 * 1024;
-            if (model.IdDocument.Length > maxBytes)
-            {
-                return Response<bool>.Fail(ResponseStatus.ValidationError,
-                    $"File is too large. Maximum allowed size is {_settings.MaxFileSizeMb}MB.");
-            }
-
             var existingResponse = await GetVerificationByUserIdAsync(userId);
             var existing = existingResponse.Data;
 
@@ -62,7 +45,14 @@ namespace BLL.Services.Implementation
                 return Response<bool>.Fail(ResponseStatus.Conflict, "You already have a pending or verified application.");
             }
 
-            var documentUrl = await _fileUploader.SaveFileAsync(model.IdDocument, "verifications");
+            var uploadResponse = await _fileUploader.SaveFileAsync(model.IdDocument, "verifications", false);
+
+            if (!uploadResponse.Succeeded)
+            {
+                return Response<bool>.Fail(ResponseStatus.Error, $"File upload failed: {uploadResponse.Message}");
+            }
+
+            var documentUrl = uploadResponse.Data;
 
             if (existing != null && existing.Status == HostVerificationStatus.Rejected)
             {

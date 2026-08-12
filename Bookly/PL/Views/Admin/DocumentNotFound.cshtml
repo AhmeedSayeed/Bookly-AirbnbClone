@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Document Not Found";
+    // Using a minimal layout or the standard admin layout
+}
+
+<div style="max-width: var(--content-max); margin: var(--space-8) auto; text-align: center; padding: var(--space-6); background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);">
+    
+    <div style="margin-bottom: var(--space-4);">
+        <!-- A simple warning icon using your existing layout variables -->
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-danger)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+    </div>
+
+    <h1 class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); margin-bottom: var(--space-4);">File Missing</h1>
+    
+    <p style="color: var(--color-text); font-size: var(--fs-md); margin-bottom: var(--space-6);">
+        The requested verification document could not be located on the server. The physical file may have been deleted, moved, or the upload was interrupted.
+    </p>
+    
+    <!-- Since this opened in a new tab (target="_blank"), closing the window returns them to the queue -->
+    <button onclick="window.close()" class="btn-primary" style="padding: var(--space-2) var(--space-6); background: var(--color-navy); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;">
+        Close Window
+    </button>
+</div>
