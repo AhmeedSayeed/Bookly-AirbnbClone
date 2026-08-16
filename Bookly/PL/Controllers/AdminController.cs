@@ -5,17 +5,20 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using System;
 using System.Threading.Tasks;
-
+using Microsoft.Extensions.Localization;
 namespace PL.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, IStringLocalizer<SharedResource> localizer)
         {
             _adminService = adminService;
+            _localizer = localizer;
+        
         }
 
 
@@ -26,7 +29,7 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.Message ?? "Failed to load dashboard statistics.";
+                TempData["ErrorMessage"] = _localizer["FailedToLoadDashboardStatistics"];
                 return View(new AdminDashboardViewModel());
             }
 

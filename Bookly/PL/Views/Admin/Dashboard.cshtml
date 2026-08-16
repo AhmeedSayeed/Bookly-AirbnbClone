@@ -1,18 +1,18 @@
 @model AdminDashboardViewModel
 
 @{
-    ViewData["Title"] = "Platform Dashboard";
+    ViewData["Title"] = Localizer["PlatformDashboard"];
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
-    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-4);">Dashboard Overview</h1>
+    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-4);"> @Localizer["DashboardOverview"]</h1>
 
     <!-- Admin Sub-Navigation -->
     <div style="display: flex; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-border);">
-        <a asp-controller="Admin" asp-action="Dashboard" style="color: var(--color-navy); font-weight: 600; text-decoration: none; padding: var(--space-2) var(--space-4); background: var(--color-surface-sunk); border-radius: var(--radius-pill);">Overview</a>
-        <a asp-controller="Admin" asp-action="Verifications" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">Review IDs</a>
-        <a asp-controller="Admin" asp-action="Users" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">Manage Users</a>
-        <a asp-controller="Admin" asp-action="Listings" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">Moderate Listings</a>
+        <a asp-controller="Admin" asp-action="Dashboard" style="color: var(--color-navy); font-weight: 600; text-decoration: none; padding: var(--space-2) var(--space-4); background: var(--color-surface-sunk); border-radius: var(--radius-pill);"> @Localizer["Overview"]</a>
+        <a asp-controller="Admin" asp-action="Verifications" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);"> @Localizer["ReviewIds"]</a>
+        <a asp-controller="Admin" asp-action="Users" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">  @Localizer["ManageUsers"]</a>
+        <a asp-controller="Admin" asp-action="Listings" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">@Localizer["ModerateListings"]</a>
     </div>
 
     @if (TempData["ErrorMessage"] != null)
@@ -26,29 +26,50 @@
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
 
         <div style="background: var(--color-surface); padding: var(--space-5); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);">
-            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">Total Users</p>
-            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">@Model.TotalUsers</p>
+            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">
+                @Localizer["TotalUsers"]
+            </p>
+            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">
+                @Model.TotalUsers
+            </p>
         </div>
 
         <div style="background: var(--color-surface); padding: var(--space-5); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);">
-            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">Total Listings</p>
-            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">@Model.TotalListings</p>
+            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">
+                @Localizer["TotalListings"]
+            </p>
+            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">
+                @Model.TotalListings
+            </p>
         </div>
 
         <div style="background: var(--color-surface); padding: var(--space-5); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);">
-            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">Total Bookings</p>
-            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">@Model.TotalBookings</p>
+            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">
+                @Localizer["TotalBookings"]
+            </p>
+            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">
+                @Model.TotalBookings
+            </p>
         </div>
 
         <div style="background: var(--color-surface); padding: var(--space-5); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);">
-            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">Revenue</p>
-            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">@Model.TotalRevenue.ToString("C")</p>
+            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: var(--space-2);">
+                @Localizer["Revenue"]
+            </p>
+            <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">
+                @Model.TotalRevenue.ToString("C")
+            </p>
         </div>
+
     </div>
 
     <!-- Recent Activity Feed -->
-    <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-4);">Recent Activity</h2>
+    <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-4);">
+        @Localizer["RecentActivity"]
+    </h2>
+
     <div style="background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); padding: var(--space-4);">
+
         @if (Model.RecentActivity != null && Model.RecentActivity.Any())
         {
             <ul style="list-style: none; padding: 0; margin: 0;">
@@ -62,7 +83,9 @@
         }
         else
         {
-            <p style="color: var(--color-text-muted); text-align: center; margin: var(--space-4) 0;">No recent activity.</p>
+            <p style="color: var(--color-text-muted); text-align: center; margin: var(--space-4) 0;">
+                @Localizer["NoRecentActivity"]
+            </p>
         }
+
     </div>
-</div>

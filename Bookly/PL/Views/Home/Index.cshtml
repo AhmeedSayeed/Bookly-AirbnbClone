@@ -1,65 +1,110 @@
 ﻿@model HomeViewModel
 
 @{
-    ViewData["Title"] = "Discover places to stay";
+    ViewData["Title"] = Localizer["DiscoverPlacesToStay"];
 }
 
 <!-- The Hero Search Pill -->
 <form asp-controller="Listings" asp-action="Index" method="get" class="search-pill">
     <div class="search-pill__segment">
-        <label for="city">Where</label>
-        <input type="text" id="city" name="City" placeholder="Search destinations" autocomplete="off" />
+        <label for="city">@Localizer["Where"]</label>
+        <input type="text"
+               id="city"
+               name="City"
+               placeholder="@Localizer["SearchDestinations"]"
+               autocomplete="off" />
     </div>
+
     <div class="search-pill__segment">
-        <label for="checkin">Check in</label>
+        <label for="checkin">@Localizer["CheckIn"]</label>
         <input type="date" id="checkin" name="CheckIn" />
     </div>
+
     <div class="search-pill__segment">
-        <label for="checkout">Check out</label>
+        <label for="checkout">@Localizer["CheckOut"]</label>
         <input type="date" id="checkout" name="CheckOut" />
     </div>
+
     <div class="search-pill__segment">
-        <label for="guests">Guests</label>
-        <input type="number" id="guests" name="Guests" min="1" placeholder="Add guests" />
+        <label for="guests">@Localizer["Guests"]</label>
+        <input type="number"
+               id="guests"
+               name="Guests"
+               min="1"
+               placeholder="@Localizer["AddGuests"]" />
     </div>
-    <button type="submit" class="search-pill__btn" aria-label="Search">
-        <!-- Minimal SVG Search Icon -->
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+
+    <button type="submit"
+            class="search-pill__btn"
+            aria-label="@Localizer["Search"]">
+
+        <svg width="20"
+             height="20"
+             viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round">
+
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+
         </svg>
     </button>
 </form>
 
-<h1 class="font-display" style="font-size: var(--fs-xl); margin-top: var(--space-8);">Featured stays</h1>
+<h1 class="font-display"
+    style="font-size: var(--fs-xl); margin-top: var(--space-8);">
+    @Localizer["FeaturedStays"]
+</h1>
 
 <!-- Listings Grid -->
 <div class="listings-grid">
+
     @if (Model.FeaturedListings != null && Model.FeaturedListings.Any())
     {
         foreach (var listing in Model.FeaturedListings)
         {
             <a href="/Listings/Details/@listing.Id" class="listing-card">
+
                 <div class="listing-card__image-wrapper">
-                    <img src="@(string.IsNullOrEmpty(listing.PrimaryPhotoUrl) ? "/images/placeholder.jpg" : listing.PrimaryPhotoUrl)"
+                    <img src="@(string.IsNullOrEmpty(listing.PrimaryPhotoUrl)
+                                                  ? "/images/placeholder.jpg"
+                                                  : listing.PrimaryPhotoUrl)"
                          alt="@listing.Title"
                          class="listing-card__image" />
                 </div>
+
                 <div class="listing-card__body">
-                    <h3 class="listing-card__title">@listing.Title</h3>
-                    <div class="listing-card__location">@listing.City, @listing.Country</div>
+
+                    <h3 class="listing-card__title">
+                        @listing.Title
+                    </h3>
+
+                    <div class="listing-card__location">
+                        @listing.City, @listing.Country
+                    </div>
 
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-3);">
+
                         <div class="listing-card__price">
-                            $@listing.PricePerNight.ToString("0") <span style="font-size: var(--fs-sm); font-weight: 400; color: var(--color-text-muted);">/ night</span>
+                            $@listing.PricePerNight.ToString("0")
+                            <span style="font-size: var(--fs-sm); font-weight: 400; color: var(--color-text-muted);">
+                                @Localizer["PerNight"]
+                            </span>
                         </div>
+
                         @if (listing.AverageRating > 0)
                         {
                             <div style="font-weight: 600; display: flex; align-items: center; gap: var(--space-1);">
-                                <span style="color: var(--color-brass);">★</span> @listing.AverageRating.ToString("0.0")
+                                <span style="color: var(--color-brass);">★</span>
+                                @listing.AverageRating.ToString("0.0")
                             </div>
                         }
+
                     </div>
+
                 </div>
             </a>
         }
@@ -67,7 +112,8 @@
     else
     {
         <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-8) 0; color: var(--color-text-muted);">
-            <p>No listings found. Check back soon.</p>
+            <p>@Localizer["NoListingsFound"]</p>
         </div>
     }
+
 </div>

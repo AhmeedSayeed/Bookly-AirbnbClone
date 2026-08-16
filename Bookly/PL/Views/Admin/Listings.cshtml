@@ -1,11 +1,11 @@
 @model AdminListingsViewModel
 
 @{
-    ViewData["Title"] = "Moderate Listings";
+    ViewData["Title"] = @Localizer["ModerateListings"];
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
-    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6);">Listing Moderation</h1>
+    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6);"> @Localizer["ListingModeration"]</h1>
 
     @if (TempData["SuccessMessage"] != null)
     {
@@ -24,11 +24,11 @@
         <table style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead style="background: var(--color-surface-sunk); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">
                 <tr>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">Listing Title</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">Host</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">Location</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">Status</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); text-align: right;">Actions</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["ListingTitle"]</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["Host"]</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["Location"]</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["Status"]</th>
+                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); text-align: right;">@Localizer["Actions"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,22 +41,22 @@
                         <td style="padding: var(--space-4); font-size: var(--fs-sm);">
                             @if (listing.IsActive)
                             {
-                                <span style="color: var(--color-success);">Public</span>
+                                <span style="color: var(--color-success);">@Localizer["Public"]</span>
                             }
                             else
                             {
-                                <span style="color: var(--color-danger);">Deactivated</span>
+                                <span style="color: var(--color-danger);">@Localizer["Deactivated"]</span>
                             }
                         </td>
                         <td style="padding: var(--space-4); text-align: right;">
-                            <a href="/Listings/Details/@listing.Id" target="_blank" style="color: var(--color-brass); font-size: var(--fs-sm); font-weight: 600; text-decoration: none; margin-right: var(--space-3);">View</a>
+                            <a href="/Listings/Details/@listing.Id" target="_blank" style="color: var(--color-brass); font-size: var(--fs-sm); font-weight: 600; text-decoration: none; margin-right: var(--space-3);">@Localizer["View"]</a>
 
                             @if (listing.IsActive)
                             {
-                                <form asp-action="ModerateListing" method="post" onsubmit="return confirm('Are you sure you want to forcefully deactivate this listing?');" style="display:inline;">
+                                <form asp-action="ModerateListing" method="post" onsubmit="return confirm('@Localizer["ConfirmTakeDown"]');" style="display:inline;">
                                     <input type="hidden" name="id" value="@listing.Id" />
                                     <input type="hidden" name="isActive" value="false" />
-                                    <button type="submit" class="btn-primary" style="background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border: none; padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-sm);">Take Down</button>
+                                    <button type="submit" class="btn-primary" style="background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border: none; padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-sm);">@Localizer["TakeDown"]</button>
                                 </form>
                             }
                             else
@@ -64,7 +64,7 @@
                                 <form asp-action="ModerateListing" method="post" style="display:inline;">
                                     <input type="hidden" name="id" value="@listing.Id" />
                                     <input type="hidden" name="isActive" value="true" />
-                                    <button type="submit" class="btn-primary" style="background: var(--color-surface); color: var(--color-navy); border: 1px solid var(--color-border-strong); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-sm);">Restore</button>
+                                    <button type="submit" class="btn-primary" style="background: var(--color-surface); color: var(--color-navy); border: 1px solid var(--color-border-strong); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-sm);">@Localizer["Restore"]</button>
                                 </form>
                             }
                         </td>

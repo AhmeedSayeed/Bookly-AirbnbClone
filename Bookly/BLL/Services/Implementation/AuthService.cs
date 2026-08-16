@@ -99,7 +99,14 @@ namespace BLL.Services
                     ResponseStatus.Unauthorized,
                     "Invalid email or password");
             }
-
+            // Check if the account is suspended
+            if (user.LockoutEnd.HasValue &&
+                user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            {
+                return Response<AuthResultDto>.Fail(
+                    ResponseStatus.Unauthorized,
+                    "AccountSuspended");
+            }
             var roles = await _userManager.GetRolesAsync(user);
 
             var accessTokenResult = _tokenService.GenerateAccessToken(user, roles);

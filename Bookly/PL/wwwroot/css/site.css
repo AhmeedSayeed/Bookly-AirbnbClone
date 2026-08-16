@@ -498,3 +498,6 @@ h1, h2, h3, .font-display {
     padding: 1px 6px;
     position: absolute;
 }
+html[dir="rtl"] .user-dropdown-item {
+    text-align: right;
+}

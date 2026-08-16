@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 
 namespace PL.Controllers
 {
@@ -24,15 +25,17 @@ namespace PL.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IVerificationService _verificationService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public AccountController(UserManager<ApplicationUser> userManager,
-            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper)
+            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper, IStringLocalizer<SharedResource> localizer)
         {
             _userManager = userManager;
             _userService = userService;
             _authService = authService;
             _verificationService = verificationService;
             _mapper = mapper;
+            _localizer = localizer;
         }
 
         [HttpGet]
@@ -80,7 +83,11 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while updating your profile.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    _localizer["ProfileUpdateError"].Value
+                );
+
                 return View(model);
             }
 
@@ -111,6 +118,7 @@ namespace PL.Controllers
                 {
                     ModelState.AddModelError(string.Empty, error);
                 }
+
                 return View(model);
             }
 
@@ -145,7 +153,11 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message);
+                var message = response.Message == "AccountSuspended"
+                    ? _localizer["AccountSuspended"].Value
+                    : _localizer["InvalidEmailOrPassword"].Value;
+
+                ModelState.AddModelError(string.Empty, message);
                 return View(model);
             }
 
@@ -179,6 +191,7 @@ namespace PL.Controllers
             if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
+
             if (user != null && user.IsHost)
             {
                 return RedirectToAction("MyListings", "Listings");
@@ -204,26 +217,38 @@ namespace PL.Controllers
             if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user != null && user.IsHost) return RedirectToAction("MyListings", "Listings");
+
+            if (user != null && user.IsHost)
+                return RedirectToAction("MyListings", "Listings");
 
             if (!ModelState.IsValid)
             {
-                var verificationResponse = await _verificationService.GetVerificationByUserIdAsync(userId);
+                var verificationResponse =
+                    await _verificationService.GetVerificationByUserIdAsync(userId);
+
                 if (verificationResponse.Data != null)
-                    ViewBag.VerificationStatus = verificationResponse.Data.Status.ToString();
+                    ViewBag.VerificationStatus =
+                        verificationResponse.Data.Status.ToString();
 
                 return View(model);
             }
 
-            var response = await _verificationService.SubmitVerificationAsync(userId, model);
+            var response =
+                await _verificationService.SubmitVerificationAsync(userId, model);
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "Failed to submit application.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    _localizer["ProfileUpdateError"].Value
+                );
+
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = "Your ID has been submitted and is under review.";
+            TempData["SuccessMessage"] =
+                _localizer["IdSubmittedForReview"].Value;
+
             return RedirectToAction(nameof(BecomeAHost));
         }
 
