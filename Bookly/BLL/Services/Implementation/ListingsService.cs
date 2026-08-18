@@ -92,6 +92,9 @@ namespace BLL.Services.Implementation
             listing.HostId = hostId;
             listing.IsActive = true;
 
+            listing.ListingAmenities ??= new List<ListingAmenity>();
+            listing.Photos ??= new List<ListingPhoto>();
+
             if (model.SelectedAmenityIds != null && model.SelectedAmenityIds.Any())
             {
                 foreach (var amenityId in model.SelectedAmenityIds)
@@ -112,12 +115,9 @@ namespace BLL.Services.Implementation
                         return Response<int>.Fail(ResponseStatus.Error, $"Failed to upload photo: {uploadResponse.Message}");
                     }
 
-
-                    var photoUrl = uploadResponse.Data;
-
                     listing.Photos.Add(new ListingPhoto
                     {
-                        Url = photoUrl,
+                        Url = uploadResponse.Data,
                         DisplayOrder = displayOrder++
                     });
                 }
@@ -156,6 +156,7 @@ namespace BLL.Services.Implementation
         {
             var existingListing = await _listingRepo.GetAllAsIQueryable()
                 .Include(l => l.ListingAmenities)
+                .Include(l => l.Photos)
                 .FirstOrDefaultAsync(l => l.Id == model.Id);
 
             if (existingListing == null)
@@ -176,6 +177,41 @@ namespace BLL.Services.Implementation
                     {
                         ListingId = existingListing.Id,
                         AmenityId = amenityId
+                    });
+                }
+            }
+
+            if (model.DeletedPhotoIds != null && model.DeletedPhotoIds.Any())
+            {
+                var photosToRemove = existingListing.Photos
+                    .Where(p => model.DeletedPhotoIds.Contains(p.Id))
+                    .ToList();
+
+                foreach (var photo in photosToRemove)
+                {
+                    existingListing.Photos.Remove(photo);
+                }
+            }
+
+            if (model.NewPhotos != null && model.NewPhotos.Any())
+            {
+                int displayOrder = existingListing.Photos.Any()
+                    ? existingListing.Photos.Max(p => p.DisplayOrder) + 1
+                    : 1;
+
+                foreach (var photo in model.NewPhotos)
+                {
+                    var uploadResponse = await _fileUploader.SaveFileAsync(photo, "listings", true);
+
+                    if (!uploadResponse.Succeeded)
+                    {
+                        return Response<bool>.Fail(ResponseStatus.Error, $"Failed to upload photo: {uploadResponse.Message}");
+                    }
+
+                    existingListing.Photos.Add(new ListingPhoto
+                    {
+                        Url = uploadResponse.Data,
+                        DisplayOrder = displayOrder++
                     });
                 }
             }

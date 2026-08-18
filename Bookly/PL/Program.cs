@@ -119,6 +119,22 @@ namespace PL
                         {
                             context.Fail("User account is suspended.");
                         }
+                    },
+
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+
+                        context.Response.Redirect("/Account/Login");
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnForbidden = context =>
+                    {
+                        context.Response.Redirect("/Account/AccessDenied");
+
+                        return Task.CompletedTask;
                     }
                 };
             });
@@ -159,6 +175,7 @@ namespace PL
             builder.Services.AddScoped<IVerificationService, VerificationService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
 
 
             var app = builder.Build();

@@ -128,6 +128,17 @@
                                 @Localizer["MyListings"]
                             </a>
 
+                            <a asp-controller="Bookings" asp-action="MyTrips" style="display: block; padding: var(--space-2) var(--space-4); text-decoration: none; color: var(--color-text); font-size: var(--fs-sm);">
+                                @Localizer["MyTrips"]
+                            </a>
+                            
+                            @if(User.IsInRole("Host") || User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="Bookings" asp-action="HostRequests" style="display: block; padding: var(--space-2) var(--space-4); text-decoration: none; color: var(--color-text); font-size: var(--fs-sm);">
+                                    @Localizer["HostDashboard"]
+                                </a>
+                            }
+
                             @if (User.IsInRole("Admin"))
                             {
                                 <a href="/Admin/Dashboard"

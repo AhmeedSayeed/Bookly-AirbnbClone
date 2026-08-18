@@ -252,6 +252,13 @@ namespace PL.Controllers
             return RedirectToAction(nameof(BecomeAHost));
         }
 
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
+        }
+
         private void SetTokenCookies(AuthResultDto data, bool rememberMe)
         {
             var cookieOptions = new CookieOptions

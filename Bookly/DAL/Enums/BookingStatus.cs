@@ -8,8 +8,9 @@ namespace DAL.Enums
     {
         Pending = 1,
         Confirmed,
-        Canceled,
+        Cancelled,
         Rejected,
+        Paid,
         Completed
     }
 }
