@@ -1,58 +1,131 @@
 @model ListingFormViewModel
 
 @{
-    ViewData["Title"] = "Create Listing";
+    ViewData["Title"] = Localizer["CreateListing"];
 }
 
 <div style="max-width: 720px; margin: 0 auto; padding: 0 var(--gutter);">
-    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6);">Create a new listing</h1>
 
-    <!-- REQUIRED: enctype for file uploads -->
+    <h1 class="font-display"
+        style="font-size: var(--fs-xl); margin-bottom: var(--space-6);">
+        @Localizer["CreateNewListing"]
+    </h1>
+
     <form asp-action="Create" method="post" enctype="multipart/form-data">
-        <div asp-validation-summary="ModelOnly" style="color: var(--color-danger); margin-bottom: var(--space-4);"></div>
+
+        <div asp-validation-summary="ModelOnly"
+             style="color: var(--color-danger); margin-bottom: var(--space-4);">
+        </div>
 
         <div class="form-group" style="margin-bottom: var(--space-4);">
-            <label asp-for="Title" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">Title</label>
-            <input asp-for="Title" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
-            <span asp-validation-for="Title" style="color: var(--color-danger); font-size: var(--fs-sm);"></span>
+
+            <label asp-for="Title"
+                   class="form-label"
+                   style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">
+                @Localizer["Title"]
+            </label>
+
+            <input asp-for="Title"
+                   class="form-control"
+                   style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+
+            <span asp-validation-for="Title"
+                  style="color: var(--color-danger); font-size: var(--fs-sm);">
+            </span>
+
         </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
+
             <div class="form-group">
-                <label asp-for="City" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">City</label>
-                <input asp-for="City" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+
+                <label asp-for="City"
+                       class="form-label"
+                       style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
+                    @Localizer["City"]
+                </label>
+
+                <input asp-for="City"
+                       class="form-control"
+                       style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+
             </div>
+
             <div class="form-group">
-                <label asp-for="PricePerNight" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">Price Per Night</label>
-                <input asp-for="PricePerNight" class="form-control" type="number" step="0.01" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+
+                <label asp-for="PricePerNight"
+                       class="form-label"
+                       style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
+                    @Localizer["PricePerNight"]
+                </label>
+
+                <input asp-for="PricePerNight"
+                       class="form-control"
+                       type="number"
+                       step="0.01"
+                       style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+
             </div>
+
         </div>
 
         <!-- AMENITIES ARRAY BINDING -->
         <div class="form-group" style="margin-bottom: var(--space-5);">
-            <label class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">Amenities</label>
+
+            <label class="form-label"
+                   style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                @Localizer["Amenities"]
+            </label>
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2);">
+
                 @if (ViewBag.Amenities != null)
                 {
                     foreach (var amenity in ViewBag.Amenities)
                     {
-                        var isChecked = Model.SelectedAmenityIds != null && Model.SelectedAmenityIds.Contains(amenity.Id);
+                        var isChecked = Model.SelectedAmenityIds != null &&
+                                        Model.SelectedAmenityIds.Contains(amenity.Id);
+
                         <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
-                            <!-- The name must exactly match the DTO list property name -->
-                            <input type="checkbox" name="SelectedAmenityIds" value="@amenity.Id" @(isChecked ? "checked" : "") />
-                            <span style="font-size: var(--fs-sm);">@amenity.Name</span>
+
+                            <input type="checkbox"
+                                   name="SelectedAmenityIds"
+                                   value="@amenity.Id"
+                            @(isChecked ? "checked" : "") />
+
+                            <span style="font-size: var(--fs-sm);">
+                                @amenity.Name
+                            </span>
+
                         </label>
                     }
                 }
+
             </div>
         </div>
 
         <!-- FILE UPLOAD -->
         <div class="form-group" style="margin-bottom: var(--space-6);">
-            <label asp-for="NewPhotos" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">Upload Photos</label>
-            <input type="file" asp-for="NewPhotos" multiple accept="image/*" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+
+            <label asp-for="NewPhotos"
+                   class="form-label"
+                   style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
+                @Localizer["UploadPhotos"]
+            </label>
+
+            <input type="file"
+                   asp-for="NewPhotos"
+                   multiple
+                   accept="image/*"
+                   style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+
         </div>
 
-        <button type="submit" class="btn-primary" style="width: 100%; padding: var(--space-4); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface);">Publish Listing</button>
+        <button type="submit"
+                class="btn-primary"
+                style="width: 100%; padding: var(--space-4); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface);">
+            @Localizer["PublishListing"]
+        </button>
+
     </form>
 </div>

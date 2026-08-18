@@ -1,5 +1,5 @@
 @{
-    ViewData["Title"] = "Document Not Found";
+    ViewData["Title"] = Localizer["DocumentNotFound"];
     // Using a minimal layout or the standard admin layout
 }
 
@@ -14,14 +14,14 @@
         </svg>
     </div>
 
-    <h1 class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); margin-bottom: var(--space-4);">File Missing</h1>
+    <h1 class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); margin-bottom: var(--space-4);"> @Localizer["FileMissing"]</h1>
     
     <p style="color: var(--color-text); font-size: var(--fs-md); margin-bottom: var(--space-6);">
-        The requested verification document could not be located on the server. The physical file may have been deleted, moved, or the upload was interrupted.
+        @Localizer["VerificationDocumentNotFoundMessage"]
     </p>
-    
+
     <!-- Since this opened in a new tab (target="_blank"), closing the window returns them to the queue -->
     <button onclick="window.close()" class="btn-primary" style="padding: var(--space-2) var(--space-6); background: var(--color-navy); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; font-weight: 600;">
-        Close Window
+        @Localizer["CloseWindow"]
     </button>
 </div>

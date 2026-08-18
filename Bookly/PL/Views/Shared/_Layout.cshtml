@@ -1,10 +1,16 @@
 ﻿@using DAL.Models
 @using DAL.Models.Identity
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.Extensions.Localization
+@using System.Globalization
+@using PL
 @inject UserManager<ApplicationUser> UserManager
+@inject IStringLocalizer<SharedResource> Localizer
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@CultureInfo.CurrentUICulture.Name"
+      dir="@(CultureInfo.CurrentUICulture.Name.StartsWith("ar") ? "rtl" : "ltr")">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,38 +22,94 @@
 
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
+
 <body>
     <header style="background: var(--color-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--color-border);">
         <div class="container" style="display: flex; justify-content: space-between; align-items: center; height: 72px;">
+
             <a href="/" style="text-decoration: none; color: var(--color-navy);">
                 <h2 class="font-display" style="margin: 0; font-size: var(--fs-xl);">Bookly</h2>
             </a>
 
             <nav style="display: flex; gap: var(--space-4); align-items: center;">
+
+                <!-- Language Switcher -->
+                <div style="display: flex; gap: var(--space-2); align-items: center;">
+
+                    <form asp-controller="Language"
+                          asp-action="SetLanguage"
+                          method="post"
+                          style="display: inline;">
+
+                        <input type="hidden"
+                               name="returnUrl"
+                               value="@Context.Request.Path@Context.Request.QueryString" />
+
+                        <button type="submit"
+                                name="culture"
+                                value="en"
+                                style="border: none; background: none; cursor: pointer; font-family: var(--font-body);">
+                            English
+                        </button>
+
+                    </form>
+
+                    <span>|</span>
+
+                    <form asp-controller="Language"
+                          asp-action="SetLanguage"
+                          method="post"
+                          style="display: inline;">
+
+                        <input type="hidden"
+                               name="returnUrl"
+                               value="@Context.Request.Path@Context.Request.QueryString" />
+
+                        <button type="submit"
+                                name="culture"
+                                value="ar"
+                                style="border: none; background: none; cursor: pointer; font-family: var(--font-body);">
+                            العربية
+                        </button>
+
+                    </form>
+
+                </div>
+
                 @if (User.Identity.IsAuthenticated)
                 {
                     var currentUser = await UserManager.GetUserAsync(User);
                     var hasPhoto = !string.IsNullOrEmpty(currentUser?.ProfilePhotoUrl);
 
                     // Safely extract initials
-                    var firstInitial = !string.IsNullOrEmpty(currentUser?.FirstName) ? currentUser.FirstName.Substring(0, 1) : "";
-                    var lastInitial = !string.IsNullOrEmpty(currentUser?.LastName) ? currentUser.LastName.Substring(0, 1) : "";
+                    var firstInitial = !string.IsNullOrEmpty(currentUser?.FirstName)
+                        ? currentUser.FirstName.Substring(0, 1)
+                        : "";
+
+                    var lastInitial = !string.IsNullOrEmpty(currentUser?.LastName)
+                        ? currentUser.LastName.Substring(0, 1)
+                        : "";
+
                     var initials = $"{firstInitial}{lastInitial}";
 
                     <div class="notification-bell" id="notificationBell">
                         <i class="icon-bell"></i>
-                        <span class="notification-badge" id="notificationBadge" style="display:none;"></span>
+                        <span class="notification-badge"
+                              id="notificationBadge"
+                              style="display:none;"></span>
                     </div>
+
                     <div class="toast-container" id="toastContainer"></div>
 
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-                    
 
                     <div class="user-menu-container" tabindex="0">
 
                         @if (hasPhoto)
                         {
-                            <img src="@currentUser.ProfilePhotoUrl" alt="Profile" class="avatar" />
+                            <img src="@currentUser.ProfilePhotoUrl"
+                                 alt="@Localizer["Profile"]"
+                                 class="avatar" />
                         }
                         else
                         {
@@ -55,40 +117,82 @@
                         }
 
                         <div class="user-dropdown">
-                            <a href="/Account/Profile" class="user-dropdown-item">Account Info</a>
-                            <a href="/Listings/MyListings" class="user-dropdown-item">My Listings</a>
+
+                            <a href="/Account/Profile"
+                               class="user-dropdown-item">
+                                @Localizer["AccountInfo"]
+                            </a>
+
+                            <a href="/Listings/MyListings"
+                               class="user-dropdown-item">
+                                @Localizer["MyListings"]
+                            </a>
+
                             @if (User.IsInRole("Admin"))
                             {
-                                <a href="/Admin/Dashboard" class="user-dropdown-item" style="color: var(--color-brass); font-weight: 600;">Admin Dashboard</a>
+                                <a href="/Admin/Dashboard"
+                                   class="user-dropdown-item"
+                                   style="color: var(--color-brass); font-weight: 600;">
+                                    @Localizer["AdminDashboard"]
+                                </a>
                             }
+
                             <hr style="border: none; border-top: 1px solid var(--color-border); margin: 0;" />
-                            <form asp-controller="Account" asp-action="Logout" method="post" style="margin: 0;">
-                                <button type="submit" class="user-dropdown-item" style="color: var(--color-danger);">Log out</button>
+
+                            <form asp-controller="Account"
+                                  asp-action="Logout"
+                                  method="post"
+                                  style="margin: 0;">
+
+                                <button type="submit"
+                                        class="user-dropdown-item"
+                                        style="color: var(--color-danger);">
+                                    @Localizer["Logout"]
+                                </button>
+
                             </form>
+
                         </div>
                     </div>
+
                     @if (User.Identity.IsAuthenticated)
                     {
-                        <a asp-controller="Account" asp-action="BecomeAHost" style="font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 600; color: var(--color-text); text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast) var(--ease-smooth);">
-                            Host your home
+                        <a asp-controller="Account"
+                           asp-action="BecomeAHost"
+                           style="font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 600; color: var(--color-text); text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast) var(--ease-smooth);">
+                            @Localizer["HostYourHome"]
                         </a>
                     }
                 }
                 else
                 {
-                    <a href="/Account/Login" style="color: var(--color-text); text-decoration: none; font-weight: 500;">Log in</a>
-                    <a href="/Account/Register" class="btn-primary" style="padding: var(--space-2) var(--space-4);">Sign up</a>
+                    <a href="/Account/Login"
+                       style="color: var(--color-text); text-decoration: none; font-weight: 500;">
+                        @Localizer["Login"]
+                    </a>
+
+                    <a href="/Account/Register"
+                       class="btn-primary"
+                       style="padding: var(--space-2) var(--space-4);">
+                        @Localizer["SignUp"]
+                    </a>
                 }
+
             </nav>
         </div>
     </header>
 
-    <main class="container" style="padding-top: var(--space-6); padding-bottom: var(--space-8);">
+    <main class="container"
+          style="padding-top: var(--space-6); padding-bottom: var(--space-8);">
+
         @RenderBody()
+
     </main>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/notifications.js"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

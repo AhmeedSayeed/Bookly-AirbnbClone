@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 
 namespace PL.Controllers
 {
@@ -19,15 +20,18 @@ namespace PL.Controllers
         private readonly IListingService _listingService;
         private readonly IAmenityService _amenityService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public ListingsController(
             IListingService listingService,
             IAmenityService amenityService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IStringLocalizer<SharedResource> localizer)
         {
             _listingService = listingService;
             _amenityService = amenityService;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         private int GetCurrentUserId()
@@ -49,7 +53,9 @@ namespace PL.Controllers
         private async Task LoadAmenitiesIntoViewBagAsync()
         {
             var amenitiesResponse = await _amenityService.GetAllAsync();
-            ViewBag.Amenities = amenitiesResponse.Succeeded ? amenitiesResponse.Data : new List<AmenityDto>();
+            ViewBag.Amenities = amenitiesResponse.Succeeded
+                ? amenitiesResponse.Data
+                : new List<AmenityDto>();
         }
 
         [HttpGet]
@@ -86,7 +92,7 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] = "You must be a verified host to manage listings.";
+                TempData["InfoMessage"] = _localizer["MustBeVerifiedHost"].Value;
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -102,7 +108,7 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] = "Ready to start earning? Verify your ID to create a listing.";
+                TempData["InfoMessage"] = _localizer["VerifyIdToCreateListing"].Value;
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -117,7 +123,9 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] = "You must be a verified host to publish a listing.";
+                TempData["InfoMessage"] =
+                    _localizer["MustBeVerifiedHostToPublish"].Value;
+
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -132,12 +140,18 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "Failed to create listing.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    response.Message ?? _localizer["FailedToCreateListing"].Value
+                );
+
                 await LoadAmenitiesIntoViewBagAsync();
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = "Listing created successfully.";
+            TempData["SuccessMessage"] =
+                _localizer["ListingCreatedSuccessfully"].Value;
+
             return RedirectToAction(nameof(MyListings));
         }
 
@@ -147,7 +161,9 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] = "You must be a verified host to edit listings.";
+                TempData["InfoMessage"] =
+                    _localizer["MustBeVerifiedHostToEdit"].Value;
+
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -167,7 +183,9 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] = "You must be a verified host to edit listings.";
+                TempData["InfoMessage"] =
+                    _localizer["MustBeVerifiedHostToEdit"].Value;
+
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -182,12 +200,18 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "Failed to update listing.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    response.Message ?? _localizer["FailedToUpdateListing"].Value
+                );
+
                 await LoadAmenitiesIntoViewBagAsync();
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = "Listing updated successfully.";
+            TempData["SuccessMessage"] =
+                _localizer["ListingUpdatedSuccessfully"].Value;
+
             return RedirectToAction(nameof(MyListings));
         }
 
@@ -198,7 +222,9 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] = "You must be a verified host to delete listings.";
+                TempData["InfoMessage"] =
+                    _localizer["MustBeVerifiedHostToDelete"].Value;
+
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -207,11 +233,13 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.Message ?? "Failed to delete listing.";
+                TempData["ErrorMessage"] =
+                    response.Message ?? _localizer["FailedToDeleteListing"].Value;
             }
             else
             {
-                TempData["SuccessMessage"] = "Listing deleted successfully.";
+                TempData["SuccessMessage"] =
+                    _localizer["ListingDeletedSuccessfully"].Value;
             }
 
             return RedirectToAction(nameof(MyListings));

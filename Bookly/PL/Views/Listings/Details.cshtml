@@ -13,35 +13,63 @@
         @if (Model.PhotoUrls != null && Model.PhotoUrls.Any())
         {
             var photos = Model.PhotoUrls.ToList();
-            <img src="@photos[0]" class="mosaic-hero" style="grid-row: 1 / 3; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg);" />
-            
+
+            <img src="@photos[0]"
+                 class="mosaic-hero"
+                 style="grid-row: 1 / 3; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg);" />
+
             @for (int i = 1; i < Math.Min(photos.Count, 5); i++)
             {
-                <img src="@photos[i]" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg);" />
+                <img src="@photos[i]"
+                     style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg);" />
             }
-            <button class="mosaic-show-all" style="position: absolute; bottom: var(--space-3); right: var(--space-3); border-radius: var(--radius-pill); border: 1px solid var(--color-brass); background: var(--color-surface); padding: var(--space-2) var(--space-4); font-weight: 600; box-shadow: var(--shadow-md);">Show all photos</button>
+
+            <button class="mosaic-show-all"
+                    style="position: absolute; bottom: var(--space-3); right: var(--space-3); border-radius: var(--radius-pill); border: 1px solid var(--color-brass); background: var(--color-surface); padding: var(--space-2) var(--space-4); font-weight: 600; box-shadow: var(--shadow-md);">
+                @Localizer["ShowAllPhotos"]
+            </button>
         }
     </div>
 
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-7);">
         <div>
-            <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-3);">Hosted by @Model.Host.FullName</h2>
-            <p style="font-size: var(--fs-base); line-height: 1.6; margin-bottom: var(--space-6);">@Model.Description</p>
+            <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-3);">
+                @Localizer["HostedBy"] @Model.Host.FullName
+            </h2>
 
-            <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">What this place offers</h3>
+            <p style="font-size: var(--fs-base); line-height: 1.6; margin-bottom: var(--space-6);">
+                @Model.Description
+            </p>
+
+            <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">
+                @Localizer["WhatThisPlaceOffers"]
+            </h3>
+
             <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
                 @foreach (var amenity in Model.Amenities)
                 {
-                    <span style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); font-size: var(--fs-sm);">@amenity</span>
+                    <span style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); font-size: var(--fs-sm);">
+                        @amenity
+                    </span>
                 }
             </div>
         </div>
-        
+
         <div>
             <!-- Placeholder for Booking Box -->
             <div style="padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); position: sticky; top: 100px;">
-                <h3 class="font-display" style="font-size: var(--fs-lg); color: var(--color-navy);">@Model.PricePerNight.ToString("C") <span style="font-size: var(--fs-sm); font-family: var(--font-body); color: var(--color-text-muted);">night</span></h3>
-                <button class="btn-primary" style="width: 100%; margin-top: var(--space-4); background: var(--color-brass); color: var(--color-navy);">Request to book</button>
+
+                <h3 class="font-display" style="font-size: var(--fs-lg); color: var(--color-navy);">
+                    @Model.PricePerNight.ToString("C")
+                    <span style="font-size: var(--fs-sm); font-family: var(--font-body); color: var(--color-text-muted);">
+                        @Localizer["Night"]
+                    </span>
+                </h3>
+
+                <button class="btn-primary"
+                        style="width: 100%; margin-top: var(--space-4); background: var(--color-brass); color: var(--color-navy);">
+                    @Localizer["RequestToBook"]
+                </button>
             </div>
         </div>
     </div>

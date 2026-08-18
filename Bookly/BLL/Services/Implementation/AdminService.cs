@@ -271,6 +271,7 @@ namespace BLL.Services.Implementation
 
             var vm = new AdminDashboardViewModel
             {
+
                 TotalUsers = totalUsers,
                 TotalListings = totalListings,
                 TotalBookings = totalBookings,
