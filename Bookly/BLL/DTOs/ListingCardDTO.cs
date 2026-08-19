@@ -10,5 +10,7 @@ namespace BLL.DTOs.Listing
         public string? ThumbnailUrl { get; set; } 
         
         public string HostName { get; set; } = string.Empty;
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
     }
 }

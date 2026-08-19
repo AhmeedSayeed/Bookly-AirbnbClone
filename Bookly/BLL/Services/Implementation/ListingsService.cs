@@ -63,6 +63,7 @@ namespace BLL.Services.Implementation
                     b.Status == BookingStatus.Confirmed &&
                     b.CheckInDate < checkOut &&
                     b.CheckOutDate > checkIn));
+                predicate = predicate.And(l => !l.BlockedDates.Any(bd => bd.Date >= checkIn && bd.Date < checkOut));
             }
 
             var pagedListings = await _listingRepo.GetAllPaginatedEnhancedAsync<ListingCardDto>(
@@ -73,7 +74,9 @@ namespace BLL.Services.Implementation
                     City = l.City,
                     PricePerNight = l.PricePerNight,
                     ThumbnailUrl = l.Photos.OrderBy(p => p.DisplayOrder).Select(p => p.Url).FirstOrDefault(),
-                    HostName = l.Host.FirstName
+                    HostName = l.Host.FirstName,
+                    Latitude = l.Latitude,
+                    Longitude = l.Longitude
                 },
                 pageNumber: request.PageNumber,
                 pageSize: request.PageSize,
