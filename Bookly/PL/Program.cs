@@ -38,6 +38,7 @@ namespace PL
 
             builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorageSettings"));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+            builder.Services.Configure<PaymobSettings>(builder.Configuration.GetSection("PaymobSettings"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
             {
@@ -159,6 +160,11 @@ namespace PL
             builder.Services.AddScoped<IVerificationService, VerificationService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+<<<<<<< Updated upstream
+=======
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddHttpClient<IPaymentService, PaymentService>();
+>>>>>>> Stashed changes
 
 
             var app = builder.Build();

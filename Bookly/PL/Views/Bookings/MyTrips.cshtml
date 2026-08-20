@@ -1,0 +1,142 @@
+﻿@model BLL.ViewModels.Bookings.MyTripsViewModel
+
+@{
+    ViewData["Title"] = "My Trips";
+}
+
+<div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
+    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6);">
+        @Localizer["MyTrips"]
+    </h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div style="padding: var(--space-3); background: var(--color-surface-sunk); color: var(--color-success, #2e7d32); border-radius: var(--radius-sm); margin-bottom: var(--space-4);">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div style="padding: var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); margin-bottom: var(--space-4);">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <!-- UPCOMING TRIPS SECTION -->
+    <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-4); color: var(--color-navy);">
+        Upcoming Reservations
+    </h2>
+
+    @if (Model.Upcoming != null && Model.Upcoming.Any())
+    {
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
+            @foreach (var trip in Model.Upcoming)
+            {
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); display: flex; flex-direction: column;">
+
+                    <div style="position: relative; padding-top: 56.25%; background: var(--color-surface-sunk);">
+                        <img src="@(string.IsNullOrEmpty(trip.ListingPhotoUrl) ? "/images/placeholder.jpg" : trip.ListingPhotoUrl)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
+                        <span style="position: absolute; top: var(--space-2); right: var(--space-2); background: var(--color-surface); padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 600; box-shadow: var(--shadow-sm);">
+                            @trip.Status
+                        </span>
+                    </div>
+
+                    <div style="padding: var(--space-4); display: flex; flex-direction: column; flex-grow: 1;">
+                        <h3 class="font-display" style="font-size: var(--fs-md); margin: 0 0 var(--space-1) 0;">@trip.ListingTitle</h3>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-muted); margin: 0 0 var(--space-3) 0;">@trip.ListingCity</p>
+
+                        <p style="font-size: var(--fs-sm); margin: 0 0 var(--space-4) 0;">
+                            <strong>@trip.CheckInDate.ToString("MMM dd, yyyy")</strong> - <strong>@trip.CheckOutDate.ToString("MMM dd, yyyy")</strong>
+                        </p>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--color-border); flex-wrap: wrap; gap: var(--space-2);">
+                            <span class="font-display" style="font-weight: 700; color: var(--color-navy);">@trip.TotalPrice.ToString("C")</span>
+
+                            <div style="display: flex; gap: var(--space-2); align-items: center;">
+                                @if (trip.Status == "Confirmed")
+                                {
+                                    <form asp-controller="Payments" asp-action="Checkout" method="post" style="margin: 0;">
+                                        <input type="hidden" name="bookingId" value="@trip.Id" />
+                                        <input type="hidden" name="method" value="1" />
+                                        <button type="submit" class="btn-primary" style="padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-xs); font-weight: 600; border: none; cursor: pointer;">
+                                            Pay Now
+                                        </button>
+                                    </form>
+                                }
+
+                                <a asp-action="Details" asp-route-id="@trip.Id" style="font-size: var(--fs-sm); text-decoration: none; font-weight: 600; color: var(--color-navy);">Details</a>
+
+                                @if (trip.Status != "Paid" && trip.Status != "Completed" && trip.Status != "Cancelled" && trip.Status != "Rejected")
+                                {
+                                    <form asp-action="Cancel" asp-route-id="@trip.Id" method="post" style="margin: 0;" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
+                                        <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                                        <button type="submit" style="background: none; border: none; color: var(--color-danger); font-size: var(--fs-sm); font-weight: 600; cursor: pointer;">Cancel</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p style="color: var(--color-text-muted); margin-bottom: var(--space-8);">You have no upcoming trips booked right now.</p>
+    }
+
+    <!-- PAST TRIPS SECTION -->
+    <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-4); color: var(--color-navy);">
+        Past Trips
+    </h2>
+
+    @if (Model.Past != null && Model.Past.Any())
+    {
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
+            @foreach (var trip in Model.Past)
+            {
+                <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; opacity: 0.9; display: flex; flex-direction: column;">
+
+                    <div style="position: relative; padding-top: 56.25%; background: var(--color-surface-sunk);">
+                        <img src="@(string.IsNullOrEmpty(trip.ListingPhotoUrl) ? "/images/placeholder.jpg" : trip.ListingPhotoUrl)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
+                        <span style="position: absolute; top: var(--space-2); right: var(--space-2); background: var(--color-surface); padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); font-size: var(--fs-xs); font-weight: 600;">
+                            @trip.Status
+                        </span>
+                    </div>
+
+                    <div style="padding: var(--space-4); display: flex; flex-direction: column; flex-grow: 1;">
+                        <h3 class="font-display" style="font-size: var(--fs-md); margin: 0 0 var(--space-1) 0;">@trip.ListingTitle</h3>
+                        <p style="font-size: var(--fs-sm); color: var(--color-text-muted); margin: 0 0 var(--space-3) 0;">@trip.ListingCity</p>
+
+                        <p style="font-size: var(--fs-sm); margin: 0 0 var(--space-4) 0;">
+                            @trip.CheckInDate.ToString("MMM dd, yyyy") - @trip.CheckOutDate.ToString("MMM dd, yyyy")
+                        </p>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: auto; padding-top: var(--space-3); border-top: 1px solid var(--color-border); flex-wrap: wrap; gap: var(--space-2);">
+                            <span class="font-display" style="font-weight: 700;">@trip.TotalPrice.ToString("C")</span>
+
+                            <div style="display: flex; gap: var(--space-2); align-items: center;">
+                                @if (trip.Status == "Confirmed")
+                                {
+                                    <form asp-controller="Payments" asp-action="Checkout" method="post" style="margin: 0;">
+                                        <input type="hidden" name="bookingId" value="@trip.Id" />
+                                        <input type="hidden" name="method" value="1" />
+                                        <button type="submit" class="btn-primary" style="padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-xs); font-weight: 600; border: none; cursor: pointer;">
+                                            Pay Now
+                                        </button>
+                                    </form>
+                                }
+
+                                <a asp-action="Details" asp-route-id="@trip.Id" style="font-size: var(--fs-sm); text-decoration: none; font-weight: 600; color: var(--color-navy);">Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p style="color: var(--color-text-muted);">No past trip history.</p>
+    }
+</div>

@@ -107,9 +107,14 @@
 
                         @if (hasPhoto)
                         {
+                            <!-- Attempt to load image. If 404, hide image and show the initials div immediately following it -->
                             <img src="@currentUser.ProfilePhotoUrl"
                                  alt="@Localizer["Profile"]"
-                                 class="avatar" />
+                                 class="avatar"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+
+                            <!-- Hidden by default, displayed only if the onerror event triggers -->
+                            <div class="avatar-initials" style="display: none;">@initials</div>
                         }
                         else
                         {
@@ -128,6 +133,20 @@
                                 @Localizer["MyListings"]
                             </a>
 
+<<<<<<< Updated upstream
+=======
+                            <a asp-controller="Bookings" asp-action="MyTrips" style="display: block; padding: var(--space-2) var(--space-4); text-decoration: none; color: var(--color-text); font-size: var(--fs-sm);">
+                                @Localizer["MyTrips"]
+                            </a>
+
+                            @if (User.IsInRole("Host") || User.IsInRole("Admin"))
+                            {
+                                <a asp-controller="Bookings" asp-action="HostRequests" style="display: block; padding: var(--space-2) var(--space-4); text-decoration: none; color: var(--color-text); font-size: var(--fs-sm);">
+                                    @Localizer["HostDashboard"]
+                                </a>
+                            }
+
+>>>>>>> Stashed changes
                             @if (User.IsInRole("Admin"))
                             {
                                 <a href="/Admin/Dashboard"
