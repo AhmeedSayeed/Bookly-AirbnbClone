@@ -1,6 +1,7 @@
 using BLL.ViewModels.Bookings;
 using BLL.ViewModels.Common;
 using BLL.ViewModels.Reviews;
+using System.Collections.Generic;
 
 namespace BLL.ViewModels.Listings;
 

@@ -120,6 +120,22 @@ namespace PL
                         {
                             context.Fail("User account is suspended.");
                         }
+                    },
+
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+
+                        context.Response.Redirect("/Account/Login");
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnForbidden = context =>
+                    {
+                        context.Response.Redirect("/Account/AccessDenied");
+
+                        return Task.CompletedTask;
                     }
                 };
             });
@@ -160,11 +176,8 @@ namespace PL
             builder.Services.AddScoped<IVerificationService, VerificationService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
-<<<<<<< Updated upstream
-=======
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddHttpClient<IPaymentService, PaymentService>();
->>>>>>> Stashed changes
 
 
             var app = builder.Build();
