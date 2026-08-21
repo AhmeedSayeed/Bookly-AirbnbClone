@@ -1,0 +1,48 @@
+﻿@model bool
+
+@{
+    ViewData["Title"] = Localizer["EmailVerification"];
+}
+
+<div class="container mt-5">
+    <div class="text-center mx-auto" style="max-width: 550px;">
+
+        @if (Model)
+        {
+            <div class="mb-4">
+                <span style="font-size: 60px;">✓</span>
+            </div>
+
+            <h2>@Localizer["EmailVerifiedSuccessfully"]</h2>
+
+            <p class="text-muted mt-3">
+                @Localizer["EmailSuccessfullyVerified"]
+            </p>
+
+            <p class="text-muted">
+                @Localizer["CanNowLogin"]
+            </p>
+
+            <a asp-controller="Account"
+               asp-action="Login"
+               class="btn btn-primary mt-3">
+                @Localizer["GoToLogin"]
+            </a>
+        }
+        else
+        {
+            <h2>@Localizer["EmailVerificationFailed"]</h2>
+
+            <p class="text-muted mt-3">
+                @Localizer["InvalidOrExpiredVerificationLink"]
+            </p>
+
+            <a asp-controller="Account"
+               asp-action="Login"
+               class="btn btn-primary mt-3">
+                @Localizer["GoToLogin"]
+            </a>
+        }
+
+    </div>
+</div>

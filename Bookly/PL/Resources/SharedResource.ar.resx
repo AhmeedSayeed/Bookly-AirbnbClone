@@ -678,4 +678,125 @@
 	<data name="LocalDebuggingDescription" xml:space="preserve">
   <value>لتصحيح الأخطاء محليًا، قم بتمكين بيئة التطوير عن طريق تعيين متغير البيئة ASPNETCORE_ENVIRONMENT إلى Development ثم أعد تشغيل التطبيق.</value>
 </data>
+	<data name="ForgotPassword" xml:space="preserve">
+  <value>هل نسيت كلمة المرور؟</value>
+</data>
+	<data name="CheckYourEmail" xml:space="preserve">
+  <value>تحقق من بريدك الإلكتروني</value>
+</data>
+
+	<data name="PasswordResetLinkSent" xml:space="preserve">
+  <value>لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.</value>
+</data>
+
+	<data name="CheckInboxResetPassword" xml:space="preserve">
+  <value>يرجى التحقق من صندوق الوارد والضغط على الرابط لإعادة تعيين كلمة المرور.</value>
+</data>
+
+	<data name="EmailVerification" xml:space="preserve">
+  <value>تأكيد البريد الإلكتروني</value>
+</data>
+
+	<data name="EmailVerifiedSuccessfully" xml:space="preserve">
+  <value>تم تأكيد البريد الإلكتروني بنجاح!</value>
+</data>
+
+	<data name="EmailSuccessfullyVerified" xml:space="preserve">
+  <value>تم تأكيد بريدك الإلكتروني بنجاح.</value>
+</data>
+
+	<data name="CanNowLogin" xml:space="preserve">
+  <value>يمكنك الآن تسجيل الدخول إلى حسابك على Bookly.</value>
+</data>
+
+	<data name="GoToLogin" xml:space="preserve">
+  <value>الانتقال إلى تسجيل الدخول</value>
+</data>
+
+	<data name="EmailVerificationFailed" xml:space="preserve">
+  <value>فشل تأكيد البريد الإلكتروني</value>
+</data>
+
+	<data name="InvalidOrExpiredVerificationLink" xml:space="preserve">
+  <value>رابط التأكيد غير صالح أو انتهت صلاحيته.</value>
+</data>
+
+	<data name="AccountCreatedSuccessfully" xml:space="preserve">
+  <value>تم إنشاء حسابك بنجاح!</value>
+</data>
+
+	<data name="VerificationLinkSent" xml:space="preserve">
+  <value>لقد أرسلنا رابط تأكيد إلى بريدك الإلكتروني.</value>
+</data>
+
+	<data name="CheckInboxVerifyAccount" xml:space="preserve">
+  <value>يرجى التحقق من صندوق الوارد والضغط على الرابط لتأكيد حسابك.</value>
+</data>
+
+	<data name="DidntReceiveEmail" xml:space="preserve">
+  <value>لم تستلم البريد الإلكتروني؟</value>
+</data>
+
+	<data name="CheckSpamFolder" xml:space="preserve">
+  <value>يرجى التحقق من مجلد الرسائل غير المرغوب فيها.</value>
+</data>
+
+	<data name="ForgotPassword" xml:space="preserve">
+  <value>هل نسيت كلمة المرور؟</value>
+</data>
+
+	<data name="EnterEmailToResetPassword" xml:space="preserve">
+  <value>أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.</value>
+</data>
+
+	<data name="EnterYourEmail" xml:space="preserve">
+  <value>أدخل بريدك الإلكتروني</value>
+</data>
+
+	<data name="SendResetLink" xml:space="preserve">
+  <value>إرسال رابط إعادة التعيين</value>
+</data>
+
+	<data name="ResetPassword" xml:space="preserve">
+  <value>إعادة تعيين كلمة المرور</value>
+</data>
+
+	<data name="EnterNewPasswordBelow" xml:space="preserve">
+  <value>أدخل كلمة المرور الجديدة أدناه.</value>
+</data>
+
+	<data name="NewPassword" xml:space="preserve">
+  <value>كلمة المرور الجديدة</value>
+</data>
+
+	<data name="EnterNewPassword" xml:space="preserve">
+  <value>أدخل كلمة المرور الجديدة</value>
+</data>
+
+	<data name="ConfirmPassword" xml:space="preserve">
+  <value>تأكيد كلمة المرور</value>
+</data>
+
+	<data name="ConfirmYourPassword" xml:space="preserve">
+  <value>أكد كلمة المرور</value>
+</data>
+<data name="NewPassword" xml:space="preserve">
+  <value>كلمة المرور الجديدة</value>
+</data>
+
+<data name="ConfirmPassword" xml:space="preserve">
+  <value>تأكيد كلمة المرور</value>
+</data>
+
+<data name="EnterNewPasswordPlaceholder" xml:space="preserve">
+  <value>أدخل كلمة المرور الجديدة</value>
+</data>
+
+<data name="ConfirmNewPasswordPlaceholder" xml:space="preserve">
+  <value>تأكيد كلمة المرور الجديدة</value>
+</data>
+
+<data name="ResetPassword" xml:space="preserve">
+  <value>إعادة تعيين كلمة المرور</value>
+</data>
 </root>

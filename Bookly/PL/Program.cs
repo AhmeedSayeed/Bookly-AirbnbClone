@@ -38,6 +38,7 @@ namespace PL
 
             builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorageSettings"));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+            builder.Services.Configure<PaymobSettings>(builder.Configuration.GetSection("PaymobSettings"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
             {
@@ -119,6 +120,22 @@ namespace PL
                         {
                             context.Fail("User account is suspended.");
                         }
+                    },
+
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+
+                        context.Response.Redirect("/Account/Login");
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnForbidden = context =>
+                    {
+                        context.Response.Redirect("/Account/AccessDenied");
+
+                        return Task.CompletedTask;
                     }
                 };
             });
@@ -159,7 +176,12 @@ namespace PL
             builder.Services.AddScoped<IVerificationService, VerificationService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddHttpClient<IPaymentService, PaymentService>();
+            builder.Services.Configure<EmailSettings>(
+         builder.Configuration.GetSection("EmailSettings"));
 
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             var app = builder.Build();
             var supportedCultures = new[] { "en", "ar" };
