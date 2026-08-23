@@ -19,17 +19,20 @@ namespace PL.Controllers
     {
         private readonly IListingService _listingService;
         private readonly IAmenityService _amenityService;
+        private readonly IWishlistService _wishlistService;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IStringLocalizer<SharedResource> _localizer;
 
         public ListingsController(
             IListingService listingService,
             IAmenityService amenityService,
+            IWishlistService wishlistService,
             UserManager<ApplicationUser> userManager,
             IStringLocalizer<SharedResource> localizer)
         {
             _listingService = listingService;
             _amenityService = amenityService;
+            _wishlistService = wishlistService;
             _userManager = userManager;
             _localizer = localizer;
         }
@@ -70,6 +73,19 @@ namespace PL.Controllers
             if (!response.Succeeded || response.Data == null)
             {
                 return View(new PagedResult<ListingCardDto>());
+            }
+
+            // Mark which of these listings the current user has already wishlisted,
+            // so the heart icon renders filled without an extra request per card.
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var currentUserId = GetCurrentUserId();
+                var wishlistedIds = await _wishlistService.GetWishlistedListingIdsAsync(currentUserId);
+
+                foreach (var item in response.Data.Items)
+                {
+                    item.IsWishlisted = wishlistedIds.Contains(item.Id);
+                }
             }
 
             return View(response.Data);

@@ -128,6 +128,15 @@
                                 }
 
                                 <a asp-action="Details" asp-route-id="@trip.Id" style="font-size: var(--fs-sm); text-decoration: none; font-weight: 600; color: var(--color-navy);">Details</a>
+
+                                @if (trip.CanReview)
+                                {
+                                    <a asp-controller="Reviews" asp-action="Create" asp-route-bookingId="@trip.Id"
+                                       class="btn-primary"
+                                       style="padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); font-size: var(--fs-xs); text-decoration: none;">
+                                        @Localizer["LeaveAReview"]
+                                    </a>
+                                }
                             </div>
                         </div>
                     </div>

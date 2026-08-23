@@ -72,6 +72,90 @@
             </div>
         </div>
 
+        <!-- CANCELLATION POLICY -->
+        @if (!string.IsNullOrEmpty(Model.CancellationPolicy))
+        {
+            <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-border);">
+                <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-2);">
+                    @Localizer["CancellationPolicy"]
+                </h3>
+                <p style="color: var(--color-text-muted); font-size: var(--fs-sm);">
+                    @Model.CancellationPolicy
+                </p>
+            </div>
+        }
+
+        <!-- REVIEWS -->
+        <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-border);">
+            <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">
+                @Localizer["Reviews"] (@Model.Reviews.Count)
+                @if (Model.Reviews.Any())
+                {
+                    <span style="color: var(--color-brass); font-family: var(--font-body); font-size: var(--fs-base);">
+                        &#9733; @Model.AverageRating.ToString("0.0")
+                    </span>
+                }
+            </h3>
+
+            @if (!Model.Reviews.Any())
+            {
+                <p style="color: var(--color-text-muted);">@Localizer["NoReviewsYet"]</p>
+            }
+            else
+            {
+                <div style="display: flex; flex-direction: column; gap: var(--space-5);">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <div style="padding-bottom: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+                                <strong>@review.GuestName</strong>
+                                <span style="color: var(--color-brass);">&#9733; @review.Rating</span>
+                                <span style="color: var(--color-text-muted); font-size: var(--fs-xs);">
+                                    @review.CreatedAt.ToString("MMM yyyy")
+                                </span>
+                            </div>
+
+                            @if (review.CleanlinessRating.HasValue || review.CommunicationRating.HasValue ||
+                                 review.LocationRating.HasValue || review.ValueRating.HasValue)
+                            {
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-2); font-size: var(--fs-xs); color: var(--color-text-muted);">
+                                    @if (review.CleanlinessRating.HasValue)
+                                    {
+                                        <span>@Localizer["Cleanliness"]: @review.CleanlinessRating</span>
+                                    }
+                                    @if (review.CommunicationRating.HasValue)
+                                    {
+                                        <span>@Localizer["Communication"]: @review.CommunicationRating</span>
+                                    }
+                                    @if (review.LocationRating.HasValue)
+                                    {
+                                        <span>@Localizer["Location"]: @review.LocationRating</span>
+                                    }
+                                    @if (review.ValueRating.HasValue)
+                                    {
+                                        <span>@Localizer["Value"]: @review.ValueRating</span>
+                                    }
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(review.Comment))
+                            {
+                                <p style="margin: 0 0 var(--space-2) 0;">@review.Comment</p>
+                            }
+
+                            @if (!string.IsNullOrEmpty(review.HostResponse))
+                            {
+                                <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--color-surface-sunk); border-radius: var(--radius-sm);">
+                                    <strong style="font-size: var(--fs-sm);">@Localizer["ResponseFromHost"]</strong>
+                                    <p style="margin: var(--space-1) 0 0 0; font-size: var(--fs-sm);">@review.HostResponse</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
         <div>
             <!-- BOOKING WIDGET -->
             <div style="padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); position: sticky; top: 100px; background: var(--color-surface);">

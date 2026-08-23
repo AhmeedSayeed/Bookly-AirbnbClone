@@ -3,6 +3,12 @@
 @{
     ViewData["Title"] = Localizer["SearchStays"];
     var currentSearch = ViewBag.CurrentSearch as BLL.DTOs.Listing.ListingSearchRequestDto;
+    var isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+}
+
+@if (isAuthenticated)
+{
+    @Html.AntiForgeryToken()
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: 0 var(--gutter); display: grid; grid-template-columns: 300px 1fr; gap: var(--space-6); margin-top: var(--space-6);">
@@ -68,20 +74,35 @@
             {
                 foreach (var item in Model.Items)
                 {
-                    <a asp-action="Details"
-                       asp-route-id="@item.Id"
-                       style="text-decoration: none; color: inherit; display: block;">
+                    <div class="listing-card" data-listing-id="@item.Id" style="display: flex; flex-direction: column; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform var(--duration-fast), box-shadow var(--duration-fast); height: 100%;">
 
-                        <div class="listing-card" style="display: flex; flex-direction: column; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform var(--duration-fast), box-shadow var(--duration-fast); height: 100%;">
-
-                            <!-- Constrained Image Container -->
-                            <div style="position: relative; padding-top: 66.66%; overflow: hidden; background: var(--color-surface-sunk);">
+                        <!-- Constrained Image Container -->
+                        <div style="position: relative; padding-top: 66.66%; overflow: hidden; background: var(--color-surface-sunk);">
+                            <a asp-action="Details" asp-route-id="@item.Id">
                                 <img src="@(string.IsNullOrEmpty(item.ThumbnailUrl) ? "/images/placeholder.jpg" : item.ThumbnailUrl)"
                                      alt="@item.Title"
                                      style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
-                            </div>
+                            </a>
 
-                            <!-- Card Data -->
+                            @if (isAuthenticated)
+                            {
+                                <button type="button"
+                                        class="wishlist-toggle-btn"
+                                        data-listing-id="@item.Id"
+                                        title="@Localizer["Wishlist"]"
+                                        style="position: absolute; top: var(--space-2); right: var(--space-2);
+                                    width: 32px; height: 32px; border-radius: var(--radius-pill);
+                                    border: none; background: rgba(255,255,255,0.85);
+                                    display: flex; align-items: center; justify-content: center;
+                                    cursor: pointer; z-index: 2;">
+                                    <span class="wishlist-heart-icon"
+                                          style="color: @(item.IsWishlisted ? "var(--color-clay)" : "var(--color-text-muted)");">&#9829;</span>
+                                </button>
+                            }
+                        </div>
+
+                        <!-- Card Data -->
+                        <a asp-action="Details" asp-route-id="@item.Id" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; flex-grow: 1;">
                             <div style="padding: var(--space-3); display: flex; flex-direction: column; flex-grow: 1;">
 
                                 <h3 class="font-display" style="font-size: var(--fs-md); margin: 0 0 var(--space-1) 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
@@ -99,8 +120,8 @@
                                     </span>
                                 </p>
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 }
             }
             else
@@ -118,3 +139,35 @@
         </div>
     </div>
 </div>
+
+@if (isAuthenticated)
+{
+    @section Scripts {
+        <script>
+            document.querySelectorAll('.wishlist-toggle-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var listingId = btn.getAttribute('data-listing-id');
+                    var icon = btn.querySelector('.wishlist-heart-icon');
+
+                    fetch('@Url.Action("Toggle", "Wishlist")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: 'listingId=' + encodeURIComponent(listingId)
+                    })
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) {
+                            if (data.success) {
+                                icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
+                            }
+                        });
+                });
+            });
+        </script>
+    }
+}

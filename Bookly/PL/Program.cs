@@ -178,7 +178,8 @@ namespace PL
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddHttpClient<IPaymentService, PaymentService>();
-
+            builder.Services.AddScoped<IWishlistService, WishlistService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
 
             var app = builder.Build();
             var supportedCultures = new[] { "en", "ar" };
