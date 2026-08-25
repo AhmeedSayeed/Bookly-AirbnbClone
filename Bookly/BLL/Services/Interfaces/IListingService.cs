@@ -1,5 +1,6 @@
 ﻿using BLL.DTOs;
 using BLL.DTOs.Listing;
+using BLL.ViewModels.Availability;
 using BLL.ViewModels.Listings;
 using DAL.Models.Common;
 
@@ -14,5 +15,7 @@ namespace BLL.Services.Interfaces
         public Task<Response<bool>> DeleteAsync(int id, int currentUserId);
         public Task<Response<List<ListingSummaryViewModel>>> GetListingsByHostIdAsync(int hostId);
         public Task<Response<ListingFormViewModel>> GetListingForEditAsync(int id);
+        public Task<Response<AvailabilityCalendarViewModel>> GetAvailabilityCalendarAsync(int listingId, int currentUserId);
+        public Task<Response<bool>> UpdateAvailabilityCalendarAsync(AvailabilityCalendarViewModel model, int currentUserId);
     }
 }

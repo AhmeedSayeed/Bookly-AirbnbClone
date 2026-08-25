@@ -46,6 +46,12 @@
                     </p>
 
                     <div style="display: flex; gap: var(--space-2); margin-top: auto;">
+                        <a asp-action="Availability"
+                           asp-route-id="@item.Id"
+                           class="btn-primary"
+                           style="flex: 1; text-align: center; background: var(--color-surface-sunk); color: var(--color-navy); border: 1px solid var(--color-border); padding: var(--space-2); border-radius: var(--radius-sm); font-size: var(--fs-sm); text-decoration: none;">
+                            Calendar
+                        </a>
                         <a asp-action="Edit"
                            asp-route-id="@item.Id"
                            class="btn-primary"

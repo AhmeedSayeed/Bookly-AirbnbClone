@@ -180,6 +180,7 @@ namespace PL
             builder.Services.AddHttpClient<IPaymentService, PaymentService>();
             builder.Services.AddScoped<IWishlistService, WishlistService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<ICouponService, CouponService>();
 
             var app = builder.Build();
             var supportedCultures = new[] { "en", "ar" };

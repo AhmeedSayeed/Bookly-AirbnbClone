@@ -3,6 +3,7 @@ using BLL.DTOs;
 using BLL.DTOs.Listing;
 using BLL.Services.Interfaces;
 using BLL.ViewModels.Listings;
+using BLL.ViewModels.Availability;
 using DAL.Enums;
 using DAL.Models.Common;
 using DAL.Models.Property;
@@ -271,6 +272,85 @@ namespace BLL.Services.Implementation
             viewModel.SelectedAmenityIds = listing.ListingAmenities.Select(la => la.AmenityId).ToList();
 
             return Response<ListingFormViewModel>.Success(viewModel);
+        }
+        public async Task<Response<AvailabilityCalendarViewModel>> GetAvailabilityCalendarAsync(int listingId, int currentUserId)
+        {
+            // Get it with its reservations and blocked dates
+            var listing = await _listingRepo.GetAllAsIQueryable()
+                .Include(l => l.BlockedDates)
+                .Include(l => l.Bookings)
+                .FirstOrDefaultAsync(l => l.Id == listingId);
+            // Check property existance
+            if (listing == null)
+                return Response<AvailabilityCalendarViewModel>.Fail(ResponseStatus.NotFound, "Listing not found.");
+            // check that current user is property owner
+            if (listing.HostId != currentUserId)
+                return Response<AvailabilityCalendarViewModel>.Fail(ResponseStatus.Forbidden, "You do not have permission to manage this listing.");
+            // extract all reserved days (pending or confirmed)
+            var bookedDates = new List<DateTime>();
+            var activeBookings = listing.Bookings
+                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
+                .ToList();
+            foreach (var booking in activeBookings)
+            {
+                for (var date = booking.CheckInDate.Date; date < booking.CheckOutDate.Date; date = date.AddDays(1))
+                {
+                    if (!bookedDates.Contains(date))
+                        bookedDates.Add(date);
+                }
+            }
+            // Get blocked dates
+            var blockedDates = listing.BlockedDates
+                .Select(bd => bd.Date.Date)
+                .OrderBy(d => d)
+                .ToList();
+            // prepare ViewModel and return it
+            var viewModel = new AvailabilityCalendarViewModel
+            {
+                ListingId = listing.Id,
+                ListingTitle = listing.Title,
+                BookedDates = bookedDates,
+                BlockedDates = blockedDates
+            };
+            return Response<AvailabilityCalendarViewModel>.Success(viewModel);
+        }
+        public async Task<Response<bool>> UpdateAvailabilityCalendarAsync(AvailabilityCalendarViewModel model, int currentUserId)
+        {
+            var listing = await _listingRepo.GetAllAsIQueryable()
+                .Include(l => l.BlockedDates)
+                .FirstOrDefaultAsync(l => l.Id == model.ListingId);
+            if (listing == null)
+                return Response<bool>.Fail(ResponseStatus.NotFound, "Listing not found.");
+            if (listing.HostId != currentUserId)
+                return Response<bool>.Fail(ResponseStatus.Forbidden, "You do not have permission to manage this listing.");
+            // delete blocked dates to retype them
+            var today = DateTime.UtcNow.Date;
+            var existingFutureBlocks = listing.BlockedDates
+                .Where(bd => bd.Date.Date >= today)
+                .ToList();
+            foreach (var oldBlock in existingFutureBlocks)
+            {
+                listing.BlockedDates.Remove(oldBlock);
+            }
+            // add new date that user choosed (validation: it can't be from pasts or repeated)
+            if (model.BlockedDates != null && model.BlockedDates.Any())
+            {
+                var validDates = model.BlockedDates
+                    .Where(d => d.Date >= today)
+                    .Distinct();
+                foreach (var date in validDates)
+                {
+                    listing.BlockedDates.Add(new BlockedDate
+                    {
+                        ListingId = listing.Id,
+                        Date = date.Date,
+                        Reason = "Blocked by host"
+                    });
+                }
+            }
+            // save changes in DB
+            var saved = await _listingRepo.SaveAsync();
+            return Response<bool>.Success(true, "Availability calendar updated successfully.");
         }
     }
 }

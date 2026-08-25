@@ -1,0 +1,277 @@
+﻿@model BLL.ViewModels.Availability.AvailabilityCalendarViewModel
+
+@{
+    ViewData["Title"] = "Manage Availability - " + Model.ListingTitle;
+}
+
+<style>
+    .cal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-4);
+    }
+
+    .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: var(--space-2);
+        text-align: center;
+    }
+
+    .cal-day-name {
+        font-weight: 600;
+        font-size: var(--fs-xs);
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        padding: var(--space-2) 0;
+    }
+
+    .cal-day {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+        transition: all var(--duration-fast) var(--ease-smooth);
+        position: relative;
+    }
+
+        .cal-day:hover:not(.cal-day--disabled):not(.cal-day--booked) {
+            border-color: var(--color-brass);
+            transform: scale(1.03);
+        }
+    /* States */
+    .cal-day--disabled {
+        background: var(--color-surface-sunk);
+        color: var(--color-text-muted);
+        opacity: 0.4;
+        cursor: not-allowed;
+        border-color: transparent;
+    }
+
+    .cal-day--booked {
+        background: var(--color-navy);
+        color: var(--color-text-inverse);
+        cursor: not-allowed;
+        border-color: var(--color-navy);
+    }
+
+    .cal-day--blocked {
+        background: #FDF0ED;
+        color: var(--color-clay);
+        border-color: var(--color-clay);
+        font-weight: 700;
+        text-decoration: line-through;
+    }
+
+    .cal-legend {
+        display: flex;
+        gap: var(--space-4);
+        margin-top: var(--space-5);
+        padding: var(--space-3);
+        background: var(--color-surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        flex-wrap: wrap;
+    }
+
+    .cal-legend-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--fs-xs);
+        color: var(--color-text-muted);
+    }
+
+    .cal-legend-box {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 1px solid var(--color-border);
+    }
+</style>
+
+<div style="max-width: 800px; margin: 0 auto; padding: 0 var(--gutter);">
+
+    <!-- Top Navigation -->
+    <div style="margin-bottom: var(--space-5); margin-top: var(--space-4);">
+        <a asp-action="MyListings" style="color: var(--color-text-muted); text-decoration: none; font-size: var(--fs-sm); font-weight: 500;">
+            &larr; Back to My Listings
+        </a>
+        <h1 class="font-display" style="font-size: var(--fs-xl); margin-top: var(--space-2);">
+            Manage Calendar
+        </h1>
+        <p style="color: var(--color-text-muted); font-size: var(--fs-base);">
+            @Model.ListingTitle
+        </p>
+    </div>
+
+    <!-- Calendar Card -->
+    <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: var(--shadow-sm);">
+
+        <div class="cal-header">
+            <button type="button" class="btn-primary" onclick="prevMonth()" style="padding: var(--space-2) var(--space-3); background: var(--color-surface-sunk); color: var(--color-text); border: none;">
+                &larr; Prev
+            </button>
+            <h2 id="monthYearTitle" class="font-display" style="margin: 0; font-size: var(--fs-lg); color: var(--color-navy);"></h2>
+            <button type="button" class="btn-primary" onclick="nextMonth()" style="padding: var(--space-2) var(--space-3); background: var(--color-surface-sunk); color: var(--color-text); border: none;">
+                Next &rarr;
+            </button>
+        </div>
+
+        <!-- Weekday Headers -->
+        <div class="cal-grid" style="margin-bottom: var(--space-2);">
+            <div class="cal-day-name">Sun</div>
+            <div class="cal-day-name">Mon</div>
+            <div class="cal-day-name">Tue</div>
+            <div class="cal-day-name">Wed</div>
+            <div class="cal-day-name">Thu</div>
+            <div class="cal-day-name">Fri</div>
+            <div class="cal-day-name">Sat</div>
+        </div>
+
+        <!-- Days Grid -->
+        <div id="calendarDaysGrid" class="cal-grid"></div>
+
+        <!-- Legend -->
+        <div class="cal-legend">
+            <div class="cal-legend-item">
+                <div class="cal-legend-box" style="background: var(--color-surface);"></div>
+                <span>Available (Click to block)</span>
+            </div>
+            <div class="cal-legend-item">
+                <div class="cal-legend-box" style="background: #FDF0ED; border-color: var(--color-clay);"></div>
+                <span>Blocked by you (Click to unblock)</span>
+            </div>
+            <div class="cal-legend-item">
+                <div class="cal-legend-box" style="background: var(--color-navy);"></div>
+                <span>Booked by Guest</span>
+            </div>
+        </div>
+
+        <!-- Save Form -->
+        <form asp-action="Availability" method="post" id="availabilityForm" style="margin-top: var(--space-6);">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="ListingId" value="@Model.ListingId" />
+            <input type="hidden" name="ListingTitle" value="@Model.ListingTitle" />
+
+            <!-- Dynamic hidden inputs for BlockedDates will be injected here by JS -->
+            <div id="hiddenInputsContainer"></div>
+
+            <div style="display: flex; justify-content: flex-end; gap: var(--space-3);">
+                <a asp-action="MyListings" class="btn-primary" style="background: transparent; border: 1px solid var(--color-border-strong); color: var(--color-text);">
+                    Cancel
+                </a>
+                <button type="submit" class="btn-primary" style="background: var(--color-brass); color: var(--color-navy);">
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Parse dates from backend model
+        const bookedDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BookedDates.Select(d => d.ToString("yyyy-MM-dd")))));
+        let blockedDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BlockedDates.Select(d => d.ToString("yyyy-MM-dd")))));
+
+        let currentDate = new Date();
+
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"];
+
+            document.getElementById('monthYearTitle').innerText = `${monthNames[month]} ${year}`;
+
+            const firstDayIndex = new Date(year, month, 1).getDay();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+
+            const grid = document.getElementById('calendarDaysGrid');
+            grid.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            // Empty cells before the 1st day of month
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyCell = document.createElement('div');
+                grid.appendChild(emptyCell);
+            }
+
+            // Days of the month
+            for (let day = 1; day <= lastDay; day++) {
+                const cellDate = new Date(year, month, day);
+                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                const dayCell = document.createElement('div');
+                dayCell.classList.add('cal-day');
+                dayCell.innerText = day;
+
+                if (cellDate < today) {
+                    dayCell.classList.add('cal-day--disabled');
+                } else if (bookedDates.has(dateString)) {
+                    dayCell.classList.add('cal-day--booked');
+                    dayCell.title = "Booked by guest";
+                } else if (blockedDates.has(dateString)) {
+                    dayCell.classList.add('cal-day--blocked');
+                    dayCell.onclick = () => toggleDate(dateString);
+                } else {
+                    dayCell.onclick = () => toggleDate(dateString);
+                }
+
+                grid.appendChild(dayCell);
+            }
+
+            updateHiddenInputs();
+        }
+
+        function toggleDate(dateString) {
+            if (blockedDates.has(dateString)) {
+                blockedDates.delete(dateString);
+            } else {
+                blockedDates.add(dateString);
+            }
+            renderCalendar();
+        }
+
+        function updateHiddenInputs() {
+            const container = document.getElementById('hiddenInputsContainer');
+            container.innerHTML = '';
+
+            let index = 0;
+            blockedDates.forEach(date => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `BlockedDates[${index}]`;
+                input.value = date;
+                container.appendChild(input);
+                index++;
+            });
+        }
+
+        function prevMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        // Initial render
+        renderCalendar();
+    </script>
+}
