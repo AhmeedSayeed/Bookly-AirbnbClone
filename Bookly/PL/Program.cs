@@ -179,9 +179,11 @@ namespace PL
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddHttpClient<IPaymentService, PaymentService>();
             builder.Services.Configure<EmailSettings>(
-         builder.Configuration.GetSection("EmailSettings"));
+            builder.Configuration.GetSection("EmailSettings"));
 
             builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IWishlistService, WishlistService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
 
             var app = builder.Build();
             var supportedCultures = new[] { "en", "ar" };

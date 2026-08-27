@@ -30,7 +30,8 @@
                      alt="@Localizer["ProfilePhoto"]"
                      class="profile-upload-image"
                      id="profileImagePreview"
-                     style="display: @(hasPhoto ? "block" : "none");" />
+                     style="display: @(hasPhoto ? "block" : "none");" 
+                     onerror="this.style.display='none'; document.getElementById('profileInitialsPreview').style.display='flex';" />
 
                 <!-- The Initials Fallback Element -->
                 <div class="avatar-initials"
@@ -135,6 +136,7 @@
 
 @section Scripts {
     <script>
+        // Triggered when a user selects a new image to upload
         function previewImage(event) {
             const input = event.target;
 
@@ -147,6 +149,7 @@
 
                     imgPreview.src = e.target.result;
 
+                    // Force image to show and hide initials when a valid local file is read
                     imgPreview.style.display = 'block';
 
                     if (initialsPreview) {

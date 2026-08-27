@@ -80,6 +80,7 @@ namespace BLL.Services.Implementation
             verification.Status = HostVerificationStatus.Verified;
             verification.VerifiedAt = DateTime.UtcNow;
             verification.User.IsHost = true;
+            await _userManager.AddToRoleAsync(verification.User, "Host");
 
             _verificationRepo.Update(verification);
             await _verificationRepo.SaveAsync();

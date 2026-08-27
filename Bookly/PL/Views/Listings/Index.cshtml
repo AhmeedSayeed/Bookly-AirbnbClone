@@ -1,15 +1,21 @@
-@model PagedResult<ListingCardDto>
+@model DAL.Models.Common.PagedResult<BLL.DTOs.Listing.ListingCardDto>
 
 @{
     ViewData["Title"] = Localizer["SearchStays"];
-    var currentSearch = ViewBag.CurrentSearch as ListingSearchRequestDto;
+    var currentSearch = ViewBag.CurrentSearch as BLL.DTOs.Listing.ListingSearchRequestDto;
+    var isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+}
+
+@if (isAuthenticated)
+{
+    @Html.AntiForgeryToken()
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: 0 var(--gutter); display: grid; grid-template-columns: 300px 1fr; gap: var(--space-6); margin-top: var(--space-6);">
 
     <!-- SEARCH SIDEBAR -->
     <aside>
-        <form method="get" asp-action="Index" style="padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+        <form method="get" asp-action="Index" style="padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); position: sticky; top: 100px; background: var(--color-surface);">
 
             <h2 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">
                 @Localizer["Filters"]
@@ -19,7 +25,6 @@
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
                     @Localizer["City"]
                 </label>
-
                 <input type="text"
                        name="City"
                        value="@currentSearch?.City"
@@ -28,7 +33,6 @@
             </div>
 
             <div style="margin-top: var(--space-4);">
-
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
                     @Localizer["Amenities"]
                 </label>
@@ -40,17 +44,14 @@
                         var isChecked = currentSearch?.AmenityIds != null &&
                                         currentSearch.AmenityIds.Contains(amenity.Id);
 
-                        <label style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-1); cursor: pointer;">
-
+                        <label style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2); cursor: pointer;">
                             <input type="checkbox"
                                    name="AmenityIds"
                                    value="@amenity.Id"
                             @(isChecked ? "checked" : "") />
-
                             <span style="font-size: var(--fs-sm);">
                                 @amenity.Name
                             </span>
-
                         </label>
                     }
                 }
@@ -58,7 +59,7 @@
 
             <button type="submit"
                     class="btn-primary"
-                    style="width: 100%; margin-top: var(--space-4); border-radius: var(--radius-pill);">
+                    style="width: 100%; margin-top: var(--space-4); padding: var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-weight: 600; border: none; cursor: pointer;">
                 @Localizer["ApplyFilters"]
             </button>
 
@@ -67,63 +68,106 @@
 
     <!-- RESULTS GRID -->
     <div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
 
             @if (Model.Items != null && Model.Items.Any())
             {
                 foreach (var item in Model.Items)
                 {
-                    <a asp-action="Details"
-                       asp-route-id="@item.Id"
-                       style="text-decoration: none; color: inherit;">
+                    <div class="listing-card" data-listing-id="@item.Id" style="display: flex; flex-direction: column; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform var(--duration-fast), box-shadow var(--duration-fast); height: 100%;">
 
-                        <div class="listing-card">
+                        <!-- Constrained Image Container -->
+                        <div style="position: relative; padding-top: 66.66%; overflow: hidden; background: var(--color-surface-sunk);">
+                            <a asp-action="Details" asp-route-id="@item.Id">
+                                <img src="@(string.IsNullOrEmpty(item.ThumbnailUrl) ? "/images/placeholder.jpg" : item.ThumbnailUrl)"
+                                     alt="@item.Title"
+                                     style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
+                            </a>
 
-                            <img src="@(string.IsNullOrEmpty(item.ThumbnailUrl) ? "/images/placeholder.jpg" : item.ThumbnailUrl)"
-                                 alt="@item.Title" />
+                            @if (isAuthenticated)
+                            {
+                                <button type="button"
+                                        class="wishlist-toggle-btn"
+                                        data-listing-id="@item.Id"
+                                        title="@Localizer["Wishlist"]"
+                                        style="position: absolute; top: var(--space-2); right: var(--space-2);
+                                    width: 32px; height: 32px; border-radius: var(--radius-pill);
+                                    border: none; background: rgba(255,255,255,0.85);
+                                    display: flex; align-items: center; justify-content: center;
+                                    cursor: pointer; z-index: 2;">
+                                    <span class="wishlist-heart-icon"
+                                          style="color: @(item.IsWishlisted ? "var(--color-clay)" : "var(--color-text-muted)");">&#9829;</span>
+                                </button>
+                            }
+                        </div>
 
-                            <div style="padding: var(--space-3);">
+                        <!-- Card Data -->
+                        <a asp-action="Details" asp-route-id="@item.Id" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; flex-grow: 1;">
+                            <div style="padding: var(--space-3); display: flex; flex-direction: column; flex-grow: 1;">
 
-                                <h3 class="font-display"
-                                    style="font-size: var(--fs-md); margin-bottom: var(--space-1);">
+                                <h3 class="font-display" style="font-size: var(--fs-md); margin: 0 0 var(--space-1) 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                     @item.City
                                 </h3>
 
-                                <p style="font-size: var(--fs-sm); color: var(--color-text-muted); margin-bottom: var(--space-2);">
+                                <p style="font-size: var(--fs-sm); color: var(--color-text-muted); margin: 0 0 var(--space-2) 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1;">
                                     @item.Title
                                 </p>
 
-                                <p class="font-display"
-                                   style="font-weight: 700; color: var(--color-navy);">
-
+                                <p class="font-display" style="font-weight: 700; color: var(--color-navy); margin: 0; margin-top: auto;">
                                     @item.PricePerNight.ToString("C")
-
                                     <span style="font-weight: 400; font-size: var(--fs-sm); color: var(--color-text-muted); font-family: var(--font-body);">
                                         @Localizer["Night"]
                                     </span>
-
                                 </p>
-
                             </div>
-                        </div>
-                    </a>
+                        </a>
+                    </div>
                 }
             }
             else
             {
                 <div style="grid-column: 1 / -1; text-align: center; padding: var(--space-8) 0;">
-
-                    <h2 class="font-display" style="font-size: var(--fs-lg);">
+                    <h2 class="font-display" style="font-size: var(--fs-lg); color: var(--color-navy); margin-bottom: var(--space-2);">
                         @Localizer["NoPlacesFound"]
                     </h2>
-
                     <p style="color: var(--color-text-muted);">
                         @Localizer["TryAdjustingSearchFilters"]
                     </p>
-
                 </div>
             }
 
         </div>
     </div>
 </div>
+
+@if (isAuthenticated)
+{
+    @section Scripts {
+        <script>
+            document.querySelectorAll('.wishlist-toggle-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var listingId = btn.getAttribute('data-listing-id');
+                    var icon = btn.querySelector('.wishlist-heart-icon');
+
+                    fetch('@Url.Action("Toggle", "Wishlist")', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: 'listingId=' + encodeURIComponent(listingId)
+                    })
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) {
+                            if (data.success) {
+                                icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
+                            }
+                        });
+                });
+            });
+        </script>
+    }
+}
