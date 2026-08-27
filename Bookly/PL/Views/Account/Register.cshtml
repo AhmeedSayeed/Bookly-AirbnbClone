@@ -1,53 +1,115 @@
 @model BLL.ViewModels.Account.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Sign up";
+    ViewData["Title"] = Localizer["SignUp"];
 }
 
 <div class="auth-container">
-    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6); text-align: center;">Join Bookly</h1>
+
+    <h1 class="font-display"
+        style="font-size: var(--fs-xl); margin-bottom: var(--space-6); text-align: center;">
+        @Localizer["JoinBookly"]
+    </h1>
 
     <form asp-controller="Account" asp-action="Register" method="post">
-        <div asp-validation-summary="ModelOnly" class="form-error" style="margin-bottom: var(--space-4);"></div>
+
+        <div asp-validation-summary="ModelOnly"
+             class="form-error"
+             style="margin-bottom: var(--space-4);">
+        </div>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4);">
+
             <div class="form-group">
-                <label asp-for="FirstName" class="form-label">First Name</label>
-                <input asp-for="FirstName" class="form-control" autocomplete="given-name" />
+
+                <label asp-for="FirstName" class="form-label">
+                    @Localizer["FirstName"]
+                </label>
+
+                <input asp-for="FirstName"
+                       class="form-control"
+                       autocomplete="given-name" />
+
                 <span asp-validation-for="FirstName" class="form-error"></span>
+
             </div>
-            
+
             <div class="form-group">
-                <label asp-for="LastName" class="form-label">Last Name</label>
-                <input asp-for="LastName" class="form-control" autocomplete="family-name" />
+
+                <label asp-for="LastName" class="form-label">
+                    @Localizer["LastName"]
+                </label>
+
+                <input asp-for="LastName"
+                       class="form-control"
+                       autocomplete="family-name" />
+
                 <span asp-validation-for="LastName" class="form-error"></span>
+
             </div>
+
         </div>
 
         <div class="form-group">
-            <label asp-for="Email" class="form-label">Email</label>
-            <input asp-for="Email" class="form-control" autocomplete="email" />
+
+            <label asp-for="Email" class="form-label">
+                @Localizer["Email"]
+            </label>
+
+            <input asp-for="Email"
+                   class="form-control"
+                   autocomplete="email" />
+
             <span asp-validation-for="Email" class="form-error"></span>
+
         </div>
 
         <div class="form-group">
-            <label asp-for="Password" class="form-label">Password</label>
-            <input asp-for="Password" class="form-control" autocomplete="new-password" />
+
+            <label asp-for="Password" class="form-label">
+                @Localizer["Password"]
+            </label>
+
+            <input asp-for="Password"
+                   class="form-control"
+                   autocomplete="new-password" />
+
             <span asp-validation-for="Password" class="form-error"></span>
+
         </div>
 
         <div class="form-group">
-            <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
-            <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+
+            <label asp-for="ConfirmPassword" class="form-label">
+                @Localizer["ConfirmPassword"]
+            </label>
+
+            <input asp-for="ConfirmPassword"
+                   class="form-control"
+                   autocomplete="new-password" />
+
             <span asp-validation-for="ConfirmPassword" class="form-error"></span>
+
         </div>
 
-        <button type="submit" class="btn-primary" style="width: 100%; margin-top: var(--space-2);">Agree and continue</button>
+        <button type="submit"
+                class="btn-primary"
+                style="width: 100%; margin-top: var(--space-2);">
+            @Localizer["AgreeAndContinue"]
+        </button>
+
     </form>
 
     <div class="auth-footer">
-        Already have an account? <a asp-controller="Account" asp-action="Login">Log in</a>
+
+        @Localizer["AlreadyHaveAccount"]
+
+        <a asp-controller="Account" asp-action="Login">
+            @Localizer["Login"]
+        </a>
+
     </div>
+
 </div>
 
 @section Scripts {

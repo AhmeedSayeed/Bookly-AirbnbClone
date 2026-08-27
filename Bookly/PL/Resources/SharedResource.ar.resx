@@ -1,0 +1,812 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Profile" xml:space="preserve">
+    <value>الملف الشخصي</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>مرحبًا بعودتك</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>البريد الإلكتروني</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>كلمة المرور</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>تسجيل الدخول</value>
+  </data>
+  <data name="DontHaveAccount" xml:space="preserve">
+    <value>ليس لديك حساب؟</value>
+  </data>
+  <data name="SignUp" xml:space="preserve">
+    <value>إنشاء حساب</value>
+  </data>
+  <data name="AccountInfo" xml:space="preserve">
+    <value>معلومات الحساب</value>
+  </data>
+  <data name="MyListings" xml:space="preserve">
+    <value>إعلاناتي</value>
+  </data>
+  <data name="AdminDashboard" xml:space="preserve">
+    <value>لوحة تحكم المسؤول</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>تسجيل الخروج</value>
+  </data>
+  <data name="HostYourHome" xml:space="preserve">
+    <value>اعرض منزلك</value>
+  </data>
+  <data name="PersonalInfo" xml:space="preserve">
+    <value>المعلومات الشخصية</value>
+  </data>
+  <data name="ProfilePhoto" xml:space="preserve">
+    <value>صورة الملف الشخصي</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>الاسم الأول</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>اسم العائلة</value>
+  </data>
+  <data name="EmailAddress" xml:space="preserve">
+    <value>عنوان البريد الإلكتروني</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>نبذة عني</value>
+  </data>
+  <data name="BioPlaceholder" xml:space="preserve">
+    <value>أخبر المضيفين والضيوف عن نفسك</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>إلغاء</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>حفظ التغييرات</value>
+  </data>
+  <data name="ProfileUpdateError" xml:space="preserve">
+    <value>حدث خطأ أثناء تحديث ملفك الشخصي.</value>
+  </data>
+  <data name="JoinBookly" xml:space="preserve">
+    <value>انضم إلى Bookly</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>تأكيد كلمة المرور</value>
+  </data>
+  <data name="AgreeAndContinue" xml:space="preserve">
+    <value>موافقة ومتابعة</value>
+  </data>
+  <data name="AlreadyHaveAccount" xml:space="preserve">
+    <value>لديك حساب بالفعل؟</value>
+  </data>
+  <data name="BecomeAHost" xml:space="preserve">
+    <value>كن مضيفًا</value>
+  </data>
+  <data name="ApplicationUnderReview" xml:space="preserve">
+    <value>الطلب قيد المراجعة</value>
+  </data>
+  <data name="ApplicationReviewMessage" xml:space="preserve">
+    <value>يقوم فريقنا حاليًا بمراجعة وثيقة هويتك. سنخبرك بمجرد ترقية حسابك إلى حساب مضيف.</value>
+  </data>
+  <data name="HostVerificationDescription" xml:space="preserve">
+    <value>لضمان سلامة مجتمعنا، نطلب بطاقة هوية حكومية سارية قبل أن تتمكن من عرض عقار.</value>
+  </data>
+  <data name="PreviousApplicationRejected" xml:space="preserve">
+    <value>تم رفض طلبك السابق. يرجى التأكد من أن بطاقة هويتك واضحة ومقروءة وسارية قبل التقديم مرة أخرى.</value>
+  </data>
+  <data name="GovernmentId" xml:space="preserve">
+    <value>بطاقة الهوية الحكومية</value>
+  </data>
+  <data name="UploadYourId" xml:space="preserve">
+    <value>ارفع بطاقة هويتك</value>
+  </data>
+  <data name="ClickOrDragToSelect" xml:space="preserve">
+    <value>اضغط أو اسحب لاختيار ملف</value>
+  </data>
+  <data name="IdPreview" xml:space="preserve">
+    <value>معاينة الهوية</value>
+  </data>
+  <data name="ClickToChangeFile" xml:space="preserve">
+    <value>اضغط لتغيير الملف</value>
+  </data>
+  <data name="AcceptedFormats" xml:space="preserve">
+    <value>الصيغ المقبولة: JPG، PNG، PDF.</value>
+  </data>
+  <data name="SubmitForVerification" xml:space="preserve">
+    <value>إرسال للمراجعة</value>
+  </data>
+  <data name="IdSubmittedForReview" xml:space="preserve">
+    <value>تم إرسال بطاقة هويتك وهي قيد المراجعة.</value>
+  </data>
+  <data name="FailedToSubmitApplication" xml:space="preserve">
+    <value>فشل إرسال الطلب.</value>
+  </data>
+  <data name="MustBeVerifiedHost" xml:space="preserve">
+    <value>يجب أن تكون مضيفًا موثّقًا لإدارة الإعلانات.</value>
+  </data>
+  <data name="VerifyIdToCreateListing" xml:space="preserve">
+    <value>هل أنت مستعد لبدء تحقيق الأرباح؟ وثّق هويتك لإنشاء إعلان.</value>
+  </data>
+  <data name="MustBeVerifiedHostToPublish" xml:space="preserve">
+    <value>يجب أن تكون مضيفًا موثّقًا لنشر إعلان.</value>
+  </data>
+  <data name="MustBeVerifiedHostToEdit" xml:space="preserve">
+    <value>يجب أن تكون مضيفًا موثّقًا لتعديل الإعلانات.</value>
+  </data>
+  <data name="MustBeVerifiedHostToDelete" xml:space="preserve">
+    <value>يجب أن تكون مضيفًا موثّقًا لحذف الإعلانات.</value>
+  </data>
+  <data name="FailedToCreateListing" xml:space="preserve">
+    <value>فشل إنشاء الإعلان.</value>
+  </data>
+  <data name="ListingCreatedSuccessfully" xml:space="preserve">
+    <value>تم إنشاء الإعلان بنجاح.</value>
+  </data>
+  <data name="FailedToUpdateListing" xml:space="preserve">
+    <value>فشل تحديث الإعلان.</value>
+  </data>
+  <data name="ListingUpdatedSuccessfully" xml:space="preserve">
+    <value>تم تحديث الإعلان بنجاح.</value>
+  </data>
+  <data name="FailedToDeleteListing" xml:space="preserve">
+    <value>فشل حذف الإعلان.</value>
+  </data>
+  <data name="ListingDeletedSuccessfully" xml:space="preserve">
+    <value>تم حذف الإعلان بنجاح.</value>
+  </data>
+  <data name="DiscoverPlacesToStay" xml:space="preserve">
+    <value>اكتشف أماكن للإقامة</value>
+  </data>
+  <data name="Where" xml:space="preserve">
+    <value>إلى أين؟</value>
+  </data>
+  <data name="SearchDestinations" xml:space="preserve">
+    <value>ابحث عن وجهات</value>
+  </data>
+  <data name="CheckIn" xml:space="preserve">
+    <value>تسجيل الوصول</value>
+  </data>
+  <data name="CheckOut" xml:space="preserve">
+    <value>تسجيل المغادرة</value>
+  </data>
+  <data name="Guests" xml:space="preserve">
+    <value>الضيوف</value>
+  </data>
+  <data name="AddGuests" xml:space="preserve">
+    <value>أضف عدد الضيوف</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>بحث</value>
+  </data>
+  <data name="FeaturedStays" xml:space="preserve">
+    <value>أماكن إقامة مميزة</value>
+  </data>
+  <data name="NoListingsFound" xml:space="preserve">
+    <value>لم يتم العثور على إعلانات. تحقق مرة أخرى قريبًا.</value>
+  </data>
+  <data name="SearchStays" xml:space="preserve">
+    <value>البحث عن أماكن إقامة</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>الفلاتر</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>المدينة</value>
+  </data>
+  <data name="Amenities" xml:space="preserve">
+    <value>المرافق</value>
+  </data>
+  <data name="ApplyFilters" xml:space="preserve">
+    <value>تطبيق الفلاتر</value>
+  </data>
+  <data name="NoPlacesFound" xml:space="preserve">
+    <value>لم يتم العثور على أماكن</value>
+  </data>
+  <data name="TryAdjustingFilters" xml:space="preserve">
+    <value>جرّب تعديل فلاتر البحث.</value>
+  </data>
+  <data name="CreateListing" xml:space="preserve">
+    <value>إنشاء إعلان</value>
+  </data>
+  <data name="CreateNewListing" xml:space="preserve">
+    <value>إنشاء إعلان جديد</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>العنوان</value>
+  </data>
+  <data name="PricePerNight" xml:space="preserve">
+    <value>السعر لليلة</value>
+  </data>
+  <data name="UploadPhotos" xml:space="preserve">
+    <value>رفع الصور</value>
+  </data>
+  <data name="PublishListing" xml:space="preserve">
+    <value>نشر الإعلان</value>
+  </data>
+  <data name="ShowAllPhotos" xml:space="preserve">
+    <value>عرض جميع الصور</value>
+  </data>
+  <data name="HostedBy" xml:space="preserve">
+    <value>يستضيفه</value>
+  </data>
+  <data name="WhatThisPlaceOffers" xml:space="preserve">
+    <value>ما يقدمه هذا المكان</value>
+  </data>
+  <data name="RequestToBook" xml:space="preserve">
+    <value>طلب الحجز</value>
+  </data>
+  <data name="MyListingsTitle" xml:space="preserve">
+    <value>إعلاناتي</value>
+  </data>
+  <data name="CreateNewListingButton" xml:space="preserve">
+    <value>إنشاء إعلان جديد</value>
+  </data>
+  <data name="Bookings" xml:space="preserve">
+    <value>الحجوزات</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>تعديل</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>حذف</value>
+  </data>
+  <data name="ConfirmDeleteListing" xml:space="preserve">
+    <value>هل أنت متأكد أنك تريد حذف هذا الإعلان؟</value>
+  </data>
+  <data name="PlatformDashboard" xml:space="preserve">
+    <value>لوحة تحكم المنصة</value>
+  </data>
+  <data name="DashboardOverview" xml:space="preserve">
+    <value>نظرة عامة على لوحة التحكم</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>نظرة عامة</value>
+  </data>
+  <data name="ReviewIds" xml:space="preserve">
+    <value>مراجعة الهويات</value>
+  </data>
+  <data name="ManageUsers" xml:space="preserve">
+    <value>إدارة المستخدمين</value>
+  </data>
+  <data name="ModerateListings" xml:space="preserve">
+    <value>مراجعة الإعلانات</value>
+  </data>
+  <data name="TotalUsers" xml:space="preserve">
+    <value>إجمالي المستخدمين</value>
+  </data>
+  <data name="TotalListings" xml:space="preserve">
+    <value>إجمالي الإعلانات</value>
+  </data>
+  <data name="TotalBookings" xml:space="preserve">
+    <value>إجمالي الحجوزات</value>
+  </data>
+  <data name="Revenue" xml:space="preserve">
+    <value>الإيرادات</value>
+  </data>
+  <data name="RecentActivity" xml:space="preserve">
+    <value>النشاط الأخير</value>
+  </data>
+  <data name="NoRecentActivity" xml:space="preserve">
+    <value>لا يوجد نشاط حديث.</value>
+  </data>
+  <data name="FailedToLoadDashboardStatistics" xml:space="preserve">
+    <value>فشل تحميل إحصائيات لوحة التحكم.</value>
+  </data>
+  <data name="ListingModeration" xml:space="preserve">
+    <value>مراجعة الإعلانات</value>
+  </data>
+  <data name="ListingTitle" xml:space="preserve">
+    <value>عنوان الإعلان</value>
+  </data>
+  <data name="Host" xml:space="preserve">
+    <value>المضيف</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>الموقع</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>الحالة</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>الإجراءات</value>
+  </data>
+  <data name="Public" xml:space="preserve">
+    <value>متاح للعامة</value>
+  </data>
+  <data name="Deactivated" xml:space="preserve">
+    <value>غير مفعّل</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>عرض</value>
+  </data>
+  <data name="TakeDown" xml:space="preserve">
+    <value>إزالة</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>استعادة</value>
+  </data>
+  <data name="ConfirmTakeDown" xml:space="preserve">
+    <value>هل أنت متأكد أنك تريد إزالة هذا الإعلان؟</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>المستخدم</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>الدور</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="Suspended" xml:space="preserve">
+    <value>موقوف</value>
+  </data>
+  <data name="Unlock" xml:space="preserve">
+    <value>إلغاء الإيقاف</value>
+  </data>
+  <data name="Suspend" xml:space="preserve">
+    <value>إيقاف</value>
+  </data>
+  <data name="ConfirmSuspendUser" xml:space="preserve">
+    <value>هل أنت متأكد أنك تريد إيقاف هذا المستخدم؟</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>ضيف</value>
+  </data>
+  <data name="VerificationQueue" xml:space="preserve">
+    <value>قائمة التحقق</value>
+  </data>
+  <data name="PendingHostVerifications" xml:space="preserve">
+    <value>طلبات تحقق المضيفين المعلقة</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>اسم المستخدم</value>
+  </data>
+  <data name="SubmittedAt" xml:space="preserve">
+    <value>تاريخ التقديم</value>
+  </data>
+  <data name="Document" xml:space="preserve">
+    <value>المستند</value>
+  </data>
+  <data name="ViewId" xml:space="preserve">
+    <value>عرض الهوية</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>موافقة</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>رفض</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>السبب</value>
+  </data>
+  <data name="RejectionReasonPlaceholder" xml:space="preserve">
+    <value>أدخل سبب الرفض</value>
+  </data>
+  <data name="ConfirmApproveHost" xml:space="preserve">
+    <value>هل أنت متأكد أنك تريد الموافقة على هذا المضيف؟</value>
+  </data>
+  <data name="ConfirmRejectHost" xml:space="preserve">
+    <value>هل أنت متأكد أنك تريد رفض هذا المضيف؟</value>
+  </data>
+  <data name="NoPendingVerifications" xml:space="preserve">
+    <value>لا توجد طلبات تحقق معلقة للمراجعة.</value>
+  </data>
+  <data name="DocumentNotFound" xml:space="preserve">
+    <value>المستند غير موجود</value>
+  </data>
+  <data name="FileMissing" xml:space="preserve">
+    <value>الملف مفقود</value>
+  </data>
+  <data name="VerificationDocumentNotFoundMessage" xml:space="preserve">
+    <value>تعذر العثور على مستند التحقق المطلوب.</value>
+  </data>
+  <data name="CloseWindow" xml:space="preserve">
+    <value>إغلاق النافذة</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>الإشعارات</value>
+  </data>
+  <data name="MarkAllAsRead" xml:space="preserve">
+    <value>تحديد الكل كمقروء</value>
+  </data>
+  <data name="MarkRead" xml:space="preserve">
+    <value>تحديد كمقروء</value>
+  </data>
+  <data name="ShowingPage" xml:space="preserve">
+    <value>عرض الصفحة</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>من</value>
+  </data>
+  <data name="Prev" xml:space="preserve">
+    <value>السابق</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>التالي</value>
+  </data>
+  <data name="NoNotificationsYet" xml:space="preserve">
+    <value>لقد اطلعت على كل شيء. لا توجد إشعارات حاليًا.</value>
+  </data>
+  <data name="TryAdjustingSearchFilters" xml:space="preserve">
+    <value>حاولي تعديل فلاتر البحث.</value>
+  </data>
+  <data name="InvalidEmailOrPassword" xml:space="preserve">
+    <value>البريد الإلكتروني أو كلمة المرور غير صحيحة.</value>
+  </data>
+  <data name="AccountSuspended" xml:space="preserve">
+    <value>تم تعليق حسابك.</value>
+  </data>
+	<data name="PerNight" xml:space="preserve">
+  <value>في الليلة</value>
+</data>
+
+	<data name="PrivacyPolicy" xml:space="preserve">
+  <value>سياسة الخصوصية</value>
+</data>
+
+	<data name="PrivacyPolicyDescription" xml:space="preserve">
+  <value>استخدم هذه الصفحة لعرض سياسة الخصوصية الخاصة بالموقع.</value>
+</data>
+
+	<data name="RememberMe" xml:space="preserve">
+  <value>تذكرني؟</value>
+</data>
+	<data name="Error" xml:space="preserve">
+  <value>خطأ</value>
+</data>
+
+	<data name="ErrorOccurred" xml:space="preserve">
+  <value>حدث خطأ أثناء معالجة طلبك.</value>
+</data>
+
+	<data name="RequestId" xml:space="preserve">
+  <value>معرّف الطلب</value>
+</data>
+
+	<data name="DevelopmentMode" xml:space="preserve">
+  <value>وضع التطوير</value>
+</data>
+
+	<data name="DevelopmentModeDescription" xml:space="preserve">
+  <value>سيؤدي التبديل إلى بيئة التطوير إلى عرض معلومات أكثر تفصيلاً حول الخطأ الذي حدث.</value>
+</data>
+
+	<data name="DevelopmentWarning" xml:space="preserve">
+  <value>يجب عدم تفعيل بيئة التطوير في التطبيقات المنشورة.</value>
+</data>
+
+	<data name="DevelopmentWarningDescription" xml:space="preserve">
+  <value>قد يؤدي ذلك إلى عرض معلومات حساسة من الاستثناءات للمستخدمين النهائيين.</value>
+</data>
+
+	<data name="LocalDebuggingDescription" xml:space="preserve">
+  <value>لتصحيح الأخطاء محليًا، قم بتمكين بيئة التطوير عن طريق تعيين متغير البيئة ASPNETCORE_ENVIRONMENT إلى Development ثم أعد تشغيل التطبيق.</value>
+</data>
+	<data name="ForgotPassword" xml:space="preserve">
+  <value>هل نسيت كلمة المرور؟</value>
+</data>
+	<data name="CheckYourEmail" xml:space="preserve">
+  <value>تحقق من بريدك الإلكتروني</value>
+</data>
+
+	<data name="PasswordResetLinkSent" xml:space="preserve">
+  <value>لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني.</value>
+</data>
+
+	<data name="CheckInboxResetPassword" xml:space="preserve">
+  <value>يرجى التحقق من صندوق الوارد والضغط على الرابط لإعادة تعيين كلمة المرور.</value>
+</data>
+
+	<data name="EmailVerification" xml:space="preserve">
+  <value>تأكيد البريد الإلكتروني</value>
+</data>
+
+	<data name="EmailVerifiedSuccessfully" xml:space="preserve">
+  <value>تم تأكيد البريد الإلكتروني بنجاح!</value>
+</data>
+
+	<data name="EmailSuccessfullyVerified" xml:space="preserve">
+  <value>تم تأكيد بريدك الإلكتروني بنجاح.</value>
+</data>
+
+	<data name="CanNowLogin" xml:space="preserve">
+  <value>يمكنك الآن تسجيل الدخول إلى حسابك على Bookly.</value>
+</data>
+
+	<data name="GoToLogin" xml:space="preserve">
+  <value>الانتقال إلى تسجيل الدخول</value>
+</data>
+
+	<data name="EmailVerificationFailed" xml:space="preserve">
+  <value>فشل تأكيد البريد الإلكتروني</value>
+</data>
+
+	<data name="InvalidOrExpiredVerificationLink" xml:space="preserve">
+  <value>رابط التأكيد غير صالح أو انتهت صلاحيته.</value>
+</data>
+
+	<data name="AccountCreatedSuccessfully" xml:space="preserve">
+  <value>تم إنشاء حسابك بنجاح!</value>
+</data>
+
+	<data name="VerificationLinkSent" xml:space="preserve">
+  <value>لقد أرسلنا رابط تأكيد إلى بريدك الإلكتروني.</value>
+</data>
+
+	<data name="CheckInboxVerifyAccount" xml:space="preserve">
+  <value>يرجى التحقق من صندوق الوارد والضغط على الرابط لتأكيد حسابك.</value>
+</data>
+
+	<data name="DidntReceiveEmail" xml:space="preserve">
+  <value>لم تستلم البريد الإلكتروني؟</value>
+</data>
+
+	<data name="CheckSpamFolder" xml:space="preserve">
+  <value>يرجى التحقق من مجلد الرسائل غير المرغوب فيها.</value>
+</data>
+
+	<data name="ForgotPassword" xml:space="preserve">
+  <value>هل نسيت كلمة المرور؟</value>
+</data>
+
+	<data name="EnterEmailToResetPassword" xml:space="preserve">
+  <value>أدخل بريدك الإلكتروني وسنرسل لك رابطًا لإعادة تعيين كلمة المرور.</value>
+</data>
+
+	<data name="EnterYourEmail" xml:space="preserve">
+  <value>أدخل بريدك الإلكتروني</value>
+</data>
+
+	<data name="SendResetLink" xml:space="preserve">
+  <value>إرسال رابط إعادة التعيين</value>
+</data>
+
+	<data name="ResetPassword" xml:space="preserve">
+  <value>إعادة تعيين كلمة المرور</value>
+</data>
+
+	<data name="EnterNewPasswordBelow" xml:space="preserve">
+  <value>أدخل كلمة المرور الجديدة أدناه.</value>
+</data>
+
+	<data name="NewPassword" xml:space="preserve">
+  <value>كلمة المرور الجديدة</value>
+</data>
+
+	<data name="EnterNewPassword" xml:space="preserve">
+  <value>أدخل كلمة المرور الجديدة</value>
+</data>
+
+	<data name="ConfirmPassword" xml:space="preserve">
+  <value>تأكيد كلمة المرور</value>
+</data>
+
+	<data name="ConfirmYourPassword" xml:space="preserve">
+  <value>أكد كلمة المرور</value>
+</data>
+<data name="NewPassword" xml:space="preserve">
+  <value>كلمة المرور الجديدة</value>
+</data>
+
+<data name="ConfirmPassword" xml:space="preserve">
+  <value>تأكيد كلمة المرور</value>
+</data>
+
+<data name="EnterNewPasswordPlaceholder" xml:space="preserve">
+  <value>أدخل كلمة المرور الجديدة</value>
+</data>
+
+<data name="ConfirmNewPasswordPlaceholder" xml:space="preserve">
+  <value>تأكيد كلمة المرور الجديدة</value>
+</data>
+
+<data name="ResetPassword" xml:space="preserve">
+  <value>إعادة تعيين كلمة المرور</value>
+</data>
+  <data name="PerNight" xml:space="preserve">
+    <value>في الليلة</value>
+  </data>
+<data name="PrivacyPolicyDescription" xml:space="preserve">
+    <value>استخدم هذه الصفحة لعرض سياسة الخصوصية الخاصة بالموقع.</value>
+  </data>
+<data name="Error" xml:space="preserve">
+    <value>خطأ</value>
+  </data>
+<data name="RequestId" xml:space="preserve">
+    <value>معرّف الطلب</value>
+  </data>
+<data name="DevelopmentModeDescription" xml:space="preserve">
+    <value>سيؤدي التبديل إلى بيئة التطوير إلى عرض معلومات أكثر تفصيلاً حول الخطأ الذي حدث.</value>
+  </data>
+<data name="DevelopmentWarningDescription" xml:space="preserve">
+    <value>قد يؤدي ذلك إلى عرض معلومات حساسة من الاستثناءات للمستخدمين النهائيين.</value>
+  </data>
+<data name="Whishlist" xml:space="preserve">
+    <value> المفضلة</value>
+  </data>
+  <data name="NoSavedListingsYet" xml:space="preserve">
+    <value> لا توجد أماكن محفوظة بعد</value>
+  </data>
+  <data name="TapHeartToSave" xml:space="preserve">
+    <value> اضغط على القلب في أي إعلان لحفظه هنا</value>
+  </data>
+  <data name="ExploreListings" xml:space="preserve">
+    <value> استكشف الأماكن</value>
+  </data>
+  <data name="RemoveFromWishlist" xml:space="preserve">
+    <value>	إزالة من المفضلة</value>
+  </data>
+  <data name="LeaveAReview" xml:space="preserve">
+    <value> أضف تقييم</value>
+  </data>
+  <data name="OverallRating" xml:space="preserve">
+    <value>التقييم العام</value>
+  </data>
+  <data name="Excellent" xml:space="preserve">
+    <value> ممتاز</value>
+  </data>
+  <data name="Good" xml:space="preserve">
+    <value> جيد</value>
+  </data>
+  <data name="Average" xml:space="preserve">
+    <value> متوسط</value>
+  </data>
+  <data name="Poor" xml:space="preserve">
+    <value>ضعيف</value>
+  </data>
+  <data name="Cleanliness" xml:space="preserve">
+    <value> النظافة</value>
+  </data>
+  <data name="Terrible" xml:space="preserve">
+    <value> سيء جدًا	</value>
+  </data>
+  <data name="Communication" xml:space="preserve">
+    <value> التواصل</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>القيمة مقابل السعر</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value> تعليق</value>
+  </data>
+  <data name="SubmitReview" xml:space="preserve">
+    <value>إرسال التقييم</value>
+  </data>
+  <data name="RespondToReview" xml:space="preserve">
+    <value> الرد على التقييم</value>
+  </data>
+  <data name="YourResponse " xml:space="preserve">
+    <value> ردك</value>
+  </data>
+  <data name="PostResponse" xml:space="preserve">
+    <value>نشر الرد</value>
+  </data>
+  <data name="CancellationPolicy" xml:space="preserve">
+    <value>سياسة الإلغاء</value>
+  </data>
+  <data name="Reviews" xml:space="preserve">
+    <value> التقييمات</value>
+  </data>
+  <data name="NoReviewsYet" xml:space="preserve">
+    <value>لا توجد تقييمات بعد</value>
+  </data>
+  <data name="ResponseFromHost" xml:space="preserve">
+    <value>رد صاحب المكان</value>
+  </data>
+</root>

@@ -1,0 +1,58 @@
+@model BLL.ViewModels.Bookings.BookingConfirmationViewModel
+
+@{
+    ViewData["Title"] = "Booking Confirmation";
+}
+
+<div style="max-width: 600px; margin: 8vh auto; text-align: center; padding: var(--space-8) var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
+    
+    <!-- Success Checkmark Icon -->
+    <div style="display: inline-flex; align-items: center; justify-content: center; width: 80px; height: 80px; border-radius: 50%; background: rgba(46, 125, 50, 0.1); color: var(--color-success, #2e7d32); margin-bottom: var(--space-5);">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    </div>
+
+    <h1 class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); margin-bottom: var(--space-2);">
+        Request Sent Successfully!
+    </h1>
+
+    <p style="font-size: var(--fs-base); color: var(--color-text-muted); margin-bottom: var(--space-6);">
+        Your booking request for <strong>@Model.ListingTitle</strong> has been sent to the host. You will be notified once they respond.
+    </p>
+
+    <!-- Summary Box -->
+    <div style="background: var(--color-surface-sunk); padding: var(--space-4); border-radius: var(--radius-md); text-align: left; margin-bottom: var(--space-6); font-size: var(--fs-sm);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+            <span style="color: var(--color-text-muted);">Booking ID:</span>
+            <strong>#@Model.BookingId</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+            <span style="color: var(--color-text-muted);">Check-in:</span>
+            <strong>@Model.CheckInDate.ToString("MMM dd, yyyy")</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+            <span style="color: var(--color-text-muted);">Checkout:</span>
+            <strong>@Model.CheckOutDate.ToString("MMM dd, yyyy")</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2);">
+            <span style="color: var(--color-text-muted);">Guests:</span>
+            <strong>@Model.NumberOfGuests</strong>
+        </div>
+        <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-3) 0;" />
+        <div style="display: flex; justify-content: space-between; font-size: var(--fs-md); font-weight: 700; color: var(--color-navy);">
+            <span>Total Price:</span>
+            <span>@Model.TotalPrice.ToString("C")</span>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
+        <a asp-action="MyTrips" style="padding: var(--space-3) var(--space-6); border-radius: var(--radius-pill); background: transparent; border: 1px solid var(--color-border-strong); color: var(--color-text); text-decoration: none; font-weight: 600;">
+            View My Trips
+        </a>
+
+        <a asp-controller="Home" asp-action="Index" class="btn-primary" style="padding: var(--space-3) var(--space-6); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); text-decoration: none; font-weight: 600;">
+            Explore More Stays
+        </a>
+    </div>
+</div>

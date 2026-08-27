@@ -44,10 +44,23 @@ public class ListingProfile : Profile
         CreateMap<Listing, ListingAdminRowViewModel>()
             .ForMember(d => d.HostName, o => o.MapFrom(s => s.Host.FirstName + " " + s.Host.LastName));
 
-        // Form -> Entity (create/edit)
         CreateMap<ListingFormViewModel, Listing>()
             .ForMember(d => d.Id, o => o.Condition(s => s.Id.HasValue))
             .ForMember(d => d.ListingAmenities, o => o.Ignore())
-            .ForMember(d => d.Photos, o => o.Ignore());
+            .ForMember(d => d.Photos, o => o.Ignore())
+            .ForMember(d => d.PropertyType, o => o.MapFrom(s => s.PropertyType))
+            .ForMember(d => d.CancellationPolicy, o => o.MapFrom(s => s.CancellationPolicy));
+
+        CreateMap<Listing, ListingFormViewModel>()
+            .ForMember(d => d.SelectedAmenityIds, o => o.Ignore())
+            .ForMember(d => d.NewPhotos, o => o.Ignore());
+
+        CreateMap<ListingPhoto, ExistingListingPhoto>();
+
+        CreateMap<Listing, ListingFormViewModel>()
+            .ForMember(d => d.ExistingPhotos, o => o.MapFrom(s => s.Photos))
+            .ForMember(d => d.SelectedAmenityIds, o => o.Ignore())
+            .ForMember(d => d.NewPhotos, o => o.Ignore())
+            .ForMember(d => d.DeletedPhotoIds, o => o.Ignore());
     }
 }

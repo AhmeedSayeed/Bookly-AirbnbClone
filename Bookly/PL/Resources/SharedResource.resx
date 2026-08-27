@@ -1,0 +1,742 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+
+  <data name="Profile" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="WelcomeBack" xml:space="preserve">
+    <value>Welcome back</value>
+  </data>
+  <data name="Email" xml:space="preserve">
+    <value>Email</value>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="Login" xml:space="preserve">
+    <value>Log in</value>
+  </data>
+  <data name="DontHaveAccount" xml:space="preserve">
+    <value>Don't have an account?</value>
+  </data>
+  <data name="SignUp" xml:space="preserve">
+    <value>Sign up</value>
+  </data>
+  <data name="AccountInfo" xml:space="preserve">
+    <value>Account Info</value>
+  </data>
+  <data name="MyListings" xml:space="preserve">
+    <value>My Listings</value>
+  </data>
+  <data name="AdminDashboard" xml:space="preserve">
+    <value>Admin Dashboard</value>
+  </data>
+  <data name="Logout" xml:space="preserve">
+    <value>Log out</value>
+  </data>
+  <data name="HostYourHome" xml:space="preserve">
+    <value>Host your home</value>
+  </data>
+  <data name="PersonalInfo" xml:space="preserve">
+    <value>Personal info</value>
+  </data>
+  <data name="ProfilePhoto" xml:space="preserve">
+    <value>Profile Photo</value>
+  </data>
+  <data name="FirstName" xml:space="preserve">
+    <value>First Name</value>
+  </data>
+  <data name="LastName" xml:space="preserve">
+    <value>Last Name</value>
+  </data>
+  <data name="EmailAddress" xml:space="preserve">
+    <value>Email address</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="BioPlaceholder" xml:space="preserve">
+    <value>Tell hosts and guests about yourself</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="ProfileUpdateError" xml:space="preserve">
+    <value>An error occurred while updating your profile.</value>
+  </data>
+  <data name="JoinBookly" xml:space="preserve">
+    <value>Join Bookly</value>
+  </data>
+  <data name="ConfirmPassword" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="AgreeAndContinue" xml:space="preserve">
+    <value>Agree and continue</value>
+  </data>
+  <data name="AlreadyHaveAccount" xml:space="preserve">
+    <value>Already have an account?</value>
+  </data>
+  <data name="BecomeAHost" xml:space="preserve">
+    <value>Become a Host</value>
+  </data>
+  <data name="ApplicationUnderReview" xml:space="preserve">
+    <value>Application Under Review</value>
+  </data>
+  <data name="ApplicationReviewMessage" xml:space="preserve">
+    <value>Our team is currently reviewing your ID document. We will notify you once your account has been upgraded to a Host profile.</value>
+  </data>
+  <data name="HostVerificationDescription" xml:space="preserve">
+    <value>To ensure the safety of our community, we require a valid government-issued ID before you can list a property.</value>
+  </data>
+  <data name="PreviousApplicationRejected" xml:space="preserve">
+    <value>Your previous application was rejected. Please ensure your ID is clear, readable, and valid before applying again.</value>
+  </data>
+  <data name="GovernmentId" xml:space="preserve">
+    <value>Government ID</value>
+  </data>
+  <data name="UploadYourId" xml:space="preserve">
+    <value>Upload your ID</value>
+  </data>
+  <data name="ClickOrDragToSelect" xml:space="preserve">
+    <value>Click or drag to select</value>
+  </data>
+  <data name="IdPreview" xml:space="preserve">
+    <value>ID Preview</value>
+  </data>
+  <data name="ClickToChangeFile" xml:space="preserve">
+    <value>Click to change file</value>
+  </data>
+  <data name="AcceptedFormats" xml:space="preserve">
+    <value>Accepted formats: JPG, PNG, PDF.</value>
+  </data>
+  <data name="SubmitForVerification" xml:space="preserve">
+    <value>Submit for Verification</value>
+  </data>
+  <data name="IdSubmittedForReview" xml:space="preserve">
+    <value>Your ID has been submitted and is under review.</value>
+  </data>
+  <data name="FailedToSubmitApplication" xml:space="preserve">
+    <value>Failed to submit application.</value>
+  </data>
+  <data name="MustBeVerifiedHost" xml:space="preserve">
+    <value>You must be a verified host to manage listings.</value>
+  </data>
+  <data name="VerifyIdToCreateListing" xml:space="preserve">
+    <value>Ready to start earning? Verify your ID to create a listing.</value>
+  </data>
+  <data name="MustBeVerifiedHostToPublish" xml:space="preserve">
+    <value>You must be a verified host to publish a listing.</value>
+  </data>
+  <data name="MustBeVerifiedHostToEdit" xml:space="preserve">
+    <value>You must be a verified host to edit listings.</value>
+  </data>
+  <data name="MustBeVerifiedHostToDelete" xml:space="preserve">
+    <value>You must be a verified host to delete listings.</value>
+  </data>
+  <data name="FailedToCreateListing" xml:space="preserve">
+    <value>Failed to create listing.</value>
+  </data>
+  <data name="ListingCreatedSuccessfully" xml:space="preserve">
+    <value>Listing created successfully.</value>
+  </data>
+  <data name="FailedToUpdateListing" xml:space="preserve">
+    <value>Failed to update listing.</value>
+  </data>
+  <data name="ListingUpdatedSuccessfully" xml:space="preserve">
+    <value>Listing updated successfully.</value>
+  </data>
+  <data name="FailedToDeleteListing" xml:space="preserve">
+    <value>Failed to delete listing.</value>
+  </data>
+  <data name="DiscoverPlacesToStay" xml:space="preserve">
+    <value>Discover places to stay</value>
+  </data>
+  <data name="Where" xml:space="preserve">
+    <value>Where</value>
+  </data>
+  <data name="SearchDestinations" xml:space="preserve">
+    <value>Search destinations</value>
+  </data>
+  <data name="CheckIn" xml:space="preserve">
+    <value>Check in</value>
+  </data>
+  <data name="CheckOut" xml:space="preserve">
+    <value>Check out</value>
+  </data>
+  <data name="Guests" xml:space="preserve">
+    <value>Guests</value>
+  </data>
+  <data name="AddGuests" xml:space="preserve">
+    <value>Add guests</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="FeaturedStays" xml:space="preserve">
+    <value>Featured stays</value>
+  </data>
+  <data name="Night" xml:space="preserve">
+    <value>night</value>
+  </data>
+  <data name="NoListingsFound" xml:space="preserve">
+    <value>No listings found. Check back soon.</value>
+  </data>
+  <data name="SearchStays" xml:space="preserve">
+    <value>Search Stays</value>
+  </data>
+  <data name="Filters" xml:space="preserve">
+    <value>Filters</value>
+  </data>
+  <data name="City" xml:space="preserve">
+    <value>City</value>
+  </data>
+  <data name="Amenities" xml:space="preserve">
+    <value>Amenities</value>
+  </data>
+  <data name="ApplyFilters" xml:space="preserve">
+    <value>Apply Filters</value>
+  </data>
+  <data name="NoPlacesFound" xml:space="preserve">
+    <value>No places found</value>
+  </data>
+  <data name="TryAdjustingFilters" xml:space="preserve">
+    <value>Try adjusting your search filters.</value>
+  </data>
+  <data name="CreateListing" xml:space="preserve">
+    <value>Create Listing</value>
+  </data>
+  <data name="CreateNewListing" xml:space="preserve">
+    <value>Create a new listing</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="PricePerNight" xml:space="preserve">
+    <value>Price Per Night</value>
+  </data>
+  <data name="UploadPhotos" xml:space="preserve">
+    <value>Upload Photos</value>
+  </data>
+  <data name="PublishListing" xml:space="preserve">
+    <value>Publish Listing</value>
+  </data>
+  <data name="ShowAllPhotos" xml:space="preserve">
+    <value>Show all photos</value>
+  </data>
+  <data name="HostedBy" xml:space="preserve">
+    <value>Hosted by</value>
+  </data>
+  <data name="WhatThisPlaceOffers" xml:space="preserve">
+    <value>What this place offers</value>
+  </data>
+  <data name="RequestToBook" xml:space="preserve">
+    <value>Request to book</value>
+  </data>
+  <data name="MyListingsTitle" xml:space="preserve">
+    <value>My Listings</value>
+  </data>
+  <data name="CreateNewListingButton" xml:space="preserve">
+    <value>Create new listing</value>
+  </data>
+  <data name="Bookings" xml:space="preserve">
+    <value>Bookings</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="ConfirmDeleteListing" xml:space="preserve">
+    <value>Are you sure you want to delete this listing?</value>
+  </data>
+  <data name="PlatformDashboard" xml:space="preserve">
+    <value>Platform Dashboard</value>
+  </data>
+  <data name="DashboardOverview" xml:space="preserve">
+    <value>Dashboard Overview</value>
+  </data>
+  <data name="Overview" xml:space="preserve">
+    <value>Overview</value>
+  </data>
+  <data name="ReviewIds" xml:space="preserve">
+    <value>Review IDs</value>
+  </data>
+  <data name="ManageUsers" xml:space="preserve">
+    <value>Manage Users</value>
+  </data>
+  <data name="ModerateListings" xml:space="preserve">
+    <value>Moderate Listings</value>
+  </data>
+  <data name="TotalUsers" xml:space="preserve">
+    <value>Total Users</value>
+  </data>
+  <data name="TotalListings" xml:space="preserve">
+    <value>Total Listings</value>
+  </data>
+  <data name="TotalBookings" xml:space="preserve">
+    <value>Total Bookings</value>
+  </data>
+  <data name="Revenue" xml:space="preserve">
+    <value>Revenue</value>
+  </data>
+  <data name="RecentActivity" xml:space="preserve">
+    <value>Recent Activity</value>
+  </data>
+  <data name="NoRecentActivity" xml:space="preserve">
+    <value>No recent activity.</value>
+  </data>
+  <data name="FailedToLoadDashboardStatistics" xml:space="preserve">
+    <value>Failed to load dashboard statistics.</value>
+  </data>
+  <data name="ListingModeration" xml:space="preserve">
+    <value>Listing Moderation</value>
+  </data>
+  <data name="ListingTitle" xml:space="preserve">
+    <value>Listing Title</value>
+  </data>
+  <data name="Host" xml:space="preserve">
+    <value>Host</value>
+  </data>
+  <data name="Location" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Actions" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="Public" xml:space="preserve">
+    <value>Public</value>
+  </data>
+  <data name="Deactivated" xml:space="preserve">
+    <value>Deactivated</value>
+  </data>
+  <data name="View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="TakeDown" xml:space="preserve">
+    <value>Take Down</value>
+  </data>
+  <data name="Restore" xml:space="preserve">
+    <value>Restore</value>
+  </data>
+  <data name="ConfirmTakeDown" xml:space="preserve">
+    <value>Are you sure you want to take down this listing?</value>
+  </data>
+  <data name="User" xml:space="preserve">
+    <value>User</value>
+  </data>
+  <data name="Role" xml:space="preserve">
+    <value>Role</value>
+  </data>
+  <data name="Active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="Suspended" xml:space="preserve">
+    <value>Suspended</value>
+  </data>
+  <data name="Unlock" xml:space="preserve">
+    <value>Unlock</value>
+  </data>
+  <data name="Suspend" xml:space="preserve">
+    <value>Suspend</value>
+  </data>
+  <data name="ConfirmSuspendUser" xml:space="preserve">
+    <value>Are you sure you want to suspend this user?</value>
+  </data>
+  <data name="Guest" xml:space="preserve">
+    <value>Guest</value>
+  </data>
+  <data name="VerificationQueue" xml:space="preserve">
+    <value>Verification Queue</value>
+  </data>
+  <data name="PendingHostVerifications" xml:space="preserve">
+    <value>Pending Host Verifications</value>
+  </data>
+  <data name="UserName" xml:space="preserve">
+    <value>User Name</value>
+  </data>
+  <data name="SubmittedAt" xml:space="preserve">
+    <value>Submitted At</value>
+  </data>
+  <data name="Document" xml:space="preserve">
+    <value>Document</value>
+  </data>
+  <data name="ViewId" xml:space="preserve">
+    <value>View ID</value>
+  </data>
+  <data name="Approve" xml:space="preserve">
+    <value>Approve</value>
+  </data>
+  <data name="Reject" xml:space="preserve">
+    <value>Reject</value>
+  </data>
+  <data name="Reason" xml:space="preserve">
+    <value>Reason</value>
+  </data>
+  <data name="RejectionReasonPlaceholder" xml:space="preserve">
+    <value>Enter rejection reason</value>
+  </data>
+  <data name="ConfirmApproveHost" xml:space="preserve">
+    <value>Are you sure you want to approve this host?</value>
+  </data>
+  <data name="ConfirmRejectHost" xml:space="preserve">
+    <value>Are you sure you want to reject this host?</value>
+  </data>
+  <data name="NoPendingVerifications" xml:space="preserve">
+    <value>No pending verifications to review.</value>
+  </data>
+  <data name="DocumentNotFound" xml:space="preserve">
+    <value>Document Not Found</value>
+  </data>
+  <data name="FileMissing" xml:space="preserve">
+    <value>File Missing</value>
+  </data>
+  <data name="VerificationDocumentNotFoundMessage" xml:space="preserve">
+    <value>The requested verification document could not be found.</value>
+  </data>
+  <data name="CloseWindow" xml:space="preserve">
+    <value>Close Window</value>
+  </data>
+  <data name="Notifications" xml:space="preserve">
+    <value>Notifications</value>
+  </data>
+  <data name="MarkAllAsRead" xml:space="preserve">
+    <value>Mark all as read</value>
+  </data>
+  <data name="MarkRead" xml:space="preserve">
+    <value>Mark Read</value>
+  </data>
+  <data name="ShowingPage" xml:space="preserve">
+    <value>Showing page</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="Prev" xml:space="preserve">
+    <value>Prev</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+  </data>
+  <data name="NoNotificationsYet" xml:space="preserve">
+    <value>You're all caught up. No notifications yet.</value>
+  </data>
+  <data name="TryAdjustingSearchFilters" xml:space="preserve">
+    <value>Try adjusting your search filters.</value>
+  </data>
+  <data name="InvalidEmailOrPassword" xml:space="preserve">
+    <value>Invalid email or password.</value>
+  </data>
+  <data name="AccountSuspended" xml:space="preserve">
+    <value>Your account has been suspended.</value>
+  </data>
+  <data name="PerNight" xml:space="preserve">
+    <value>per night</value>
+  </data>
+  <data name="PrivacyPolicy" xml:space="preserve">
+    <value>Privacy Policy</value>
+  </data>
+  <data name="PrivacyPolicyDescription" xml:space="preserve">
+    <value>Use this page to detail your site's privacy policy.</value>
+  </data>
+  <data name="RememberMe" xml:space="preserve">
+    <value>Remember me?</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="ErrorOccurred" xml:space="preserve">
+    <value>An error occurred while processing your request.</value>
+  </data>
+  <data name="RequestId" xml:space="preserve">
+    <value>Request ID</value>
+  </data>
+  <data name="DevelopmentMode" xml:space="preserve">
+    <value>Development Mode</value>
+  </data>
+  <data name="DevelopmentModeDescription" xml:space="preserve">
+    <value>Swapping to Development environment will display more detailed information about the error that occurred.</value>
+  </data>
+  <data name="DevelopmentWarning" xml:space="preserve">
+    <value>The Development environment shouldn't be enabled for deployed applications.</value>
+  </data>
+  <data name="DevelopmentWarningDescription" xml:space="preserve">
+    <value>It can result in displaying sensitive information from exceptions to end users.</value>
+  </data>
+  <data name="LocalDebuggingDescription" xml:space="preserve">
+    <value>For local debugging, enable the Development environment by setting the ASPNETCORE_ENVIRONMENT environment variable to Development and restarting the app.</value>
+  </data>
+  <data name="ForgotPassword" xml:space="preserve">
+    <value>Forgot password?</value>
+  </data>
+  <data name="CheckYourEmail" xml:space="preserve">
+    <value>Check Your Email</value>
+  </data>
+  <data name="PasswordResetLinkSent" xml:space="preserve">
+    <value>We've sent a password reset link to your email address.</value>
+  </data>
+  <data name="CheckInboxResetPassword" xml:space="preserve">
+    <value>Please check your inbox and click the link to reset your password.</value>
+  </data>
+  <data name="EmailVerification" xml:space="preserve">
+    <value>Email Verification</value>
+  </data>
+  <data name="EmailVerifiedSuccessfully" xml:space="preserve">
+    <value>Email Verified Successfully!</value>
+  </data>
+  <data name="EmailSuccessfullyVerified" xml:space="preserve">
+    <value>Your email has been successfully verified.</value>
+  </data>
+  <data name="CanNowLogin" xml:space="preserve">
+    <value>You can now log in to your Bookly account.</value>
+  </data>
+  <data name="GoToLogin" xml:space="preserve">
+    <value>Go to Login</value>
+  </data>
+  <data name="EmailVerificationFailed" xml:space="preserve">
+    <value>Email Verification Failed</value>
+  </data>
+  <data name="InvalidOrExpiredVerificationLink" xml:space="preserve">
+    <value>This verification link is invalid or has expired.</value>
+  </data>
+  <data name="AccountCreatedSuccessfully" xml:space="preserve">
+    <value>Your account has been created successfully!</value>
+  </data>
+  <data name="VerificationLinkSent" xml:space="preserve">
+    <value>We've sent a verification link to your email address.</value>
+  </data>
+  <data name="CheckInboxVerifyAccount" xml:space="preserve">
+    <value>Please check your inbox and click the link to verify your account.</value>
+  </data>
+  <data name="DidntReceiveEmail" xml:space="preserve">
+    <value>Didn't receive the email?</value>
+  </data>
+  <data name="CheckSpamFolder" xml:space="preserve">
+    <value>Please check your spam or junk folder.</value>
+  </data>
+  <data name="EnterEmailToResetPassword" xml:space="preserve">
+    <value>Enter your email address and we'll send you a link to reset your password.</value>
+  </data>
+  <data name="EnterYourEmail" xml:space="preserve">
+    <value>Enter your email</value>
+  </data>
+  <data name="SendResetLink" xml:space="preserve">
+    <value>Send Reset Link</value>
+  </data>
+  <data name="ResetPassword" xml:space="preserve">
+    <value>Reset Password</value>
+  </data>
+  <data name="EnterNewPasswordBelow" xml:space="preserve">
+    <value>Enter your new password below.</value>
+  </data>
+  <data name="NewPassword" xml:space="preserve">
+    <value>New Password</value>
+  </data>
+  <data name="EnterNewPassword" xml:space="preserve">
+    <value>Enter new password</value>
+  </data>
+  <data name="ConfirmYourPassword" xml:space="preserve">
+    <value>Confirm your password</value>
+  </data>
+  <data name="EnterNewPasswordPlaceholder" xml:space="preserve">
+    <value>Enter new password</value>
+  </data>
+  <data name="ConfirmNewPasswordPlaceholder" xml:space="preserve">
+    <value>Confirm new password</value>
+  </data>
+  <data name="Whishlist" xml:space="preserve">
+    <value>Wishlist</value>
+  </data>
+  <data name="NoSavedListingsYet" xml:space="preserve">
+    <value>No saved listings yet</value>
+  </data>
+  <data name="TapHeartToSave" xml:space="preserve">
+    <value> Tap the heart on any listing to save it here.</value>
+  </data>
+  <data name="ExploreListings" xml:space="preserve">
+    <value>	Explore listings</value>
+  </data>
+  <data name="RemoveFromWishlist" xml:space="preserve">
+    <value> Remove from wishlist</value>
+  </data>
+  <data name="LeaveAReview" xml:space="preserve">
+    <value>Leave a review</value>
+  </data>
+  <data name="OverallRating" xml:space="preserve">
+    <value>Overall rating</value>
+  </data>
+  <data name="Excellent" xml:space="preserve">
+    <value> Excellent</value>
+  </data>
+  <data name="Good" xml:space="preserve">
+    <value> Good</value>
+  </data>
+  <data name="Average" xml:space="preserve">
+    <value>Average</value>
+  </data>
+  <data name="Poor" xml:space="preserve">
+    <value>Poor</value>
+  </data>
+  <data name="Cleanliness" xml:space="preserve">
+    <value>Cleanliness</value>
+  </data>
+  <data name="Terrible" xml:space="preserve">
+    <value>Terrible</value>
+  </data>
+  <data name="Communication" xml:space="preserve">
+    <value>Communication</value>
+  </data>
+  <data name="Value" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="SubmitReview" xml:space="preserve">
+    <value>Submit review</value>
+  </data>
+  <data name="RespondToReview" xml:space="preserve">
+    <value>Respond to review</value>
+  </data>
+  <data name="YourResponse " xml:space="preserve">
+    <value>	Your response</value>
+  </data>
+  <data name="PostResponse" xml:space="preserve">
+    <value>&#x8; Post response</value>
+  </data>
+  <data name="CancellationPolicy" xml:space="preserve">
+    <value>Cancellation policy</value>
+  </data>
+  <data name="Reviews" xml:space="preserve">
+    <value>Reviews</value>
+  </data>
+  <data name="NoReviewsYet" xml:space="preserve">
+    <value> No reviews yet</value>
+  </data>
+  <data name="ResponseFromHost" xml:space="preserve">
+    <value>Response from host</value>
+  </data>
+</root>

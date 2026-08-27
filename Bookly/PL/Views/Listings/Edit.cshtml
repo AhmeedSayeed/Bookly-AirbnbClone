@@ -1,0 +1,215 @@
+﻿@model BLL.ViewModels.Listings.ListingFormViewModel
+
+@{
+    ViewData["Title"] = Localizer["EditListing"];
+}
+
+<div style="max-width: 800px; margin: 0 auto; padding: var(--space-6) var(--gutter);">
+
+    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6);">
+        @Localizer["EditListing"]
+    </h1>
+
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+
+        <input type="hidden" asp-for="Id" />
+
+        <div class="form-group" style="margin-bottom: var(--space-4);">
+            <label asp-for="Title" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">@Localizer["Title"]</label>
+            <input asp-for="Title" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            <span asp-validation-for="Title" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
+        </div>
+
+        <div class="form-group" style="margin-bottom: var(--space-5);">
+            <label asp-for="Description" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">@Localizer["Description"]</label>
+            <textarea asp-for="Description" class="form-control" rows="5" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);"></textarea>
+            <span asp-validation-for="Description" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
+        </div>
+
+        <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-3);">Property Details</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-5);">
+            <div class="form-group">
+                <label asp-for="PropertyType" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["PropertyType"]</label>
+                <select asp-for="PropertyType" asp-items="Html.GetEnumSelectList<DAL.Enums.PropertyType>()" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer;"></select>
+                <span asp-validation-for="PropertyType" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CancellationPolicy" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["CancellationPolicy"]</label>
+                <select asp-for="CancellationPolicy" asp-items="Html.GetEnumSelectList<DAL.Enums.CancellationPolicy>()" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer;"></select>
+                <span asp-validation-for="CancellationPolicy" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="PricePerNight" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["PricePerNight"]</label>
+                <input asp-for="PricePerNight" class="form-control" type="number" step="0.01" min="1" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+                <span asp-validation-for="PricePerNight" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
+            </div>
+        </div>
+
+        <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-3);">Capacity</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-5);">
+            <div class="form-group">
+                <label asp-for="MaxGuests" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["MaxGuests"]</label>
+                <input asp-for="MaxGuests" class="form-control" type="number" min="1" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Bedrooms" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Bedrooms"]</label>
+                <input asp-for="Bedrooms" class="form-control" type="number" min="0" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Beds" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Beds"]</label>
+                <input asp-for="Beds" class="form-control" type="number" min="0" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Bathrooms" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Bathrooms"]</label>
+                <input asp-for="Bathrooms" class="form-control" type="number" min="0" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+        </div>
+
+        <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-3);">Location</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-4);">
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label asp-for="Address" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Address"]</label>
+                <input asp-for="Address" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+            <div class="form-group">
+                <label asp-for="City" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["City"]</label>
+                <input asp-for="City" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Country" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Country"]</label>
+                <input asp-for="Country" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Latitude" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">Latitude</label>
+                <input asp-for="Latitude" class="form-control" type="number" step="any" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Longitude" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">Longitude</label>
+                <input asp-for="Longitude" class="form-control" type="number" step="any" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+        </div>
+
+        <h3 class="font-display" style="font-size: var(--fs-md); margin-top: var(--space-5); margin-bottom: var(--space-3);">Amenities</h3>
+        <div class="form-group" style="margin-bottom: var(--space-5); padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-surface-sunk);">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-3);">
+                @if (ViewBag.Amenities != null)
+                {
+                    foreach (var amenity in ViewBag.Amenities)
+                    {
+                        var isChecked = Model != null && Model.SelectedAmenityIds != null && Model.SelectedAmenityIds.Contains(amenity.Id);
+                        <label style="display: flex; align-items: center; gap: var(--space-2); cursor: pointer;">
+                            <input type="checkbox" name="SelectedAmenityIds" value="@amenity.Id" @(isChecked ? "checked" : "") />
+                            <span style="font-size: var(--fs-sm);">@amenity.Name</span>
+                        </label>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- NEW: EXISTING PHOTOS GRID -->
+        @if (Model.ExistingPhotos != null && Model.ExistingPhotos.Any())
+        {
+            <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-3);">Current Photos</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-5);" id="existing-photos-grid">
+                @foreach (var photo in Model.ExistingPhotos)
+                {
+                    <div id="photo-@photo.Id" style="position: relative; padding-top: 66.66%; border-radius: var(--radius-sm); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--color-border);">
+                        <img src="@photo.Url" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
+
+                        <!-- The 'X' Delete Button -->
+                        <button type="button" onclick="removeExistingPhoto(@photo.Id)" style="position: absolute; top: var(--space-2); right: var(--space-2); width: 28px; height: 28px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-border); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--color-danger); box-shadow: var(--shadow-sm);">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                }
+            </div>
+            <!-- This container holds the IDs of photos you want to delete -->
+            <div id="deleted-photos-container"></div>
+        }
+
+        <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-3);">Upload Additional Photos</h3>
+        <div class="form-group" style="margin-bottom: var(--space-6);">
+            <div style="position: relative; border: 2px dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-6); background: var(--color-surface-sunk); text-align: center; cursor: pointer; overflow: hidden;">
+                <input type="file" asp-for="NewPhotos" id="photo-upload-input" multiple accept="image/*" style="position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;" onchange="previewImages(event)" />
+                <div style="pointer-events: none; position: relative; z-index: 1;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-navy)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: var(--space-3);">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                    </svg>
+                    <p style="margin: 0; font-weight: 600; color: var(--color-navy); font-size: var(--fs-md);">Click or drag to add photos</p>
+                </div>
+            </div>
+            <div id="photo-preview-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--space-3); margin-top: var(--space-4);"></div>
+            <span asp-validation-for="NewPhotos" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
+        </div>
+
+        <div style="display: flex; gap: var(--space-4); align-items: center; justify-content: flex-end; padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+            <a asp-action="MyListings" style="color: var(--color-text); font-weight: 600; text-decoration: none;">Cancel</a>
+            <button type="submit" class="btn-primary" style="padding: var(--space-3) var(--space-6); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-md);">
+                @Localizer["UpdateListing"]
+            </button>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // NEW: Function to handle deleting existing photos
+        function removeExistingPhoto(photoId) {
+            // Hide the photo visually
+            document.getElementById('photo-' + photoId).style.display = 'none';
+
+            // Add a hidden input so the server knows to delete it
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'DeletedPhotoIds';
+            input.value = photoId;
+            document.getElementById('deleted-photos-container').appendChild(input);
+        }
+
+        // Existing function for previewing new uploads
+        function previewImages(event) {
+            const previewGrid = document.getElementById('photo-preview-grid');
+            previewGrid.innerHTML = '';
+
+            const files = event.target.files;
+            if (!files) return;
+
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const imgContainer = document.createElement('div');
+                    imgContainer.style.position = 'relative';
+                    imgContainer.style.paddingTop = '66.66%';
+                    imgContainer.style.borderRadius = 'var(--radius-sm)';
+                    imgContainer.style.overflow = 'hidden';
+                    imgContainer.style.boxShadow = 'var(--shadow-sm)';
+                    imgContainer.style.border = '1px solid var(--color-border)';
+
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.position = 'absolute';
+                    img.style.top = '0';
+                    img.style.left = '0';
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+
+                    imgContainer.appendChild(img);
+                    previewGrid.appendChild(imgContainer);
+                }
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+}

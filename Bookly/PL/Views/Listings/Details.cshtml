@@ -1,48 +1,318 @@
-@model ListingDetailsViewModel
+@model BLL.ViewModels.Listings.ListingDetailsViewModel
 
 @{
     ViewData["Title"] = Model.Title;
 }
 
-<div style="max-width: var(--content-max); margin: 0 auto; padding: 0 var(--gutter);">
+<div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
     <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-2);">@Model.Title</h1>
-    <p style="color: var(--color-text-muted); margin-bottom: var(--space-5);">@Model.City</p>
+    <p style="color: var(--color-text-muted); margin-bottom: var(--space-5);">@Model.City, @Model.Country</p>
 
     <!-- THE PHOTO MOSAIC -->
-    <div class="mosaic" style="margin-bottom: var(--space-7);">
+    <div class="mosaic" style="margin-bottom: var(--space-7); display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 250px 250px; gap: var(--space-2); position: relative; border-radius: var(--radius-lg); overflow: hidden;">
         @if (Model.PhotoUrls != null && Model.PhotoUrls.Any())
         {
             var photos = Model.PhotoUrls.ToList();
-            <img src="@photos[0]" class="mosaic-hero" style="grid-row: 1 / 3; width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg);" />
-            
+
+            <img src="@photos[0]"
+                 class="mosaic-hero"
+                 style="grid-row: 1 / 3; width: 100%; height: 100%; object-fit: cover;" />
+
             @for (int i = 1; i < Math.Min(photos.Count, 5); i++)
             {
-                <img src="@photos[i]" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-lg);" />
+                <img src="@photos[i]"
+                     style="width: 100%; height: 100%; object-fit: cover;" />
             }
-            <button class="mosaic-show-all" style="position: absolute; bottom: var(--space-3); right: var(--space-3); border-radius: var(--radius-pill); border: 1px solid var(--color-brass); background: var(--color-surface); padding: var(--space-2) var(--space-4); font-weight: 600; box-shadow: var(--shadow-md);">Show all photos</button>
+
+            <button class="mosaic-show-all"
+                    style="position: absolute; bottom: var(--space-4); right: var(--space-4); border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: var(--color-surface); padding: var(--space-2) var(--space-4); font-weight: 600; box-shadow: var(--shadow-sm); cursor: pointer; transition: transform var(--duration-fast);">
+                @Localizer["ShowAllPhotos"]
+            </button>
+        }
+        else
+        {
+            <div style="grid-column: 1 / -1; grid-row: 1 / 3; background: var(--color-surface-sunk); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted);">
+                No photos available.
+            </div>
         }
     </div>
 
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-7);">
         <div>
-            <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-3);">Hosted by @Model.Host.FullName</h2>
-            <p style="font-size: var(--fs-base); line-height: 1.6; margin-bottom: var(--space-6);">@Model.Description</p>
+            <h2 class="font-display" style="font-size: var(--fs-lg); margin-bottom: var(--space-1);">
+                @Localizer["HostedBy"] @Model.Host.FullName
+            </h2>
 
-            <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">What this place offers</h3>
+            <!-- CAPACITY INFO -->
+            <div style="font-size: var(--fs-sm); color: var(--color-text-muted); margin-bottom: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center;">
+                <span>@Model.MaxGuests @Localizer["Guests"]</span>
+                <span style="font-size: 8px;">&#9679;</span>
+                <span>@Model.Bedrooms @Localizer["Bedrooms"]</span>
+                <span style="font-size: 8px;">&#9679;</span>
+                <span>@Model.Beds @Localizer["Beds"]</span>
+                <span style="font-size: 8px;">&#9679;</span>
+                <span>@Model.Bathrooms @Localizer["Bathrooms"]</span>
+            </div>
+
+            <p style="font-size: var(--fs-base); line-height: 1.6; margin-bottom: var(--space-6); padding-bottom: var(--space-6); border-bottom: 1px solid var(--color-border);">
+                @Model.Description
+            </p>
+
+            <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">
+                @Localizer["WhatThisPlaceOffers"]
+            </h3>
+
             <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
                 @foreach (var amenity in Model.Amenities)
                 {
-                    <span style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); font-size: var(--fs-sm);">@amenity</span>
+                    <span style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); font-size: var(--fs-sm);">
+                        @amenity
+                    </span>
                 }
             </div>
         </div>
-        
+
+        <!-- CANCELLATION POLICY -->
+        @if (!string.IsNullOrEmpty(Model.CancellationPolicy))
+        {
+            <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-border);">
+                <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-2);">
+                    @Localizer["CancellationPolicy"]
+                </h3>
+                <p style="color: var(--color-text-muted); font-size: var(--fs-sm);">
+                    @Model.CancellationPolicy
+                </p>
+            </div>
+        }
+
+        <!-- REVIEWS -->
+        <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-border);">
+            <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">
+                @Localizer["Reviews"] (@Model.Reviews.Count)
+                @if (Model.Reviews.Any())
+                {
+                    <span style="color: var(--color-brass); font-family: var(--font-body); font-size: var(--fs-base);">
+                        &#9733; @Model.AverageRating.ToString("0.0")
+                    </span>
+                }
+            </h3>
+
+            @if (!Model.Reviews.Any())
+            {
+                <p style="color: var(--color-text-muted);">@Localizer["NoReviewsYet"]</p>
+            }
+            else
+            {
+                <div style="display: flex; flex-direction: column; gap: var(--space-5);">
+                    @foreach (var review in Model.Reviews)
+                    {
+                        <div style="padding-bottom: var(--space-5); border-bottom: 1px solid var(--color-border);">
+                            <div style="display: flex; align-items: center; gap: var(--space-2); margin-bottom: var(--space-2);">
+                                <strong>@review.GuestName</strong>
+                                <span style="color: var(--color-brass);">&#9733; @review.Rating</span>
+                                <span style="color: var(--color-text-muted); font-size: var(--fs-xs);">
+                                    @review.CreatedAt.ToString("MMM yyyy")
+                                </span>
+                            </div>
+
+                            @if (review.CleanlinessRating.HasValue || review.CommunicationRating.HasValue ||
+                                 review.LocationRating.HasValue || review.ValueRating.HasValue)
+                            {
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-2); font-size: var(--fs-xs); color: var(--color-text-muted);">
+                                    @if (review.CleanlinessRating.HasValue)
+                                    {
+                                        <span>@Localizer["Cleanliness"]: @review.CleanlinessRating</span>
+                                    }
+                                    @if (review.CommunicationRating.HasValue)
+                                    {
+                                        <span>@Localizer["Communication"]: @review.CommunicationRating</span>
+                                    }
+                                    @if (review.LocationRating.HasValue)
+                                    {
+                                        <span>@Localizer["Location"]: @review.LocationRating</span>
+                                    }
+                                    @if (review.ValueRating.HasValue)
+                                    {
+                                        <span>@Localizer["Value"]: @review.ValueRating</span>
+                                    }
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(review.Comment))
+                            {
+                                <p style="margin: 0 0 var(--space-2) 0;">@review.Comment</p>
+                            }
+
+                            @if (!string.IsNullOrEmpty(review.HostResponse))
+                            {
+                                <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--color-surface-sunk); border-radius: var(--radius-sm);">
+                                    <strong style="font-size: var(--fs-sm);">@Localizer["ResponseFromHost"]</strong>
+                                    <p style="margin: var(--space-1) 0 0 0; font-size: var(--fs-sm);">@review.HostResponse</p>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+
         <div>
-            <!-- Placeholder for Booking Box -->
-            <div style="padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); position: sticky; top: 100px;">
-                <h3 class="font-display" style="font-size: var(--fs-lg); color: var(--color-navy);">@Model.PricePerNight.ToString("C") <span style="font-size: var(--fs-sm); font-family: var(--font-body); color: var(--color-text-muted);">night</span></h3>
-                <button class="btn-primary" style="width: 100%; margin-top: var(--space-4); background: var(--color-brass); color: var(--color-navy);">Request to book</button>
+            <!-- BOOKING WIDGET -->
+            <div style="padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); position: sticky; top: 100px; background: var(--color-surface);">
+
+                <h3 class="font-display" style="font-size: var(--fs-lg); color: var(--color-navy); margin-bottom: var(--space-4);">
+                    @Model.PricePerNight.ToString("C")
+                    <span style="font-size: var(--fs-sm); font-family: var(--font-body); color: var(--color-text-muted);">
+                        @Localizer["Night"]
+                    </span>
+                </h3>
+
+                <form asp-controller="Bookings" asp-action="RequestBooking" method="post" onsubmit="return validateBookingForm(event)">
+                    <input type="hidden" name="ListingId" value="@Model.Id" />
+
+                    @if (TempData["BookingError"] != null)
+                    {
+                        <div style="padding: var(--space-2) var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-3);">
+                            @TempData["BookingError"]
+                        </div>
+                    }
+
+                    <!-- CLIENT-SIDE INLINE ERROR ALERT -->
+                    <div id="booking-error-alert" style="display: none; padding: var(--space-2) var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-3);"></div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden;">
+                        <div style="padding: var(--space-2); background: var(--color-surface-sunk);">
+                            <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Check-in</label>
+                            <input type="date" name="CheckInDate" id="checkin-date" required
+                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
+                                   onchange="onCheckInChange()" />
+                        </div>
+                        <div style="padding: var(--space-2); background: var(--color-surface-sunk); border-left: 1px solid var(--color-border);">
+                            <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Checkout</label>
+                            <input type="date" name="CheckOutDate" id="checkout-date" required
+                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
+                                   onchange="calculateTotal()" />
+                        </div>
+                    </div>
+
+                    <!-- INLINE ERROR MESSAGE CONTAINER -->
+                    <div id="booking-error-alert" style="display: none; padding: var(--space-2) var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-3);"></div>
+
+                    <div style="margin-bottom: var(--space-4); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-sunk);">
+                        <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Guests</label>
+                        <input type="number" name="NumberOfGuests" value="1" min="1" max="@Model.MaxGuests" required style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);" />
+                    </div>
+
+                    <button type="submit"
+                            class="btn-primary"
+                            style="width: 100%; padding: var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-md); border: none; cursor: pointer; font-weight: 600;">
+                        @Localizer["RequestToBook"]
+                    </button>
+                </form>
+
+                <!-- Live Price Breakdown Container -->
+                <div id="price-calculation" style="margin-top: var(--space-4); font-size: var(--fs-sm); display: none;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-2); color: var(--color-text-muted);">
+                        <span id="night-count-text"></span>
+                        <span id="base-total-text"></span>
+                    </div>
+                    <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-2) 0;" />
+                    <div style="display: flex; justify-content: space-between; font-weight: 700; color: var(--color-navy);">
+                        <span>Total before taxes</span>
+                        <span id="final-total-text"></span>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        const pricePerNight = @Model.PricePerNight;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('checkin-date').setAttribute('min', today);
+        });
+
+        function onCheckInChange() {
+            const checkInVal = document.getElementById('checkin-date').value;
+            const checkoutInput = document.getElementById('checkout-date');
+
+            if (checkInVal) {
+                let nextDay = new Date(checkInVal);
+                nextDay.setDate(nextDay.getDate() + 1);
+                const nextDayFormatted = nextDay.toISOString().split('T')[0];
+
+                checkoutInput.setAttribute('min', nextDayFormatted);
+
+                if (checkoutInput.value && checkoutInput.value <= checkInVal) {
+                    checkoutInput.value = nextDayFormatted;
+                }
+            }
+            calculateTotal();
+        }
+
+        function validateBookingForm(event) {
+            const checkIn = document.getElementById('checkin-date').value;
+            const checkOut = document.getElementById('checkout-date').value;
+            const errorAlert = document.getElementById('booking-error-alert');
+
+            if (!checkIn || !checkOut) {
+                errorAlert.innerText = "Please select both check-in and check-out dates.";
+                errorAlert.style.display = 'block';
+                event.preventDefault();
+                return false;
+            }
+
+            if (new Date(checkOut) <= new Date(checkIn)) {
+                errorAlert.innerText = "Check-out date must be strictly after the check-in date.";
+                errorAlert.style.display = 'block';
+                event.preventDefault();
+                return false;
+            }
+
+            errorAlert.style.display = 'none';
+            return true;
+        }
+
+        function calculateTotal() {
+            const checkInVal = document.getElementById('checkin-date').value;
+            const checkOutVal = document.getElementById('checkout-date').value;
+            const calcContainer = document.getElementById('price-calculation');
+            const errorAlert = document.getElementById('booking-error-alert');
+
+            if (!checkInVal || !checkOutVal) {
+                calcContainer.style.display = 'none';
+                return;
+            }
+
+            const checkInDate = new Date(checkInVal);
+            const checkOutDate = new Date(checkOutVal);
+
+            if (checkOutDate <= checkInDate) {
+                errorAlert.innerText = "Check-out date must be after check-in date.";
+                errorAlert.style.display = 'block';
+                calcContainer.style.display = 'none';
+                return;
+            } else {
+                errorAlert.style.display = 'none';
+            }
+
+            const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+            const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+            if (nights > 0) {
+                const total = nights * pricePerNight;
+                document.getElementById('night-count-text').innerText = `$${pricePerNight} x ${nights} nights`;
+                document.getElementById('base-total-text').innerText = `$${total.toFixed(2)}`;
+                document.getElementById('final-total-text').innerText = `$${total.toFixed(2)}`;
+                calcContainer.style.display = 'block';
+            } else {
+                calcContainer.style.display = 'none';
+            }
+        }
+    </script>
+}

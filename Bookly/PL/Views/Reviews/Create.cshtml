@@ -1,0 +1,98 @@
+﻿@model BLL.ViewModels.Reviews.CreateReviewViewModel
+
+@{
+    ViewData["Title"] = Localizer["LeaveAReview"];
+}
+
+<div style="max-width: 600px; margin: 0 auto; padding: var(--space-6) var(--gutter);">
+
+    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-2);">
+        @Localizer["LeaveAReview"]
+    </h1>
+    <p style="color: var(--color-text-muted); margin-bottom: var(--space-6);">
+        @Model.ListingTitle
+    </p>
+
+    <div asp-validation-summary="ModelOnly" style="color: var(--color-danger); margin-bottom: var(--space-4);"></div>
+
+    <form asp-action="Create" method="post">
+        <input type="hidden" asp-for="BookingId" />
+        <input type="hidden" asp-for="ListingTitle" />
+
+        <div style="margin-bottom: var(--space-5);">
+            <label style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                @Localizer["OverallRating"]
+            </label>
+            <select asp-for="Rating" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                <option value="5">5 - @Localizer["Excellent"]</option>
+                <option value="4">4 - @Localizer["Good"]</option>
+                <option value="3">3 - @Localizer["Average"]</option>
+                <option value="2">2 - @Localizer["Poor"]</option>
+                <option value="1">1 - @Localizer["Terrible"]</option>
+            </select>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-bottom: var(--space-5);">
+            <div>
+                <label style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                    @Localizer["Cleanliness"]
+                </label>
+                <select asp-for="CleanlinessRating" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                    <option value="">—</option>
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                    @Localizer["Communication"]
+                </label>
+                <select asp-for="CommunicationRating" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                    <option value="">—</option>
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                    @Localizer["Location"]
+                </label>
+                <select asp-for="LocationRating" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                    <option value="">—</option>
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <label style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                    @Localizer["Value"]
+                </label>
+                <select asp-for="ValueRating" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border);">
+                    <option value="">—</option>
+                    @for (int i = 5; i >= 1; i--)
+                    {
+                        <option value="@i">@i</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-bottom: var(--space-6);">
+            <label style="font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                @Localizer["Comment"]
+            </label>
+            <textarea asp-for="Comment" rows="4" maxlength="1000"
+                      style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); font-family: var(--font-body); resize: vertical;"></textarea>
+        </div>
+
+        <button type="submit" class="btn-primary">
+            @Localizer["SubmitReview"]
+        </button>
+    </form>
+</div>

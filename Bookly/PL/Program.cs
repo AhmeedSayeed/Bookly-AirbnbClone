@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Claims;
 
 namespace PL
 {
@@ -22,7 +23,12 @@ namespace PL
     {
         public static void Main(string[] args)
         {
+
             var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddLocalization(options =>
+            {
+                options.ResourcesPath = "Resources";
+            });
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -32,6 +38,7 @@ namespace PL
 
             builder.Services.Configure<FileStorageSettings>(builder.Configuration.GetSection("FileStorageSettings"));
             builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+            builder.Services.Configure<PaymobSettings>(builder.Configuration.GetSection("PaymobSettings"));
 
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<int>>(options =>
             {
@@ -81,6 +88,53 @@ namespace PL
                         {
                             context.Token = context.Request.Cookies["access_token"];
                         }
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnTokenValidated = async context =>
+                    {
+                        var userManager = context.HttpContext.RequestServices
+                            .GetRequiredService<UserManager<ApplicationUser>>();
+
+                        var userId = context.Principal?
+                            .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?
+                            .Value;
+
+                        if (string.IsNullOrEmpty(userId))
+                        {
+                            context.Fail("Invalid user.");
+                            return;
+                        }
+
+                        var user = await userManager.FindByIdAsync(userId);
+
+                        if (user == null)
+                        {
+                            context.Fail("User does not exist.");
+                            return;
+                        }
+
+                        if (user.LockoutEnd.HasValue &&
+                            user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+                        {
+                            context.Fail("User account is suspended.");
+                        }
+                    },
+
+                    OnChallenge = context =>
+                    {
+                        context.HandleResponse();
+
+                        context.Response.Redirect("/Account/Login");
+
+                        return Task.CompletedTask;
+                    },
+
+                    OnForbidden = context =>
+                    {
+                        context.Response.Redirect("/Account/AccessDenied");
+
                         return Task.CompletedTask;
                     }
                 };
@@ -122,10 +176,25 @@ namespace PL
             builder.Services.AddScoped<IVerificationService, VerificationService>();
             builder.Services.AddScoped<IAdminService, AdminService>();
             builder.Services.AddScoped<INotificationService, NotificationService>();
+            builder.Services.AddScoped<IBookingService, BookingService>();
+            builder.Services.AddHttpClient<IPaymentService, PaymentService>();
+            builder.Services.Configure<EmailSettings>(
+            builder.Configuration.GetSection("EmailSettings"));
 
+            builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IWishlistService, WishlistService>();
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+            builder.Services.AddScoped<ICouponService, CouponService>();
 
             var app = builder.Build();
+            var supportedCultures = new[] { "en", "ar" };
 
+            var localizationOptions = new RequestLocalizationOptions()
+                .SetDefaultCulture("en")
+                .AddSupportedCultures(supportedCultures)
+                .AddSupportedUICultures(supportedCultures);
+
+            app.UseRequestLocalization(localizationOptions);
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -136,7 +205,7 @@ namespace PL
 
             app.UseHttpsRedirection();
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();

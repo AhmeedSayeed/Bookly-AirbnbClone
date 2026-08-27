@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Localization;
 
 namespace PL.Controllers
 {
@@ -24,15 +25,19 @@ namespace PL.Controllers
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IVerificationService _verificationService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IEmailService _emailService;
 
         public AccountController(UserManager<ApplicationUser> userManager,
-            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper)
+            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper, IStringLocalizer<SharedResource> localizer, IEmailService emailService)
         {
             _userManager = userManager;
             _userService = userService;
             _authService = authService;
             _verificationService = verificationService;
             _mapper = mapper;
+            _localizer = localizer;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -80,7 +85,11 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "An error occurred while updating your profile.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    _localizer["ProfileUpdateError"].Value
+                );
+
                 return View(model);
             }
 
@@ -92,7 +101,6 @@ namespace PL.Controllers
         {
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -111,12 +119,39 @@ namespace PL.Controllers
                 {
                     ModelState.AddModelError(string.Empty, error);
                 }
+
                 return View(model);
             }
 
-            SetTokenCookies(response.Data, false);
+            var confirmationLink = Url.Action(
+                nameof(ConfirmEmail),
+                "Account",
+                new
+                {
+                    userId = response.Data.UserId,
+                    token = response.Data.EmailConfirmationToken
+                },
+                Request.Scheme);
 
-            return RedirectToAction("Index", "Home");
+            try
+            {
+                await _emailService.SendEmailAsync(
+                    response.Data.Email,
+                    "Confirm your Bookly account",
+                    $"Please confirm your email by clicking this link: {confirmationLink}");
+            }
+            catch (Exception )
+            {
+             //Error in sending email
+            }
+
+            return RedirectToAction(nameof(CheckEmail));
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult CheckEmail()
+        {
+            return View();
         }
 
         [HttpGet]
@@ -145,7 +180,14 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message);
+                var message = response.Message switch
+                {
+                    "AccountSuspended" => _localizer["AccountSuspended"].Value,
+                    "EmailNotConfirmed" => "Please verify your email before logging in.",
+                    _ => _localizer["InvalidEmailOrPassword"].Value
+                };
+
+                ModelState.AddModelError(string.Empty, message);
                 return View(model);
             }
 
@@ -179,6 +221,7 @@ namespace PL.Controllers
             if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
+
             if (user != null && user.IsHost)
             {
                 return RedirectToAction("MyListings", "Listings");
@@ -204,27 +247,46 @@ namespace PL.Controllers
             if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user != null && user.IsHost) return RedirectToAction("MyListings", "Listings");
+
+            if (user != null && user.IsHost)
+                return RedirectToAction("MyListings", "Listings");
 
             if (!ModelState.IsValid)
             {
-                var verificationResponse = await _verificationService.GetVerificationByUserIdAsync(userId);
+                var verificationResponse =
+                    await _verificationService.GetVerificationByUserIdAsync(userId);
+
                 if (verificationResponse.Data != null)
-                    ViewBag.VerificationStatus = verificationResponse.Data.Status.ToString();
+                    ViewBag.VerificationStatus =
+                        verificationResponse.Data.Status.ToString();
 
                 return View(model);
             }
 
-            var response = await _verificationService.SubmitVerificationAsync(userId, model);
+            var response =
+                await _verificationService.SubmitVerificationAsync(userId, model);
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "Failed to submit application.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    _localizer["ProfileUpdateError"].Value
+                );
+
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = "Your ID has been submitted and is under review.";
+            TempData["SuccessMessage"] =
+                _localizer["IdSubmittedForReview"].Value;
+
             return RedirectToAction(nameof(BecomeAHost));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
         private void SetTokenCookies(AuthResultDto data, bool rememberMe)
@@ -252,6 +314,117 @@ namespace PL.Controllers
                 Response.Cookies.Append("access_token", data.AccessToken, cookieOptions);
                 Response.Cookies.Append("refresh_token", data.RefreshToken, cookieOptions);
             }
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return View(true);
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+            {
+                return View(false);
+            }
+
+            return View(true);
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var response = await _authService.ForgotPasswordAsync(model);
+
+            if (response.Succeeded && response.Data != null)
+            {
+                var resetLink = Url.Action(
+                    "ResetPassword",
+                    "Account",
+                    new
+                    {
+                        userId = response.Data.UserId,
+                        token = response.Data.PasswordResetToken
+                    },
+                    Request.Scheme);
+
+                await _emailService.SendEmailAsync(
+                    response.Data.Email,
+                    "Reset your Bookly password",
+                    $"Please reset your password by clicking this link: {resetLink}");
+            }
+
+            return RedirectToAction(nameof(CheckResetEmail));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            var model = new ResetPasswordDto
+            {
+                UserId = userId,
+                Token = token
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var response = await _authService.ResetPasswordAsync(model);
+
+            if (!response.Succeeded)
+            {
+                foreach (var error in response.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error);
+                }
+
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Login));
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult CheckResetEmail()
+        {
+            return View();
         }
     }
 }

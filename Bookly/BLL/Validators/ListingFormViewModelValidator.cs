@@ -5,12 +5,6 @@ namespace BLL.Validators;
 
 public class ListingFormViewModelValidator : AbstractValidator<ListingFormViewModel>
 {
-    private static readonly string[] AllowedPropertyTypes =
-        { "Apartment", "House", "Room", "Villa", "Studio", "Other" };
-
-    private static readonly string[] AllowedCancellationPolicies =
-        { "Flexible", "Moderate", "Strict" };
-
     private static readonly string[] AllowedPhotoTypes =
         { "image/jpeg", "image/png", "image/webp" };
 
@@ -20,9 +14,8 @@ public class ListingFormViewModelValidator : AbstractValidator<ListingFormViewMo
         RuleFor(x => x.Description).NotEmpty().MaximumLength(2000);
 
         RuleFor(x => x.PropertyType)
-            .NotEmpty()
-            .Must(t => AllowedPropertyTypes.Contains(t))
-            .WithMessage($"Property type must be one of: {string.Join(", ", AllowedPropertyTypes)}.");
+            .IsInEnum()
+            .WithMessage("Invalid property type selected.");
 
         RuleFor(x => x.Address).NotEmpty();
         RuleFor(x => x.City).NotEmpty();
@@ -38,8 +31,8 @@ public class ListingFormViewModelValidator : AbstractValidator<ListingFormViewMo
         RuleFor(x => x.Beds).InclusiveBetween(0, 20);
 
         RuleFor(x => x.CancellationPolicy)
-            .Must(p => p == null || AllowedCancellationPolicies.Contains(p))
-            .WithMessage($"Cancellation policy must be one of: {string.Join(", ", AllowedCancellationPolicies)}.");
+            .IsInEnum()
+            .WithMessage("Invalid cancellation policy selected.");
 
         RuleFor(x => x.SelectedAmenityIds)
             .Must(ids => ids == null || ids.Distinct().Count() == ids.Count)

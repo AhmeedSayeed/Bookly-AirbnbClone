@@ -22,25 +22,29 @@ namespace BLL.Services
         private readonly ITokenService _tokenService;
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
 
         public AuthService(
             UserManager<ApplicationUser> userManager,
             ITokenService tokenService,
             AppDbContext context,
-            IMapper mapper)
+            IMapper mapper,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _context = context;
             _mapper = mapper;
+            _emailService = emailService;
         }
 
-        public async Task<Response<AuthResultDto>> RegisterAsync(RegisterDto model)
+        public async Task<Response<RegisterResultDto>> RegisterAsync(RegisterDto model)
         {
             var existingUser = await _userManager.FindByEmailAsync(model.Email);
+
             if (existingUser != null)
             {
-                return Response<AuthResultDto>.Fail(
+                return Response<RegisterResultDto>.Fail(
                     ResponseStatus.Conflict,
                     "Registration failed",
                     new List<string> { "Email is already registered." });
@@ -53,40 +57,27 @@ namespace BLL.Services
             if (!result.Succeeded)
             {
                 var errors = result.Errors.Select(e => e.Description).ToList();
-                return Response<AuthResultDto>.Fail(ResponseStatus.ValidationError, "User creation failed", errors);
+
+                return Response<RegisterResultDto>.Fail(
+                    ResponseStatus.ValidationError,
+                    "User creation failed",
+                    errors);
             }
 
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            var registerResult = new RegisterResultDto
+            {
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                EmailConfirmationToken = token
+            };
+
             await _userManager.AddToRoleAsync(user, AppRoles.Guest);
-            var roles = new List<string> { AppRoles.Guest };
 
-            var accessTokenResult = _tokenService.GenerateAccessToken(user, roles);
-            var refreshTokenResult = _tokenService.GenerateRefreshToken();
-
-            var refreshToken = new RefreshToken
-            {
-                UserId = user.Id,
-                Token = refreshTokenResult.Token,
-                ExpiresAt = refreshTokenResult.ExpiresAt,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Set<RefreshToken>().Add(refreshToken);
-            await _context.SaveChangesAsync();
-
-            var authResult = new AuthResultDto
-            {
-                UserId = user.Id,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                Roles = roles,
-                AccessToken = accessTokenResult.Token,
-                AccessTokenExpiration = accessTokenResult.ExpiresAt,
-                RefreshToken = refreshTokenResult.Token,
-                RefreshTokenExpiration = refreshTokenResult.ExpiresAt
-            };
-
-            return Response<AuthResultDto>.Success(authResult, "User registered successfully");
+            return Response<RegisterResultDto>.Success(
+                registerResult,
+                "User registered successfully");
         }
 
         public async Task<Response<AuthResultDto>> LoginAsync(LoginDto model)
@@ -98,6 +89,20 @@ namespace BLL.Services
                 return Response<AuthResultDto>.Fail(
                     ResponseStatus.Unauthorized,
                     "Invalid email or password");
+            }
+            if (!user.EmailConfirmed)
+            {
+                return Response<AuthResultDto>.Fail(
+                    ResponseStatus.Unauthorized,
+                    "EmailNotConfirmed");
+            }
+            // Check if the account is suspended
+            if (user.LockoutEnd.HasValue &&
+                user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            {
+                return Response<AuthResultDto>.Fail(
+                    ResponseStatus.Unauthorized,
+                    "AccountSuspended");
             }
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -129,7 +134,9 @@ namespace BLL.Services
                 RefreshTokenExpiration = refreshTokenResult.ExpiresAt
             };
 
-            return Response<AuthResultDto>.Success(authResult, "Login successful");
+            return Response<AuthResultDto>.Success(
+                authResult,
+                "Login successful");
         }
 
         public async Task<Response<AuthResultDto>> RefreshTokenAsync(string currentRefreshToken)
@@ -140,18 +147,26 @@ namespace BLL.Services
 
             if (storedToken == null)
             {
-                return Response<AuthResultDto>.Fail(ResponseStatus.Unauthorized, "Invalid refresh token");
+                return Response<AuthResultDto>.Fail(
+                    ResponseStatus.Unauthorized,
+                    "Invalid refresh token");
             }
 
-            if (storedToken.ExpiresAt < DateTime.UtcNow || storedToken.RevokedAt != null)
+            if (storedToken.ExpiresAt < DateTime.UtcNow ||
+                storedToken.RevokedAt != null)
             {
-                return Response<AuthResultDto>.Fail(ResponseStatus.Unauthorized, "Token expired or revoked. Please log in again.");
+                return Response<AuthResultDto>.Fail(
+                    ResponseStatus.Unauthorized,
+                    "Token expired or revoked. Please log in again.");
             }
 
             var roles = await _userManager.GetRolesAsync(storedToken.User);
 
-            var accessTokenResult = _tokenService.GenerateAccessToken(storedToken.User, roles);
-            var newRefreshTokenResult = _tokenService.GenerateRefreshToken();
+            var accessTokenResult =
+                _tokenService.GenerateAccessToken(storedToken.User, roles);
+
+            var newRefreshTokenResult =
+                _tokenService.GenerateRefreshToken();
 
             storedToken.RevokedAt = DateTime.UtcNow;
             storedToken.ReplacedByToken = newRefreshTokenResult.Token;
@@ -180,7 +195,9 @@ namespace BLL.Services
                 RefreshTokenExpiration = newRefreshTokenResult.ExpiresAt
             };
 
-            return Response<AuthResultDto>.Success(authResult, "Token refreshed successfully");
+            return Response<AuthResultDto>.Success(
+                authResult,
+                "Token refreshed successfully");
         }
 
         public async Task<Response<bool>> RevokeTokenAsync(string currentRefreshToken)
@@ -190,13 +207,86 @@ namespace BLL.Services
 
             if (storedToken == null || storedToken.RevokedAt != null)
             {
-                return Response<bool>.Fail(ResponseStatus.NotFound, "Token not found or already revoked");
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "Token not found or already revoked");
             }
 
             storedToken.RevokedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            return Response<bool>.Success(true, "Token revoked successfully");
+            return Response<bool>.Success(
+                true,
+                "Token revoked successfully");
+        }
+        public async Task<Response<ForgotPasswordResultDto>> ForgotPasswordAsync(
+    ForgotPasswordDto model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user == null || !user.EmailConfirmed)
+            {
+                return Response<ForgotPasswordResultDto>.Success(
+                    null!,
+                    "If an account with that email exists, a reset link has been sent.");
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var result = new ForgotPasswordResultDto
+            {
+                UserId = user.Id,
+                Email = user.Email ?? string.Empty,
+                PasswordResetToken = token
+            };
+
+            return Response<ForgotPasswordResultDto>.Success(
+                result,
+                "Password reset token generated successfully");
+        }
+        public async Task<Response<bool>> ResetPasswordAsync(
+      ResetPasswordDto model)
+        {
+            var user = await _userManager.FindByIdAsync(model.UserId);
+
+            if (user == null)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "User not found");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(
+                user,
+                model.Token,
+                model.NewPassword);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors
+                    .Select(e => e.Description)
+                    .ToList();
+
+                return Response<bool>.Fail(
+                    ResponseStatus.ValidationError,
+                    "Password reset failed",
+                    errors);
+            }
+
+            var activeTokens = await _context.Set<RefreshToken>()
+                .Where(rt => rt.UserId == user.Id && rt.RevokedAt == null)
+                .ToListAsync();
+
+            foreach (var rt in activeTokens)
+            {
+                rt.RevokedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Response<bool>.Success(
+                true,
+                "Password reset successfully");
         }
     }
 }
