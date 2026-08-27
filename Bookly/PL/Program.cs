@@ -178,6 +178,10 @@ namespace PL
             builder.Services.AddScoped<INotificationService, NotificationService>();
             builder.Services.AddScoped<IBookingService, BookingService>();
             builder.Services.AddHttpClient<IPaymentService, PaymentService>();
+            builder.Services.Configure<EmailSettings>(
+            builder.Configuration.GetSection("EmailSettings"));
+
+            builder.Services.AddScoped<IEmailService, EmailService>();
             builder.Services.AddScoped<IWishlistService, WishlistService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
 

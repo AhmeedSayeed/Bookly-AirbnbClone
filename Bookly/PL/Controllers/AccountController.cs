@@ -26,9 +26,10 @@ namespace PL.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IVerificationService _verificationService;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IEmailService _emailService;
 
         public AccountController(UserManager<ApplicationUser> userManager,
-            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper, IStringLocalizer<SharedResource> localizer)
+            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper, IStringLocalizer<SharedResource> localizer, IEmailService emailService)
         {
             _userManager = userManager;
             _userService = userService;
@@ -36,6 +37,7 @@ namespace PL.Controllers
             _verificationService = verificationService;
             _mapper = mapper;
             _localizer = localizer;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -99,7 +101,6 @@ namespace PL.Controllers
         {
             return View();
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -122,9 +123,35 @@ namespace PL.Controllers
                 return View(model);
             }
 
-            SetTokenCookies(response.Data, false);
+            var confirmationLink = Url.Action(
+                nameof(ConfirmEmail),
+                "Account",
+                new
+                {
+                    userId = response.Data.UserId,
+                    token = response.Data.EmailConfirmationToken
+                },
+                Request.Scheme);
 
-            return RedirectToAction("Index", "Home");
+            try
+            {
+                await _emailService.SendEmailAsync(
+                    response.Data.Email,
+                    "Confirm your Bookly account",
+                    $"Please confirm your email by clicking this link: {confirmationLink}");
+            }
+            catch (Exception )
+            {
+             //Error in sending email
+            }
+
+            return RedirectToAction(nameof(CheckEmail));
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult CheckEmail()
+        {
+            return View();
         }
 
         [HttpGet]
@@ -153,9 +180,12 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                var message = response.Message == "AccountSuspended"
-                    ? _localizer["AccountSuspended"].Value
-                    : _localizer["InvalidEmailOrPassword"].Value;
+                var message = response.Message switch
+                {
+                    "AccountSuspended" => _localizer["AccountSuspended"].Value,
+                    "EmailNotConfirmed" => "Please verify your email before logging in.",
+                    _ => _localizer["InvalidEmailOrPassword"].Value
+                };
 
                 ModelState.AddModelError(string.Empty, message);
                 return View(model);
@@ -284,6 +314,117 @@ namespace PL.Controllers
                 Response.Cookies.Append("access_token", data.AccessToken, cookieOptions);
                 Response.Cookies.Append("refresh_token", data.RefreshToken, cookieOptions);
             }
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return View(true);
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+            {
+                return View(false);
+            }
+
+            return View(true);
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var response = await _authService.ForgotPasswordAsync(model);
+
+            if (response.Succeeded && response.Data != null)
+            {
+                var resetLink = Url.Action(
+                    "ResetPassword",
+                    "Account",
+                    new
+                    {
+                        userId = response.Data.UserId,
+                        token = response.Data.PasswordResetToken
+                    },
+                    Request.Scheme);
+
+                await _emailService.SendEmailAsync(
+                    response.Data.Email,
+                    "Reset your Bookly password",
+                    $"Please reset your password by clicking this link: {resetLink}");
+            }
+
+            return RedirectToAction(nameof(CheckResetEmail));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string userId, string token)
+        {
+            var model = new ResetPasswordDto
+            {
+                UserId = userId,
+                Token = token
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var response = await _authService.ResetPasswordAsync(model);
+
+            if (!response.Succeeded)
+            {
+                foreach (var error in response.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error);
+                }
+
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Login));
+        }
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult CheckResetEmail()
+        {
+            return View();
         }
     }
 }
