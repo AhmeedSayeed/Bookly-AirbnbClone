@@ -2,6 +2,7 @@ using BLL.DTOs;
 using BLL.DTOs.Amenity;
 using BLL.DTOs.Listing;
 using BLL.Services.Interfaces;
+using BLL.ViewModels.Availability;
 using BLL.ViewModels.Listings;
 using DAL.Models.Common;
 using DAL.Models.Identity;
@@ -258,6 +259,44 @@ namespace PL.Controllers
                     _localizer["ListingDeletedSuccessfully"].Value;
             }
 
+            return RedirectToAction(nameof(MyListings));
+        }
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Availability(int id)
+        {
+            if (!await IsCurrentUserHostAsync())
+            {
+                TempData["InfoMessage"] = _localizer["MustBeVerifiedHost"].Value;
+                return RedirectToAction("BecomeAHost", "Account");
+            }
+            var currentUserId = GetCurrentUserId();
+            var response = await _listingService.GetAvailabilityCalendarAsync(id, currentUserId);
+            if (!response.Succeeded || response.Data == null)
+            {
+                TempData["ErrorMessage"] = response.Message ?? "Listing not found.";
+                return RedirectToAction(nameof(MyListings));
+            }
+            return View(response.Data);
+        }
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Availability(AvailabilityCalendarViewModel model)
+        {
+            if (!await IsCurrentUserHostAsync())
+            {
+                TempData["InfoMessage"] = _localizer["MustBeVerifiedHost"].Value;
+                return RedirectToAction("BecomeAHost", "Account");
+            }
+            var currentUserId = GetCurrentUserId();
+            var response = await _listingService.UpdateAvailabilityCalendarAsync(model, currentUserId);
+            if (!response.Succeeded)
+            {
+                TempData["ErrorMessage"] = response.Message ?? "Failed to update calendar.";
+                return View(model);
+            }
+            TempData["SuccessMessage"] = "Availability calendar updated successfully.";
             return RedirectToAction(nameof(MyListings));
         }
     }

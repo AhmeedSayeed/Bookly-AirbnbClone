@@ -135,24 +135,47 @@
                 </div>
             </div>
 
-            <!-- Action Buttons: Pay Now & Cancel -->
-            <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+            <!-- Coupon Box & Action Buttons -->
+            <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+
+                <!-- Coupon Input Box (Only for Confirmed/Pending bookings) -->
+                @if (Model.Status == "Confirmed" || Model.Status == "Pending")
+                {
+                    <div style="background: var(--color-surface); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-md); padding: var(--space-4);">
+                        <label style="font-size: var(--fs-xs); font-weight: 600; text-transform: uppercase; color: var(--color-text-muted); display: block; margin-bottom: var(--space-2);">
+                            Have a coupon code?
+                        </label>
+                        <div style="display: flex; gap: var(--space-2);">
+                            <input type="text" id="couponCodeInput" placeholder="e.g. SUMMER20" class="form-control" style="text-transform: uppercase; font-family: var(--font-mono); font-weight: 600;" />
+                            <button type="button" id="btnApplyCoupon" onclick="applyCoupon()" class="btn-primary" style="padding: var(--space-2) var(--space-4); font-size: var(--fs-sm); white-space: nowrap;">
+                                Apply
+                            </button>
+                        </div>
+                        <div id="couponMessage" style="font-size: var(--fs-xs); margin-top: var(--space-2); display: none;"></div>
+                    </div>
+                }
+
+                <!-- Pay Now Button -->
                 @if (Model.Status == "Confirmed")
                 {
                     <form asp-controller="Payments" asp-action="Checkout" method="post" style="margin: 0;">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="bookingId" value="@Model.Id" />
                         <input type="hidden" name="method" value="1" />
                         <button type="submit"
+                                id="btnPayNow"
                                 class="btn-primary"
                                 style="width: 100%; padding: var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-weight: 600; cursor: pointer; font-size: var(--fs-md); border: none;">
-                            Pay Now (@Model.TotalPrice.ToString("C"))
+                            Pay Now (<span id="payAmountDisplay">@Model.TotalPrice.ToString("C")</span>)
                         </button>
                     </form>
                 }
 
+                <!-- Cancel Button -->
                 @if (Model.Status != "Cancelled" && Model.Status != "Completed" && Model.Status != "Rejected" && Model.Status != "Paid")
                 {
                     <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure you want to cancel this booking?');" style="margin: 0;">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
                         <button type="submit" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-pill); background: transparent; border: 1px solid var(--color-danger); color: var(--color-danger); font-weight: 600; cursor: pointer; font-size: var(--fs-sm);">
                             Cancel Reservation
@@ -160,6 +183,62 @@
                     </form>
                 }
             </div>
+
+            @section Scripts {
+                <script>
+                                function applyCoupon() {
+                                    const codeInput = document.getElementById('couponCodeInput');
+                                    const messageDiv = document.getElementById('couponMessage');
+                                    const btnApply = document.getElementById('btnApplyCoupon');
+                                    const code = codeInput.value.trim();
+
+                                    if (!code) return;
+
+                                    btnApply.disabled = true;
+                                    btnApply.innerText = 'Applying...';
+
+                                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value || '';
+
+                                    fetch('/Coupons/Apply', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/x-www-form-urlencoded',
+                                            'RequestVerificationToken': token
+                                        },
+                                        body: `bookingId=@Model.Id&code=${encodeURIComponent(code)}`
+                                    })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            btnApply.disabled = false;
+                                            btnApply.innerText = 'Apply';
+                                            messageDiv.style.display = 'block';
+
+                                            if (data.success) {
+                                                messageDiv.style.color = 'var(--color-success, #2e7d32)';
+                                                messageDiv.innerHTML = `<strong>${data.message}</strong> - Saved $${data.discountAmount.toFixed(2)}`;
+                                                codeInput.disabled = true;
+                                                btnApply.style.display = 'none';
+
+                                                // Update price display on the screen
+                                                const payAmountSpan = document.getElementById('payAmountDisplay');
+                                                if (payAmountSpan) {
+                                                    payAmountSpan.innerText = `$${data.newTotalPrice.toFixed(2)}`;
+                                                }
+                                            } else {
+                                                messageDiv.style.color = 'var(--color-danger)';
+                                                messageDiv.innerText = data.message;
+                                            }
+                                        })
+                                        .catch(err => {
+                                            btnApply.disabled = false;
+                                            btnApply.innerText = 'Apply';
+                                            messageDiv.style.display = 'block';
+                                            messageDiv.style.color = 'var(--color-danger)';
+                                            messageDiv.innerText = 'Failed to apply coupon. Please try again.';
+                                        });
+                                }
+                </script>
+            }
 
             <div style="text-align: center; margin-top: var(--space-2);">
                 <a asp-action="MyTrips" style="font-size: var(--fs-sm); color: var(--color-text-muted); text-decoration: none;">&larr; Back to My Trips</a>
