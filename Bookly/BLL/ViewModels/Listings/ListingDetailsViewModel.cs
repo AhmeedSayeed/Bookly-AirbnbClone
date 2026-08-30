@@ -28,4 +28,6 @@ public class ListingDetailsViewModel
     public double AverageRating { get; set; }
 
     public BookingFormViewModel Booking { get; set; } = new();
+
+    public List<string> UnavailableDates { get; set; } = new();
 }

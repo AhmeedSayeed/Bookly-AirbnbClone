@@ -64,6 +64,9 @@ namespace BLL.Services.Implementation
                     b.Status == BookingStatus.Confirmed &&
                     b.CheckInDate < checkOut &&
                     b.CheckOutDate > checkIn));
+
+                predicate = predicate.And(l => !l.BlockedDates.Any(bd =>
+                    bd.Date >= checkIn && bd.Date < checkOut));
             }
 
             var pagedListings = await _listingRepo.GetAllPaginatedEnhancedAsync<ListingCardDto>(
@@ -140,6 +143,7 @@ namespace BLL.Services.Implementation
                 .Include(l => l.Photos)
                 .Include(l => l.ListingAmenities)
                     .ThenInclude(la => la.Amenity)
+                .Include(l => l.BlockedDates)
                 .Include(l => l.Bookings)
                     .ThenInclude(b => b.Review);
 
@@ -149,6 +153,31 @@ namespace BLL.Services.Implementation
                 return Response<ListingDetailsViewModel>.Fail(ResponseStatus.NotFound, "Listing not found.");
 
             var viewModel = _mapper.Map<ListingDetailsViewModel>(listing);
+
+            var unavailable = new List<string>();
+            var today = DateTime.UtcNow.Date;
+
+            // 1. Blocked dates by host
+            unavailable.AddRange(listing.BlockedDates
+                .Where(bd => bd.Date.Date >= today)
+                .Select(bd => bd.Date.ToString("yyyy-MM-dd")));
+
+            // 2. Booked dates by guests
+            var activeBookings = listing.Bookings
+                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
+                .ToList();
+
+            foreach (var b in activeBookings)
+            {
+                for (var d = b.CheckInDate.Date; d < b.CheckOutDate.Date; d = d.AddDays(1))
+                {
+                    var str = d.ToString("yyyy-MM-dd");
+                    if (!unavailable.Contains(str))
+                        unavailable.Add(str);
+                }
+            }
+
+            viewModel.UnavailableDates = unavailable;
 
             return Response<ListingDetailsViewModel>.Success(viewModel);
         }

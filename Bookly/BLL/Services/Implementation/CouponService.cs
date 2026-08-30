@@ -1,4 +1,4 @@
-﻿using BLL.DTOs;
+using BLL.DTOs;
 using BLL.Services.Interfaces;
 using DAL.Enums;
 using DAL.Models.Reservations;
@@ -116,6 +116,78 @@ namespace BLL.Services.Implementation
                 .ToListAsync();
 
             return Response<List<CouponDto>>.Success(coupons);
+        }
+
+        public async Task<Response<List<CouponDto>>> GetAllCouponsAsync()
+        {
+            var coupons = await _couponRepo.GetAllAsIQueryable()
+                .OrderByDescending(c => c.ExpiryDate)
+                .Select(c => new CouponDto
+                {
+                    Id = c.Id,
+                    Code = c.Code,
+                    DiscountPercent = c.DiscountPercent,
+                    ExpiryDate = c.ExpiryDate,
+                    MaxUses = c.MaxUses,
+                    UsesCount = c.UsesCount
+                })
+                .ToListAsync();
+
+            return Response<List<CouponDto>>.Success(coupons);
+        }
+
+        public async Task<Response<int>> CreateCouponAsync(CreateCouponDto model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Code))
+                return Response<int>.Fail(ResponseStatus.ValidationError, "Coupon code is required.");
+
+            if (model.DiscountPercent <= 0 || model.DiscountPercent > 100)
+                return Response<int>.Fail(ResponseStatus.ValidationError, "Discount percent must be between 1 and 100.");
+
+            if (model.ExpiryDate <= DateTime.UtcNow)
+                return Response<int>.Fail(ResponseStatus.ValidationError, "Expiry date must be in the future.");
+
+            if (model.MaxUses <= 0)
+                return Response<int>.Fail(ResponseStatus.ValidationError, "Max uses must be greater than 0.");
+
+            var cleanCode = model.Code.Trim().ToUpper();
+
+            var exists = await _couponRepo.GetAllAsIQueryable()
+                .AnyAsync(c => c.Code.ToUpper() == cleanCode);
+
+            if (exists)
+                return Response<int>.Fail(ResponseStatus.Conflict, "A coupon with this code already exists.");
+
+            var coupon = new Coupon
+            {
+                Code = cleanCode,
+                DiscountPercent = model.DiscountPercent,
+                ExpiryDate = model.ExpiryDate,
+                MaxUses = model.MaxUses,
+                UsesCount = 0,
+                IsDeleted = false
+            };
+
+            await _couponRepo.AddAsync(coupon);
+            var saved = await _couponRepo.SaveAsync();
+
+            return saved > 0
+                ? Response<int>.Success(coupon.Id, "Coupon created successfully.")
+                : Response<int>.Fail(ResponseStatus.Error, "Failed to create coupon.");
+        }
+
+        public async Task<Response<bool>> DeleteCouponAsync(int id)
+        {
+            var coupon = await _couponRepo.GetByIdAsync(id);
+            if (coupon == null)
+                return Response<bool>.Fail(ResponseStatus.NotFound, "Coupon not found.");
+
+            _couponRepo.Delete(id);
+            var saved = await _couponRepo.SaveAsync();
+
+            return saved > 0
+                ? Response<bool>.Success(true, "Coupon deleted successfully.")
+                : Response<bool>.Fail(ResponseStatus.Error, "Failed to delete coupon.");
         }
     }
 }

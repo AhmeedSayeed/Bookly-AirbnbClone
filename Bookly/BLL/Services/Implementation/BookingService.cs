@@ -53,6 +53,13 @@ namespace BLL.Services.Implementation
             if (overlappingBookings)
                 return Response<int>.Fail(ResponseStatus.Error, "Those dates are already booked. Please choose different dates.");
 
+            var hasBlockedDates = await _listingRepo.GetAllAsIQueryable()
+                .Where(l => l.Id == request.ListingId)
+                .AnyAsync(l => l.BlockedDates.Any(bd => bd.Date >= request.CheckInDate.Date && bd.Date < request.CheckOutDate.Date));
+
+            if (hasBlockedDates)
+                return Response<int>.Fail(ResponseStatus.ValidationError, "The selected date range contains dates blocked by the host.");
+
             int totalNights = (request.CheckOutDate.Date - request.CheckInDate.Date).Days;
 
             var booking = _mapper.Map<Booking>(request);

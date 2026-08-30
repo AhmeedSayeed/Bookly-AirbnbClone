@@ -13,6 +13,7 @@
         <a asp-controller="Admin" asp-action="Verifications" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);"> @Localizer["ReviewIds"]</a>
         <a asp-controller="Admin" asp-action="Users" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">  @Localizer["ManageUsers"]</a>
         <a asp-controller="Admin" asp-action="Listings" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">@Localizer["ModerateListings"]</a>
+        <a asp-controller="Admin" asp-action="Coupons" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">Coupons</a>
     </div>
 
     @if (TempData["ErrorMessage"] != null)
