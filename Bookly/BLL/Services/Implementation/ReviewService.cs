@@ -40,16 +40,24 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
 
             if (booking == null)
-                return Response<CreateReviewViewModel>.Fail(ResponseStatus.NotFound, "Booking not found.");
+                return Response<CreateReviewViewModel>.FailWithKey(
+                    ResponseStatus.NotFound,
+                    "BookingNotFound");
 
             if (booking.GuestId != guestId)
-                return Response<CreateReviewViewModel>.Fail(ResponseStatus.Forbidden, "This is not your booking.");
+                return Response<CreateReviewViewModel>.FailWithKey(
+                    ResponseStatus.Forbidden,
+                    "ThisIsNotYourBooking");
 
             if (booking.Status != BookingStatus.Completed)
-                return Response<CreateReviewViewModel>.Fail(ResponseStatus.ValidationError, "You can only review a stay after it's completed.");
+                return Response<CreateReviewViewModel>.FailWithKey(
+                    ResponseStatus.ValidationError,
+                    "CanOnlyReviewCompletedStay");
 
             if (booking.Review != null)
-                return Response<CreateReviewViewModel>.Fail(ResponseStatus.Conflict, "You have already reviewed this stay.");
+                return Response<CreateReviewViewModel>.FailWithKey(
+                    ResponseStatus.Conflict,
+                    "AlreadyReviewedStay");
 
             var model = new CreateReviewViewModel
             {
@@ -60,23 +68,33 @@ namespace BLL.Services.Implementation
             return Response<CreateReviewViewModel>.Success(model);
         }
 
-        public async Task<Response<bool>> SubmitReviewAsync(int guestId, CreateReviewViewModel model)
+        public async Task<Response<bool>> SubmitReviewAsync(
+            int guestId,
+            CreateReviewViewModel model)
         {
             var booking = await _bookingRepo.GetAllAsIQueryable()
                 .Include(b => b.Review)
                 .FirstOrDefaultAsync(b => b.Id == model.BookingId);
 
             if (booking == null)
-                return Response<bool>.Fail(ResponseStatus.NotFound, "Booking not found.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.NotFound,
+                    "BookingNotFound");
 
             if (booking.GuestId != guestId)
-                return Response<bool>.Fail(ResponseStatus.Forbidden, "This is not your booking.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.Forbidden,
+                    "ThisIsNotYourBooking");
 
             if (booking.Status != BookingStatus.Completed)
-                return Response<bool>.Fail(ResponseStatus.ValidationError, "You can only review a stay after it's completed.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.ValidationError,
+                    "CanOnlyReviewCompletedStay");
 
             if (booking.Review != null)
-                return Response<bool>.Fail(ResponseStatus.Conflict, "You have already reviewed this stay.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.Conflict,
+                    "AlreadyReviewedStay");
 
             var review = _mapper.Map<Review>(model);
             review.BookingId = booking.Id;
@@ -85,11 +103,17 @@ namespace BLL.Services.Implementation
             var saved = await _reviewRepo.SaveAsync();
 
             return saved > 0
-                ? Response<bool>.Success(true, "Thanks for sharing your review!")
-                : Response<bool>.Fail(ResponseStatus.Error, "Failed to submit review.");
+                ? Response<bool>.SuccessWithKey(
+                    true,
+                    "ReviewSubmittedSuccessfully")
+                : Response<bool>.FailWithKey(
+                    ResponseStatus.Error,
+                    "FailedToSubmitReview");
         }
 
-        public async Task<Response<HostResponseViewModel>> GetRespondFormAsync(int reviewId, int hostId)
+        public async Task<Response<HostResponseViewModel>> GetRespondFormAsync(
+            int reviewId,
+            int hostId)
         {
             var review = await _reviewRepo.GetAllAsIQueryable()
                 .Include(r => r.Booking).ThenInclude(b => b.Listing)
@@ -98,13 +122,19 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(r => r.Id == reviewId);
 
             if (review == null)
-                return Response<HostResponseViewModel>.Fail(ResponseStatus.NotFound, "Review not found.");
+                return Response<HostResponseViewModel>.FailWithKey(
+                    ResponseStatus.NotFound,
+                    "ReviewNotFound");
 
             if (review.Booking.Listing.HostId != hostId)
-                return Response<HostResponseViewModel>.Fail(ResponseStatus.Forbidden, "This review isn't on one of your listings.");
+                return Response<HostResponseViewModel>.FailWithKey(
+                    ResponseStatus.Forbidden,
+                    "ReviewNotOnYourListing");
 
             if (review.HostResponse != null)
-                return Response<HostResponseViewModel>.Fail(ResponseStatus.Conflict, "You've already responded to this review.");
+                return Response<HostResponseViewModel>.FailWithKey(
+                    ResponseStatus.Conflict,
+                    "AlreadyRespondedToReview");
 
             var model = new HostResponseViewModel
             {
@@ -115,7 +145,9 @@ namespace BLL.Services.Implementation
             return Response<HostResponseViewModel>.Success(model);
         }
 
-        public async Task<Response<bool>> RespondToReviewAsync(int hostId, HostResponseViewModel model)
+        public async Task<Response<bool>> RespondToReviewAsync(
+            int hostId,
+            HostResponseViewModel model)
         {
             var review = await _reviewRepo.GetAllAsIQueryable()
                 .Include(r => r.Booking).ThenInclude(b => b.Listing)
@@ -123,13 +155,19 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(r => r.Id == model.ReviewId);
 
             if (review == null)
-                return Response<bool>.Fail(ResponseStatus.NotFound, "Review not found.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.NotFound,
+                    "ReviewNotFound");
 
             if (review.Booking.Listing.HostId != hostId)
-                return Response<bool>.Fail(ResponseStatus.Forbidden, "This review isn't on one of your listings.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.Forbidden,
+                    "ReviewNotOnYourListing");
 
             if (review.HostResponse != null)
-                return Response<bool>.Fail(ResponseStatus.Conflict, "You've already responded to this review.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.Conflict,
+                    "AlreadyRespondedToReview");
 
             var hostResponse = new HostResponse
             {
@@ -142,8 +180,12 @@ namespace BLL.Services.Implementation
             var saved = await _hostResponseRepo.SaveAsync();
 
             return saved > 0
-                ? Response<bool>.Success(true, "Your response has been posted.")
-                : Response<bool>.Fail(ResponseStatus.Error, "Failed to post response.");
+                ? Response<bool>.SuccessWithKey(
+                    true,
+                    "ReviewResponsePostedSuccessfully")
+                : Response<bool>.FailWithKey(
+                    ResponseStatus.Error,
+                    "FailedToPostResponse");
         }
     }
 }

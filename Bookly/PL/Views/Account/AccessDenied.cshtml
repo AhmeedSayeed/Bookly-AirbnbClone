@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Access Denied";
+    ViewData["Title"] = Localizer["AccessDenied"];
 }
 
 <div style="max-width: 500px; margin: 10vh auto; text-align: center; padding: var(--space-8) var(--space-6); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-md);">
@@ -13,21 +13,21 @@
     </div>
 
     <h1 class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); margin-bottom: var(--space-3);">
-        Access Denied
+        @Localizer["AccessDenied"]
     </h1>
 
     <p style="font-size: var(--fs-base); color: var(--color-text-muted); margin-bottom: var(--space-6); line-height: 1.6;">
-        You do not have the required permissions to view this page or perform this action. This usually happens if you are trying to access a Host feature with a standard Guest account.
+        @Localizer["AccessDeniedMessage"]
     </p>
 
     <div style="display: flex; gap: var(--space-3); justify-content: center; flex-wrap: wrap;">
 
         <a href="javascript:history.back()" style="padding: var(--space-3) var(--space-6); border-radius: var(--radius-pill); background: transparent; border: 1px solid var(--color-border-strong); color: var(--color-text); text-decoration: none; font-weight: 600; cursor: pointer;">
-            Go Back
+            @Localizer["GoBack"]
         </a>
 
         <a asp-controller="Home" asp-action="Index" class="btn-primary" style="padding: var(--space-3) var(--space-6); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); text-decoration: none; font-weight: 600;">
-            Return to Home
+            @Localizer["ReturnToHome"]
         </a>
 
     </div>

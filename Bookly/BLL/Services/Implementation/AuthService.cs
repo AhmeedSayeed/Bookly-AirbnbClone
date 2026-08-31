@@ -44,10 +44,10 @@ namespace BLL.Services
 
             if (existingUser != null)
             {
-                return Response<RegisterResultDto>.Fail(
+                return Response<RegisterResultDto>.FailWithKey(
                     ResponseStatus.Conflict,
-                    "Registration failed",
-                    new List<string> { "Email is already registered." });
+                    "RegistrationFailed",
+                    new List<string> { "EmailAlreadyRegistered" });
             }
 
             var user = _mapper.Map<ApplicationUser>(model);
@@ -56,11 +56,13 @@ namespace BLL.Services
 
             if (!result.Succeeded)
             {
-                var errors = result.Errors.Select(e => e.Description).ToList();
+                var errors = result.Errors
+                    .Select(e => e.Code)
+                    .ToList();
 
-                return Response<RegisterResultDto>.Fail(
+                return Response<RegisterResultDto>.FailWithKey(
                     ResponseStatus.ValidationError,
-                    "User creation failed",
+                    "UserCreationFailed",
                     errors);
             }
 
@@ -75,9 +77,9 @@ namespace BLL.Services
 
             await _userManager.AddToRoleAsync(user, AppRoles.Guest);
 
-            return Response<RegisterResultDto>.Success(
+            return Response<RegisterResultDto>.SuccessWithKey(
                 registerResult,
-                "User registered successfully");
+                "UserRegisteredSuccessfully");
         }
 
         public async Task<Response<AuthResultDto>> LoginAsync(LoginDto model)
@@ -86,21 +88,23 @@ namespace BLL.Services
 
             if (user == null || !await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                return Response<AuthResultDto>.Fail(
+                return Response<AuthResultDto>.FailWithKey(
                     ResponseStatus.Unauthorized,
-                    "Invalid email or password");
+                    "InvalidEmailOrPassword");
             }
+
             if (!user.EmailConfirmed)
             {
-                return Response<AuthResultDto>.Fail(
+                return Response<AuthResultDto>.FailWithKey(
                     ResponseStatus.Unauthorized,
                     "EmailNotConfirmed");
             }
+
             // Check if the account is suspended
             if (user.LockoutEnd.HasValue &&
                 user.LockoutEnd.Value > DateTimeOffset.UtcNow)
             {
-                return Response<AuthResultDto>.Fail(
+                return Response<AuthResultDto>.FailWithKey(
                     ResponseStatus.Unauthorized,
                     "AccountSuspended");
             }
@@ -134,9 +138,100 @@ namespace BLL.Services
                 RefreshTokenExpiration = refreshTokenResult.ExpiresAt
             };
 
-            return Response<AuthResultDto>.Success(
+            return Response<AuthResultDto>.SuccessWithKey(
                 authResult,
-                "Login successful");
+                "LoginSuccessful");
+        }
+
+        public async Task<Response<AuthResultDto>> GoogleLoginAsync(
+            string email,
+            string firstName,
+            string lastName)
+        {
+            // 1. Find user by email
+            var user = await _userManager.FindByEmailAsync(email);
+
+            // 2. If user doesn't exist, create a new account
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    EmailConfirmed = true,
+                    CreatedAt = DateTime.UtcNow,
+                    IsHost = false,
+                    IsDeleted = false
+                };
+
+                var createResult = await _userManager.CreateAsync(user);
+
+                if (!createResult.Succeeded)
+                {
+                    var errors = createResult.Errors
+                        .Select(e => e.Code)
+                        .ToList();
+
+                    return Response<AuthResultDto>.FailWithKey(
+                        ResponseStatus.ValidationError,
+                        "GoogleAccountCreationFailed",
+                        errors);
+                }
+
+                // New Google users are Guests by default
+                await _userManager.AddToRoleAsync(user, AppRoles.Guest);
+            }
+
+            // 3. Check if account is suspended
+            if (user.LockoutEnd.HasValue &&
+                user.LockoutEnd.Value > DateTimeOffset.UtcNow)
+            {
+                return Response<AuthResultDto>.FailWithKey(
+                    ResponseStatus.Unauthorized,
+                    "AccountSuspended");
+            }
+
+            // 4. Get user's roles
+            var roles = await _userManager.GetRolesAsync(user);
+
+            // 5. Generate JWT
+            var accessTokenResult =
+                _tokenService.GenerateAccessToken(user, roles);
+
+            // 6. Generate Refresh Token
+            var refreshTokenResult =
+                _tokenService.GenerateRefreshToken();
+
+            var refreshToken = new RefreshToken
+            {
+                UserId = user.Id,
+                Token = refreshTokenResult.Token,
+                ExpiresAt = refreshTokenResult.ExpiresAt,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Set<RefreshToken>().Add(refreshToken);
+            await _context.SaveChangesAsync();
+
+            // 7. Build authentication result
+            var authResult = new AuthResultDto
+            {
+                UserId = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email ?? string.Empty,
+                Roles = roles,
+                AccessToken = accessTokenResult.Token,
+                AccessTokenExpiration = accessTokenResult.ExpiresAt,
+                RefreshToken = refreshTokenResult.Token,
+                RefreshTokenExpiration = refreshTokenResult.ExpiresAt
+            };
+
+            return Response<AuthResultDto>.SuccessWithKey(
+                authResult,
+                "GoogleLoginSuccessful");
         }
 
         public async Task<Response<AuthResultDto>> RefreshTokenAsync(string currentRefreshToken)
@@ -147,17 +242,17 @@ namespace BLL.Services
 
             if (storedToken == null)
             {
-                return Response<AuthResultDto>.Fail(
+                return Response<AuthResultDto>.FailWithKey(
                     ResponseStatus.Unauthorized,
-                    "Invalid refresh token");
+                    "InvalidRefreshToken");
             }
 
             if (storedToken.ExpiresAt < DateTime.UtcNow ||
                 storedToken.RevokedAt != null)
             {
-                return Response<AuthResultDto>.Fail(
+                return Response<AuthResultDto>.FailWithKey(
                     ResponseStatus.Unauthorized,
-                    "Token expired or revoked. Please log in again.");
+                    "TokenExpiredOrRevoked");
             }
 
             var roles = await _userManager.GetRolesAsync(storedToken.User);
@@ -195,9 +290,9 @@ namespace BLL.Services
                 RefreshTokenExpiration = newRefreshTokenResult.ExpiresAt
             };
 
-            return Response<AuthResultDto>.Success(
+            return Response<AuthResultDto>.SuccessWithKey(
                 authResult,
-                "Token refreshed successfully");
+                "TokenRefreshedSuccessfully");
         }
 
         public async Task<Response<bool>> RevokeTokenAsync(string currentRefreshToken)
@@ -207,28 +302,29 @@ namespace BLL.Services
 
             if (storedToken == null || storedToken.RevokedAt != null)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
-                    "Token not found or already revoked");
+                    "TokenNotFoundOrAlreadyRevoked");
             }
 
             storedToken.RevokedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
 
-            return Response<bool>.Success(
+            return Response<bool>.SuccessWithKey(
                 true,
-                "Token revoked successfully");
+                "TokenRevokedSuccessfully");
         }
+
         public async Task<Response<ForgotPasswordResultDto>> ForgotPasswordAsync(
-    ForgotPasswordDto model)
+            ForgotPasswordDto model)
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
 
             if (user == null || !user.EmailConfirmed)
             {
-                return Response<ForgotPasswordResultDto>.Success(
+                return Response<ForgotPasswordResultDto>.SuccessWithKey(
                     null!,
-                    "If an account with that email exists, a reset link has been sent.");
+                    "PasswordResetLinkSentIfAccountExists");
             }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -240,20 +336,21 @@ namespace BLL.Services
                 PasswordResetToken = token
             };
 
-            return Response<ForgotPasswordResultDto>.Success(
+            return Response<ForgotPasswordResultDto>.SuccessWithKey(
                 result,
-                "Password reset token generated successfully");
+                "PasswordResetTokenGeneratedSuccessfully");
         }
+
         public async Task<Response<bool>> ResetPasswordAsync(
-      ResetPasswordDto model)
+            ResetPasswordDto model)
         {
             var user = await _userManager.FindByIdAsync(model.UserId);
 
             if (user == null)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
-                    "User not found");
+                    "UserNotFound");
             }
 
             var result = await _userManager.ResetPasswordAsync(
@@ -264,12 +361,12 @@ namespace BLL.Services
             if (!result.Succeeded)
             {
                 var errors = result.Errors
-                    .Select(e => e.Description)
+                    .Select(e => e.Code)
                     .ToList();
 
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.ValidationError,
-                    "Password reset failed",
+                    "PasswordResetFailed",
                     errors);
             }
 
@@ -284,9 +381,9 @@ namespace BLL.Services
 
             await _context.SaveChangesAsync();
 
-            return Response<bool>.Success(
+            return Response<bool>.SuccessWithKey(
                 true,
-                "Password reset successfully");
+                "PasswordResetSuccessfully");
         }
     }
 }

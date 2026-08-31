@@ -16,7 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
-
+using Microsoft.AspNetCore.Authentication.Google;
 namespace PL
 {
     public class Program
@@ -138,6 +138,12 @@ namespace PL
                         return Task.CompletedTask;
                     }
                 };
+            }).AddGoogle(options =>
+            {
+                options.ClientId = builder.Configuration["GoogleKeys:ClientId"];
+                options.ClientSecret = builder.Configuration["GoogleKeys:ClientSecret"];
+
+                options.SignInScheme = IdentityConstants.ExternalScheme;
             });
 
             builder.Services.ConfigureApplicationCookie(options =>
