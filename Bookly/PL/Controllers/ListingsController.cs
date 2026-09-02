@@ -100,6 +100,12 @@ namespace PL.Controllers
             if (!response.Succeeded)
                 return NotFound(response.Message);
 
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var currentUserId = GetCurrentUserId();
+                response.Data.IsWishlisted = await _wishlistService.IsWishlistedAsync(currentUserId, id);
+            }
+
             return View(response.Data);
         }
 

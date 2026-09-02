@@ -600,11 +600,11 @@ html[dir="rtl"] .user-dropdown-item {
 }
 
 
-/* --- Notification Dropdown Pop-up Styles --- */
+/* --- Notification Dropdown Pop-up (RTL/LTR Adaptive) --- */
 .notification-dropdown {
     position: absolute;
     top: calc(100% + 10px);
-    right: 0;
+    inset-inline-end: 0;
     width: 360px;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
