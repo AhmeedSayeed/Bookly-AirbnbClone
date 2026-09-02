@@ -45,11 +45,9 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(b => b.Id == bookingId && b.GuestId == userId);
 
             if (booking == null)
-                return Response<string>.Fail(ResponseStatus.NotFound, "Booking not found.");
-
+                return Response<string>.FailWithKey(ResponseStatus.NotFound, "PaymentBookingNotFound");
             if (booking.Status != BookingStatus.Confirmed)
-                return Response<string>.Fail(ResponseStatus.ValidationError, "Only confirmed bookings can be paid.");
-
+                return Response<string>.FailWithKey(ResponseStatus.ValidationError, "OnlyConfirmedBookingsCanBePaid");
             int amountCents = (int)(booking.TotalPrice * 100);
             int selectedIntegrationId = method == PaymentMethod.MobileWallet
                 ? _settings.WalletIntegrationId
@@ -110,7 +108,11 @@ namespace BLL.Services.Implementation
             if (!response.IsSuccessStatusCode)
             {
                 var errorDetails = await response.Content.ReadAsStringAsync();
-                return Response<string>.Fail(ResponseStatus.Error, $"Paymob Error: {errorDetails}");
+                return Response<string>.FailWithKey(
+                    ResponseStatus.Error,
+                    "PaymobError",
+                    new[] { errorDetails }
+                );
             }
 
             var json = await response.Content.ReadFromJsonAsync<JsonNode>();
@@ -118,8 +120,10 @@ namespace BLL.Services.Implementation
             string intentionId = json?["id"]?.ToString() ?? string.Empty;
 
             if (string.IsNullOrEmpty(clientSecret))
-                return Response<string>.Fail(ResponseStatus.Error, "Payment gateway failed to return a checkout secret.");
-
+                return Response<string>.FailWithKey(
+                    ResponseStatus.Error,
+                    "PaymentGatewayCheckoutSecretFailed"
+                );
             var existingPayment = await _paymentRepo.GetAllAsIQueryable()
                 .FirstOrDefaultAsync(p => p.BookingId == booking.Id);
 
@@ -156,8 +160,10 @@ namespace BLL.Services.Implementation
         public async Task<Response<bool>> ProcessWebhookAsync(string requestBody)
         {
             if (string.IsNullOrWhiteSpace(requestBody))
-                return Response<bool>.Fail(ResponseStatus.ValidationError, "Empty webhook payload.");
-
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.ValidationError,
+                    "EmptyWebhookPayload"
+                );
             JsonDocument document;
             try
             {
@@ -165,7 +171,10 @@ namespace BLL.Services.Implementation
             }
             catch (JsonException)
             {
-                return Response<bool>.Fail(ResponseStatus.ValidationError, "Invalid JSON payload.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.ValidationError,
+                    "InvalidJsonPayload"
+                );
             }
 
             using (document)
@@ -237,8 +246,10 @@ namespace BLL.Services.Implementation
                 }
 
                 if (payment == null)
-                    return Response<bool>.Fail(ResponseStatus.NotFound, "Payment record not found for webhook.");
-
+                    return Response<bool>.FailWithKey(
+                        ResponseStatus.NotFound,
+                        "PaymentRecordNotFoundForWebhook"
+                    );
                 payment.PaymobTransactionId = transactionId;
                 payment.Status = isSuccess ? PaymentStatus.Success : PaymentStatus.Failed;
                 payment.PaidAt = isSuccess ? DateTime.UtcNow : null;
@@ -252,7 +263,10 @@ namespace BLL.Services.Implementation
                 _paymentRepo.Update(payment);
                 await _paymentRepo.SaveAsync();
 
-                return Response<bool>.Success(true, "Webhook processed successfully.");
+                return Response<bool>.SuccessWithKey(
+                    true,
+                    "WebhookProcessedSuccessfully"
+                );
             }
         }
 

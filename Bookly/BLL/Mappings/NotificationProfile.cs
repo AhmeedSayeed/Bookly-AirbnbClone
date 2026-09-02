@@ -8,6 +8,8 @@ public class NotificationProfile : Profile
 {
     public NotificationProfile()
     {
-        CreateMap<Notification, NotificationViewModel>();
+        CreateMap<Notification, NotificationViewModel>()
+            .ForMember(dest => dest.LegacyMessage,
+                opt => opt.MapFrom(src => src.Message));
     }
 }

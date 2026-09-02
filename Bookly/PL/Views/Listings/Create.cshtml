@@ -1,5 +1,5 @@
 @model ListingFormViewModel
-
+@using PL.Extensions
 @{
     ViewData["Title"] = Localizer["CreateListing"];
 }
@@ -36,7 +36,7 @@
                 <label asp-for="PropertyType" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
                     @Localizer["PropertyType"]
                 </label>
-                <select asp-for="PropertyType" asp-items="Html.GetEnumSelectList<DAL.Enums.PropertyType>()" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer;">
+                <select asp-for="PropertyType" asp-items="Html.GetLocalizedEnumSelectList<DAL.Enums.PropertyType>(Localizer)" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer;">
                     <option value="" disabled selected>@Localizer["SelectType"]</option>
                 </select>
                 <span asp-validation-for="PropertyType" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>
@@ -46,7 +46,7 @@
                 <label asp-for="CancellationPolicy" class="form-label" style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
                     @Localizer["CancellationPolicy"]
                 </label>
-                <select asp-for="CancellationPolicy" asp-items="Html.GetEnumSelectList<DAL.Enums.CancellationPolicy>()" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer;">
+                <select asp-for="CancellationPolicy" asp-items="Html.GetLocalizedEnumSelectList<DAL.Enums.CancellationPolicy>(Localizer)" class="form-control" style="width: 100%; padding: var(--space-3); border-radius: var(--radius-sm); border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer;">
                     <option value="" disabled selected>@Localizer["SelectPolicy"]</option>
                 </select>
                 <span asp-validation-for="CancellationPolicy" style="color: var(--color-danger); font-size: var(--fs-sm); display: block; margin-top: var(--space-2);"></span>

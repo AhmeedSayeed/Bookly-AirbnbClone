@@ -7,21 +7,25 @@ public class BookingRequestViewModelValidator : AbstractValidator<BookingRequest
 {
     public BookingRequestViewModelValidator()
     {
-        RuleFor(x => x.ListingId).GreaterThan(0);
+        RuleFor(x => x.ListingId)
+            .GreaterThan(0)
+            .WithMessage("ListingIdMustBeGreaterThanZero");
 
         RuleFor(x => x.CheckInDate)
             .GreaterThanOrEqualTo(DateTime.Today)
-            .WithMessage("Check-in date can't be in the past.");
+            .WithMessage("CheckInDateCannotBeInPast");
 
         RuleFor(x => x.CheckOutDate)
             .GreaterThan(x => x.CheckInDate)
-            .WithMessage("Check-out date must be after check-in date.");
+            .WithMessage("CheckOutDateMustBeAfterCheckIn");
 
         RuleFor(x => x)
             .Must(x => (x.CheckOutDate - x.CheckInDate).TotalDays <= 90)
-            .WithMessage("Bookings can't span more than 90 nights.")
+            .WithMessage("BookingsCannotExceed90Nights")
             .WithName(nameof(BookingRequestViewModel.CheckOutDate));
 
-        RuleFor(x => x.NumberOfGuests).InclusiveBetween(1, 50);
+        RuleFor(x => x.NumberOfGuests)
+            .InclusiveBetween(1, 50)
+            .WithMessage("NumberOfGuestsMustBeBetween1And50");
     }
 }

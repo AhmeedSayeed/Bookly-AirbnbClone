@@ -12,8 +12,13 @@ namespace DAL.Models.Configurations.Interactions
             builder.HasKey(n => n.Id);
 
             builder.Property(n => n.Message)
-                .IsRequired()
                 .HasMaxLength(DataSchemaConstants.DefaultNameLength);
+
+            builder.Property(n => n.MessageKey)
+                .HasMaxLength(100);
+
+            builder.Property(n => n.MessageArgsJson)
+                .HasMaxLength(1000);
 
             builder.Property(n => n.Link)
                 .HasMaxLength(DataSchemaConstants.MaxUrlLength);

@@ -24,12 +24,16 @@
             <ul style="list-style: none; padding: 0; margin: 0;">
                 @foreach (var notification in Model.Notifications)
                 {
+                    var displayText = !string.IsNullOrWhiteSpace(notification.MessageKey)
+                        ? Localizer[notification.MessageKey, notification.Args]
+                        : notification.LegacyMessage;
+
                     <li style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); background: @(notification.IsRead ? "transparent" : "var(--color-surface-sunk)"); display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4);">
 
                         <!-- Notification Content -->
                         <div style="flex-grow: 1;">
                             <p style="margin: 0 0 var(--space-1) 0; font-size: var(--fs-sm); color: var(--color-text); font-weight: @(notification.IsRead ? "400" : "600");">
-                                @notification.Message
+                                @displayText
                             </p>
                             <span style="font-size: var(--fs-xs); color: var(--color-text-muted);">
                                 @notification.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
