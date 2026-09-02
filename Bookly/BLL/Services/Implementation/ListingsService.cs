@@ -1,6 +1,7 @@
 using AutoMapper;
 using BLL.DTOs;
 using BLL.DTOs.Listing;
+using BLL.DTOs.Elasticsearch;
 using BLL.Services.Interfaces;
 using BLL.ViewModels.Listings;
 using BLL.ViewModels.Availability;
@@ -11,6 +12,7 @@ using DAL.Repository.Interfaces;
 using LinqKit;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -20,74 +22,20 @@ namespace BLL.Services.Implementation
     {
         private readonly IRepository<Listing> _listingRepo;
         private readonly IFileUploader _fileUploader;
+        private readonly IElasticListingService _elasticService;
         private readonly IMapper _mapper;
 
-        public ListingService(IRepository<Listing> listingRepo, IFileUploader fileUploader, IMapper mapper)
+        public ListingService(IRepository<Listing> listingRepo, IFileUploader fileUploader, IElasticListingService elasticService, IMapper mapper)
         {
             _listingRepo = listingRepo;
             _fileUploader = fileUploader;
+            _elasticService = elasticService;
             _mapper = mapper;
         }
 
         public async Task<Response<PagedResult<ListingCardDto>>> SearchListingsAsync(ListingSearchRequestDto request)
         {
-            var predicate = PredicateBuilder.New<Listing>(true);
-
-            predicate = predicate.And(l => l.IsActive);
-
-            if (!string.IsNullOrWhiteSpace(request.City))
-                predicate = predicate.And(l => l.City.Contains(request.City));
-
-            if (request.Guests.HasValue)
-                predicate = predicate.And(l => l.MaxGuests >= request.Guests.Value);
-
-            if (request.MinPrice.HasValue)
-                predicate = predicate.And(l => l.PricePerNight >= request.MinPrice.Value);
-
-            if (request.MaxPrice.HasValue)
-                predicate = predicate.And(l => l.PricePerNight <= request.MaxPrice.Value);
-
-            if (request.AmenityIds != null && request.AmenityIds.Any())
-            {
-                foreach (var amenityId in request.AmenityIds)
-                {
-                    predicate = predicate.And(l => l.ListingAmenities.Any(la => la.AmenityId == amenityId));
-                }
-            }
-
-            if (request.CheckIn.HasValue && request.CheckOut.HasValue)
-            {
-                var checkIn = request.CheckIn.Value;
-                var checkOut = request.CheckOut.Value;
-
-                predicate = predicate.And(l => !l.Bookings.Any(b =>
-                    b.Status == BookingStatus.Confirmed &&
-                    b.CheckInDate < checkOut &&
-                    b.CheckOutDate > checkIn));
-
-                predicate = predicate.And(l => !l.BlockedDates.Any(bd => bd.Date >= checkIn && bd.Date < checkOut));
-            }
-
-            var pagedListings = await _listingRepo.GetAllPaginatedEnhancedAsync<ListingCardDto>(
-                selector: l => new ListingCardDto
-                {
-                    Id = l.Id,
-                    Title = l.Title,
-                    City = l.City,
-                    PricePerNight = l.PricePerNight,
-                    ThumbnailUrl = l.Photos.OrderBy(p => p.DisplayOrder).Select(p => p.Url).FirstOrDefault(),
-                    HostName = l.Host.FirstName,
-                    Latitude = l.Latitude,
-                    Longitude = l.Longitude
-                },
-                pageNumber: request.PageNumber,
-                pageSize: request.PageSize,
-                filter: predicate,
-                expandable: true,
-                orderBy: q => q.OrderByDescending(l => l.CreatedAt),
-                include: q => q.Include(l => l.Photos).Include(l => l.Host)
-            );
-
+            var pagedListings = await _elasticService.SearchAsync(request);
             return Response<PagedResult<ListingCardDto>>.Success(pagedListings);
         }
 
@@ -136,13 +84,12 @@ namespace BLL.Services.Implementation
             var saved = await _listingRepo.SaveAsync();
 
             if (saved > 0)
-                return Response<int>.SuccessWithKey(
-                    listing.Id,
-                    "ListingCreatedSuccessfully");
+            {
+                await SyncListingToElasticsearchAsync(listing.Id);
+                return Response<int>.SuccessWithKey(listing.Id, "ListingCreatedSuccessfully");
+            }
 
-            return Response<int>.FailWithKey(
-                ResponseStatus.Error,
-                "FailedToCreateListing");
+            return Response<int>.FailWithKey(ResponseStatus.Error, "FailedToCreateListing");
         }
 
         public async Task<Response<ListingDetailsViewModel>> GetDetailsAsync(int id)
@@ -160,21 +107,17 @@ namespace BLL.Services.Implementation
             var listing = await query.FirstOrDefaultAsync(l => l.Id == id);
 
             if (listing == null)
-                return Response<ListingDetailsViewModel>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ListingNotFound");
+                return Response<ListingDetailsViewModel>.FailWithKey(ResponseStatus.NotFound, "ListingNotFound");
 
             var viewModel = _mapper.Map<ListingDetailsViewModel>(listing);
 
             var unavailable = new List<string>();
             var today = DateTime.UtcNow.Date;
 
-            // 1. Blocked dates by host
             unavailable.AddRange(listing.BlockedDates
                 .Where(bd => bd.Date.Date >= today)
                 .Select(bd => bd.Date.ToString("yyyy-MM-dd")));
 
-            // 2. Booked dates by guests
             var activeBookings = listing.Bookings
                 .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
                 .ToList();
@@ -190,7 +133,6 @@ namespace BLL.Services.Implementation
             }
 
             viewModel.UnavailableDates = unavailable;
-
             return Response<ListingDetailsViewModel>.Success(viewModel);
         }
 
@@ -202,14 +144,10 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(l => l.Id == model.Id);
 
             if (existingListing == null)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ListingNotFound");
+                return Response<bool>.FailWithKey(ResponseStatus.NotFound, "ListingNotFound");
 
             if (existingListing.HostId != currentUserId)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "CannotEditListing");
+                return Response<bool>.FailWithKey(ResponseStatus.Forbidden, "CannotEditListing");
 
             _mapper.Map(model, existingListing);
 
@@ -251,10 +189,7 @@ namespace BLL.Services.Implementation
 
                     if (!uploadResponse.Succeeded)
                     {
-                        return Response<bool>.FailWithKey(
-                            ResponseStatus.Error,
-                            "FailedToUploadPhoto",
-                            uploadResponse.Message);
+                        return Response<bool>.FailWithKey(ResponseStatus.Error, "FailedToUploadPhoto", uploadResponse.Message);
                     }
 
                     existingListing.Photos.Add(new ListingPhoto
@@ -268,11 +203,13 @@ namespace BLL.Services.Implementation
             _listingRepo.Update(existingListing);
             var saved = await _listingRepo.SaveAsync();
 
-            return saved > 0
-                ? Response<bool>.SuccessWithKey(true, "ListingUpdated")
-                : Response<bool>.FailWithKey(
-                    ResponseStatus.Error,
-                    "NoChangesWereSaved");
+            if (saved > 0)
+            {
+                await SyncListingToElasticsearchAsync(existingListing.Id);
+                return Response<bool>.SuccessWithKey(true, "ListingUpdated");
+            }
+
+            return Response<bool>.FailWithKey(ResponseStatus.Error, "NoChangesWereSaved");
         }
 
         public async Task<Response<bool>> DeleteAsync(int id, int currentUserId)
@@ -280,23 +217,21 @@ namespace BLL.Services.Implementation
             var listing = await _listingRepo.GetByIdAsync(id);
 
             if (listing == null)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ListingNotFound");
+                return Response<bool>.FailWithKey(ResponseStatus.NotFound, "ListingNotFound");
 
             if (listing.HostId != currentUserId)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "CannotDeleteListing");
+                return Response<bool>.FailWithKey(ResponseStatus.Forbidden, "CannotDeleteListing");
 
             _listingRepo.Delete(id);
             var saved = await _listingRepo.SaveAsync();
 
-            return saved > 0
-                ? Response<bool>.SuccessWithKey(true, "ListingDeleted")
-                : Response<bool>.FailWithKey(
-                    ResponseStatus.Error,
-                    "FailedToDeleteListing");
+            if (saved > 0)
+            {
+                await _elasticService.DeleteListingAsync(id);
+                return Response<bool>.SuccessWithKey(true, "ListingDeleted");
+            }
+
+            return Response<bool>.FailWithKey(ResponseStatus.Error, "FailedToDeleteListing");
         }
 
         public async Task<Response<List<ListingSummaryViewModel>>> GetListingsByHostIdAsync(int hostId)
@@ -321,9 +256,7 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(l => l.Id == id);
 
             if (listing == null)
-                return Response<ListingFormViewModel>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ListingNotFound");
+                return Response<ListingFormViewModel>.FailWithKey(ResponseStatus.NotFound, "ListingNotFound");
 
             var viewModel = _mapper.Map<ListingFormViewModel>(listing);
 
@@ -334,29 +267,19 @@ namespace BLL.Services.Implementation
             return Response<ListingFormViewModel>.Success(viewModel);
         }
 
-        public async Task<Response<AvailabilityCalendarViewModel>> GetAvailabilityCalendarAsync(
-            int listingId,
-            int currentUserId)
+        public async Task<Response<AvailabilityCalendarViewModel>> GetAvailabilityCalendarAsync(int listingId, int currentUserId)
         {
-            // Get it with its reservations and blocked dates
             var listing = await _listingRepo.GetAllAsIQueryable()
                 .Include(l => l.BlockedDates)
                 .Include(l => l.Bookings)
                 .FirstOrDefaultAsync(l => l.Id == listingId);
 
-            // Check property existance
             if (listing == null)
-                return Response<AvailabilityCalendarViewModel>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ListingNotFound");
+                return Response<AvailabilityCalendarViewModel>.FailWithKey(ResponseStatus.NotFound, "ListingNotFound");
 
-            // check that current user is property owner
             if (listing.HostId != currentUserId)
-                return Response<AvailabilityCalendarViewModel>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "CannotManageListing");
+                return Response<AvailabilityCalendarViewModel>.FailWithKey(ResponseStatus.Forbidden, "CannotManageListing");
 
-            // extract all reserved days (pending or confirmed)
             var bookedDates = new List<DateTime>();
             var activeBookings = listing.Bookings
                 .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
@@ -364,22 +287,18 @@ namespace BLL.Services.Implementation
 
             foreach (var booking in activeBookings)
             {
-                for (var date = booking.CheckInDate.Date;
-                     date < booking.CheckOutDate.Date;
-                     date = date.AddDays(1))
+                for (var date = booking.CheckInDate.Date; date < booking.CheckOutDate.Date; date = date.AddDays(1))
                 {
                     if (!bookedDates.Contains(date))
                         bookedDates.Add(date);
                 }
             }
 
-            // Get blocked dates
             var blockedDates = listing.BlockedDates
                 .Select(bd => bd.Date.Date)
                 .OrderBy(d => d)
                 .ToList();
 
-            // prepare ViewModel and return it
             var viewModel = new AvailabilityCalendarViewModel
             {
                 ListingId = listing.Id,
@@ -391,25 +310,18 @@ namespace BLL.Services.Implementation
             return Response<AvailabilityCalendarViewModel>.Success(viewModel);
         }
 
-        public async Task<Response<bool>> UpdateAvailabilityCalendarAsync(
-            AvailabilityCalendarViewModel model,
-            int currentUserId)
+        public async Task<Response<bool>> UpdateAvailabilityCalendarAsync(AvailabilityCalendarViewModel model, int currentUserId)
         {
             var listing = await _listingRepo.GetAllAsIQueryable()
                 .Include(l => l.BlockedDates)
                 .FirstOrDefaultAsync(l => l.Id == model.ListingId);
 
             if (listing == null)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ListingNotFound");
+                return Response<bool>.FailWithKey(ResponseStatus.NotFound, "ListingNotFound");
 
             if (listing.HostId != currentUserId)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "CannotManageListing");
+                return Response<bool>.FailWithKey(ResponseStatus.Forbidden, "CannotManageListing");
 
-            // delete blocked dates to retype them
             var today = DateTime.UtcNow.Date;
 
             var existingFutureBlocks = listing.BlockedDates
@@ -421,7 +333,6 @@ namespace BLL.Services.Implementation
                 listing.BlockedDates.Remove(oldBlock);
             }
 
-            // add new date that user choosed (validation: it can't be from pasts or repeated)
             if (model.BlockedDates != null && model.BlockedDates.Any())
             {
                 var validDates = model.BlockedDates
@@ -439,12 +350,70 @@ namespace BLL.Services.Implementation
                 }
             }
 
-            // save changes in DB
             var saved = await _listingRepo.SaveAsync();
 
-            return Response<bool>.SuccessWithKey(
-                true,
-                "AvailabilityCalendarUpdatedSuccessfully");
+            if (saved > 0)
+            {
+                await SyncListingToElasticsearchAsync(listing.Id);
+            }
+
+            return Response<bool>.SuccessWithKey(true, "AvailabilityCalendarUpdatedSuccessfully");
+        }
+
+        private async Task SyncListingToElasticsearchAsync(int listingId)
+        {
+            var listing = await _listingRepo.GetAllAsIQueryable()
+                .Include(l => l.Host)
+                .Include(l => l.Photos)
+                .Include(l => l.ListingAmenities)
+                .Include(l => l.BlockedDates)
+                .Include(l => l.Bookings)
+                .FirstOrDefaultAsync(l => l.Id == listingId);
+
+            if (listing == null) return;
+
+            var document = new ListingDocument
+            {
+                Id = listing.Id,
+                Title = listing.Title,
+                City = listing.City,
+                Description = listing.Description,
+                PricePerNight = listing.PricePerNight,
+                ThumbnailUrl = listing.Photos.OrderBy(p => p.DisplayOrder).Select(p => p.Url).FirstOrDefault(),
+                HostName = listing.Host?.FirstName ?? "",
+                Latitude = listing.Latitude,
+                Longitude = listing.Longitude,
+                MaxGuests = listing.MaxGuests,
+                Bedrooms = listing.Bedrooms,
+                Bathrooms = listing.Bathrooms,
+                PropertyType = listing.PropertyType.ToString() ?? "",
+                CancellationPolicy = listing.CancellationPolicy?.ToString() ?? "",
+                AmenityIds = listing.ListingAmenities.Select(la => la.AmenityId).ToList(),
+                CreatedAt = listing.CreatedAt
+            };
+
+            var unavailable = new HashSet<DateTime>();
+            var today = DateTime.UtcNow.Date;
+
+            foreach (var bd in listing.BlockedDates.Where(bd => bd.Date.Date >= today))
+            {
+                unavailable.Add(bd.Date.Date);
+            }
+
+            var activeBookings = listing.Bookings
+                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending);
+
+            foreach (var b in activeBookings)
+            {
+                for (var d = b.CheckInDate.Date; d < b.CheckOutDate.Date; d = d.AddDays(1))
+                {
+                    unavailable.Add(d);
+                }
+            }
+
+            document.UnavailableDates = unavailable.ToList();
+
+            await _elasticService.IndexListingAsync(document);
         }
     }
 }

@@ -10,11 +10,9 @@ namespace BLL.DTOs.Listing
         public string? ThumbnailUrl { get; set; }
 
         public string HostName { get; set; } = string.Empty;
-        public decimal? Latitude { get; set; }
-        public decimal? Longitude { get; set; }
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
 
-        // Whether the currently logged-in user has saved this listing to their wishlist.
-        // Not set by the DB query itself - populated afterwards by the controller.
         public bool IsWishlisted { get; set; }
     }
 }

@@ -98,6 +98,23 @@ namespace PL.Controllers
 
             ViewBag.CurrentSearch = searchRequest;
 
+            decimal minPrice = 0;
+            decimal maxPrice = 10000;
+
+            if (response.Succeeded && response.Data?.Items != null && response.Data.Items.Any())
+            {
+                var prices = response.Data.Items.Select(l => l.PricePerNight).ToList();
+                if (prices.Any())
+                {
+                    minPrice = prices.Min();
+                    maxPrice = prices.Max();
+                    if (minPrice == maxPrice) maxPrice = minPrice + 500;
+                }
+            }
+
+            ViewBag.MinAvailablePrice = minPrice;
+            ViewBag.MaxAvailablePrice = maxPrice;
+
             if (!response.Succeeded || response.Data == null)
             {
                 return View(new PagedResult<ListingCardDto>());
