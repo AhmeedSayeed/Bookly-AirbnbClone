@@ -102,7 +102,7 @@ namespace BLL.Services.Implementation
                 .Include(l => l.BlockedDates)
                 .Include(l => l.Bookings)
                     .ThenInclude(b => b.Review)
-                      .ThenInclude(r => r.HostResponse);
+                        .ThenInclude(r => r.HostResponse);
 
             var listing = await query.FirstOrDefaultAsync(l => l.Id == id);
 

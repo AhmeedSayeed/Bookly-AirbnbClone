@@ -2,6 +2,12 @@
 
 @{
     ViewData["Title"] = Localizer["DiscoverPlacesToStay"];
+    var isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+}
+
+@if (isAuthenticated)
+{
+    @Html.AntiForgeryToken()
 }
 
 <!-- The Hero Search Pill -->
@@ -51,20 +57,20 @@
                          alt="@listing.Title"
                          class="listing-card__image" />
 
-                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    @if (isAuthenticated)
                     {
                         <button type="button"
-                                class="home-wishlist-btn"
+                                class="wishlist-toggle-btn"
                                 data-listing-id="@listing.Id"
                                 title="@Localizer["Wishlist"]"
-                                onclick="event.preventDefault(); event.stopPropagation(); toggleHomeWishlist(this);"
+                                onclick="event.preventDefault(); event.stopPropagation();"
                                 style="position: absolute; top: var(--space-2); right: var(--space-2);
-                            width: 32px; height: 32px; border-radius: var(--radius-pill);
+                            width: 60px; height: 60px; border-radius: var(--radius-pill);
                             border: none; background: rgba(255,255,255,0.85);
                             display: flex; align-items: center; justify-content: center;
                             cursor: pointer; z-index: 2;">
-                            <span class="home-wishlist-icon"
-                                  style="color: @(listing.IsWishlisted ? "var(--color-clay)" : "var(--color-text-muted)");">&#9829;</span>
+                            <span class="wishlist-heart-icon"
+                                  style="color: @(listing.IsWishlisted ? "#8B1E1E" : "var(--color-clay)"); font-size: 38px; line-height: 1;">&#9829;</span>
                         </button>
                     }
                 </div>
@@ -82,7 +88,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-3);">
 
                         <div class="listing-card__price">
-                            @listing.PricePerNight.ToString("C0")
+                            $@listing.PricePerNight.ToString("0")
                             <span style="font-size: var(--fs-sm); font-weight: 400; color: var(--color-text-muted);">
                                 @Localizer["PerNight"]
                             </span>
@@ -111,15 +117,17 @@
 
 </div>
 
-@if (User.Identity != null && User.Identity.IsAuthenticated)
+@if (isAuthenticated)
 {
-    @Html.AntiForgeryToken()
+    <!-- Wishlist Toggle Logic -->
+    <script>
+        document.querySelectorAll('.wishlist-toggle-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
 
-    @section Scripts {
-        <script>
-            function toggleHomeWishlist(btn) {
                 var listingId = btn.getAttribute('data-listing-id');
-                var icon = btn.querySelector('.home-wishlist-icon');
+                var icon = btn.querySelector('.wishlist-heart-icon');
 
                 fetch('@Url.Action("Toggle", "Wishlist")', {
                     method: 'POST',
@@ -132,10 +140,10 @@
                     .then(function(res) { return res.json(); })
                     .then(function(data) {
                         if (data.success) {
-                            icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
+                            icon.style.color = data.isWishlisted ? '#8B1E1E' : 'var(--color-clay)';
                         }
                     });
-            }
-        </script>
-    }
+            });
+        });
+    </script>
 }

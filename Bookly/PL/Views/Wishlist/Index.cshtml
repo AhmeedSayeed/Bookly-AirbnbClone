@@ -44,11 +44,11 @@
                                 data-listing-id="@listing.Id"
                                 title="@Localizer["RemoveFromWishlist"]"
                                 style="position: absolute; top: var(--space-3); right: var(--space-3);
-                            width: 32px; height: 32px; border-radius: var(--radius-pill);
+                            width: 60px; height: 60px; border-radius: var(--radius-pill);
                             border: none; background: rgba(255,255,255,0.85);
                             display: flex; align-items: center; justify-content: center;
                             cursor: pointer;">
-                            <span class="wishlist-heart-icon" style="color: var(--color-clay);">&#9829;</span>
+                            <span class="wishlist-heart-icon" style="color: #8B1E1E; font-size: 38px; line-height: 1;">&#9829;</span>
                         </button>
                     </div>
 
@@ -80,8 +80,8 @@
 
 @section Scripts {
     <script>
-        document.querySelectorAll('.wishlist-toggle-btn').forEach(function (btn) {
-            btn.addEventListener('click', function () {
+        document.querySelectorAll('.wishlist-toggle-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
                 var listingId = btn.getAttribute('data-listing-id');
                 var card = btn.closest('.listing-card');
 
@@ -93,15 +93,15 @@
                     },
                     body: 'listingId=' + encodeURIComponent(listingId)
                 })
-                .then(function (res) { return res.json(); })
-                .then(function (data) {
-                    if (data.success && !data.isWishlisted) {
-                        // Removed from wishlist -> fade the card out on this page
-                        card.style.transition = 'opacity 0.25s ease';
-                        card.style.opacity = '0';
-                        setTimeout(function () { card.remove(); }, 250);
-                    }
-                });
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success && !data.isWishlisted) {
+                            // Removed from wishlist -> fade the card out on this page
+                            card.style.transition = 'opacity 0.25s ease';
+                            card.style.opacity = '0';
+                            setTimeout(function() { card.remove(); }, 250);
+                        }
+                    });
             });
         });
     </script>

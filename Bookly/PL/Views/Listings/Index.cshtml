@@ -323,12 +323,12 @@
                                         data-listing-id="@item.Id"
                                         title="@Localizer["Wishlist"]"
                                         style="position: absolute; top: var(--space-2); right: var(--space-2);
-                                    width: 32px; height: 32px; border-radius: var(--radius-pill);
+                                    width: 60px; height: 60px; border-radius: var(--radius-pill);
                                     border: none; background: rgba(255,255,255,0.85);
                                     display: flex; align-items: center; justify-content: center;
                                     cursor: pointer; z-index: 2;">
                                     <span class="wishlist-heart-icon"
-                                          style="color: @(item.IsWishlisted ? "var(--color-clay)" : "var(--color-text-muted)");">&#9829;</span>
+                                          style="color: @(item.IsWishlisted ? "#8B1E1E" : "var(--color-clay)"); font-size: 38px; line-height: 1;">&#9829;</span>
                                 </button>
                             }
                         </div>
@@ -451,12 +451,12 @@
                         },
                         body: 'listingId=' + encodeURIComponent(listingId)
                     })
-                    .then(function(res) { return res.json(); })
-                    .then(function(data) {
-                        if (data.success) {
-                            icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
-                        }
-                    });
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) {
+                            if (data.success) {
+                                icon.style.color = data.isWishlisted ? '#8B1E1E' : 'var(--color-clay)';
+                            }
+                        });
                 });
             });
         </script>

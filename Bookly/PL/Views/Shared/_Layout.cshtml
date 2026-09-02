@@ -19,26 +19,17 @@
 
     <!-- Load required Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-          rel="stylesheet">
-
-    <link rel="icon" type="image/png" href="~/logo.png" />
-
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 
 <body>
-
     <header style="background: var(--color-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--color-border);">
+        <div class="container" style="display: flex; justify-content: space-between; align-items: center; height: 72px;">
 
-        <div class="container"
-             style="display: flex; justify-content: space-between; align-items: center; height: 72px;">
-
-            <a href="/" style="text-decoration: none; display: flex; align-items: center;">
-                <img src="~/logo.png" alt="Bookly" style="height: 140px; width: auto; object-fit: contain;" />
+            <a href="/" style="text-decoration: none; color: var(--color-navy);">
+                <h2 class="font-display" style="margin: 0; font-size: var(--fs-xl);">Bookly</h2>
             </a>
 
             <nav style="display: flex; gap: var(--space-4); align-items: center;">
@@ -57,11 +48,9 @@
 
                         <button type="submit"
                                 name="culture"
-                                value="en-EG"
+                                value="en"
                                 style="border: none; background: none; cursor: pointer; font-family: var(--font-body);">
-
                             English
-
                         </button>
 
                     </form>
@@ -79,86 +68,54 @@
 
                         <button type="submit"
                                 name="culture"
-                                value="ar-EG"
+                                value="ar"
                                 style="border: none; background: none; cursor: pointer; font-family: var(--font-body);">
-
                             العربية
-
                         </button>
 
                     </form>
 
                 </div>
 
-
                 @if (User.Identity.IsAuthenticated)
                 {
                     var currentUser = await UserManager.GetUserAsync(User);
-
-                    var hasPhoto =
-                        !string.IsNullOrEmpty(currentUser?.ProfilePhotoUrl);
+                    var hasPhoto = !string.IsNullOrEmpty(currentUser?.ProfilePhotoUrl);
 
                     // Safely extract initials
-                    var firstInitial =
-                        !string.IsNullOrEmpty(currentUser?.FirstName)
-                            ? currentUser.FirstName.Substring(0, 1)
-                            : "";
+                    var firstInitial = !string.IsNullOrEmpty(currentUser?.FirstName)
+                        ? currentUser.FirstName.Substring(0, 1)
+                        : "";
 
-                    var lastInitial =
-                        !string.IsNullOrEmpty(currentUser?.LastName)
-                            ? currentUser.LastName.Substring(0, 1)
-                            : "";
+                    var lastInitial = !string.IsNullOrEmpty(currentUser?.LastName)
+                        ? currentUser.LastName.Substring(0, 1)
+                        : "";
 
                     var initials = $"{firstInitial}{lastInitial}";
 
-
-                    <!-- Notification Bell Wrapper -->
-                    <div class="nav-bell-container" style="position: relative;">
-                        <a href="javascript:void(0);" class="nav-bell-wrapper" id="notificationBellToggle" onclick="toggleNotifications(event)">
-                            <svg class="nav-bell-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                            </svg>
-                            <span class="nav-bell-badge" id="notificationBadge" style="display:none;"></span>
-                        </a>
-
-                        <!-- Dropdown Pop-up Box -->
-                        <div class="notification-dropdown" id="notificationDropdown">
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border);">
-                                <strong style="font-size: var(--fs-sm); color: var(--color-navy);">@Localizer["Notifications"]</strong>
-                                <a href="/Notifications" style="background: none; border: none; color: var(--color-brass); font-size: 12px; font-weight: 600; text-decoration: none;">
-                                    @Localizer["ViewAll"]
-                                </a>
-                            </div>
-
-                            <!-- Dynamic Content Container with Scroll Support -->
-                            <div class="notification-list-body" id="notificationListBody">
-                                <div style="padding: 20px; text-align: center; color: var(--color-text-muted); font-size: 13px;">
-                                    Loading...
-                                </div>
-                            </div>
-                        </div>
+                    <div class="notification-bell" id="notificationBell">
+                        <i class="icon-bell"></i>
+                        <span class="notification-badge"
+                              id="notificationBadge"
+                              style="display:none;"></span>
                     </div>
 
-                    <div class="toast-container"
-                         id="toastContainer">
-                    </div>
-
+                    <div class="toast-container" id="toastContainer"></div>
 
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 
                     <script>
                                         window.booklyNotificationTemplates = @Html.Raw(JsonSerializer.Serialize(new
                                             {
-                                                    HostVerificationApprovedNotification = Localizer["HostVerificationApprovedNotification"].Value,
-                                                    HostVerificationRejectedNotification = Localizer["HostVerificationRejectedNotification"].Value,
-                                                    HostVerificationRejectedWithReason = Localizer["HostVerificationRejectedWithReason"].Value,
-                                                    ListingDeactivatedNotification = Localizer["ListingDeactivatedNotification"].Value
+                                                                                                HostVerificationApprovedNotification = Localizer["HostVerificationApprovedNotification"].Value,
+                                                                                                HostVerificationRejectedNotification = Localizer["HostVerificationRejectedNotification"].Value,
+                                                                                                HostVerificationRejectedWithReason = Localizer["HostVerificationRejectedWithReason"].Value,
+                                                                                                ListingDeactivatedNotification = Localizer["ListingDeactivatedNotification"].Value
                                             }));
 
                                         window.booklyI18n = {
                                             view: @Html.Raw(JsonSerializer.Serialize(Localizer["View"].Value))
-                                            };
+                                                                                    };
                     </script>
 
                     <!-- User Menu -->
@@ -168,95 +125,57 @@
 
                         @if (hasPhoto)
                         {
-                            <!-- Profile Image -->
-
+                            <!-- Attempt to load image. If 404, hide image and show the initials div immediately following it -->
                             <img src="@currentUser.ProfilePhotoUrl"
                                  alt="@Localizer["Profile"]"
                                  class="avatar"
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
 
-                            <!-- Fallback Initials -->
-
-                            <div class="avatar-initials"
-                                 style="display: none;">
-                                @initials
-                            </div>
+                            <!-- Hidden by default, displayed only if the onerror event triggers -->
+                            <div class="avatar-initials" style="display: none;">@initials</div>
                         }
                         else
                         {
-                            <div class="avatar-initials">
-                                @initials
-                            </div>
+                            <div class="avatar-initials">@initials</div>
                         }
-
-
-                        <!-- Dropdown -->
 
                         <div class="user-dropdown">
 
-                            <!-- Account Info -->
-
                             <a href="/Account/Profile"
                                class="user-dropdown-item">
-
                                 @Localizer["AccountInfo"]
-
                             </a>
-
-
-                            <!-- My Listings -->
 
                             <a href="/Listings/MyListings"
                                class="user-dropdown-item">
-
                                 @Localizer["MyListings"]
-
                             </a>
 
-
-                            <!-- My Trips -->
-
-                            <a asp-controller="Bookings"
-                               asp-action="MyTrips"
-                               class="user-dropdown-item">
-
+                            <a asp-controller="Bookings" asp-action="MyTrips" style="display: block; padding: var(--space-2) var(--space-4); text-decoration: none; color: var(--color-text); font-size: var(--fs-sm);">
                                 @Localizer["MyTrips"]
-
                             </a>
 
+                            <a asp-controller="Wishlist" asp-action="Index" style="display: block; padding: var(--space-2) var(--space-4); text-decoration: none; color: var(--color-text); font-size: var(--fs-sm);">
+                                @Localizer["Wishlist"]
+                            </a>
 
-                            <!-- Host Dashboard -->
                             @if (User.IsInRole("Host") || User.IsInRole("Admin"))
                             {
-                                <a asp-controller="Bookings"
-                                   asp-action="HostRequests"
-                                   class="user-dropdown-item">
-
+                                <a asp-controller="Bookings" asp-action="HostRequests" style="display: block; padding: var(--space-2) var(--space-4); text-decoration: none; color: var(--color-text); font-size: var(--fs-sm);">
                                     @Localizer["HostDashboard"]
-
                                 </a>
                             }
 
-
-                            <!-- Admin Dashboard -->
                             @if (User.IsInRole("Admin"))
                             {
                                 <a href="/Admin/Dashboard"
                                    class="user-dropdown-item"
                                    style="color: var(--color-brass); font-weight: 600;">
-
                                     @Localizer["AdminDashboard"]
-
                                 </a>
                             }
 
-
-                            <!-- Divider -->
-
                             <hr style="border: none; border-top: 1px solid var(--color-border); margin: 0;" />
-
-
-                            <!-- Logout -->
 
                             <form asp-controller="Account"
                                   asp-action="Logout"
@@ -266,9 +185,7 @@
                                 <button type="submit"
                                         class="user-dropdown-item"
                                         style="color: var(--color-danger);">
-
                                     @Localizer["Logout"]
-
                                 </button>
 
                             </form>
@@ -276,20 +193,11 @@
                         </div>
                     </div>
 
-                 <!-- Become a Host -->
                     @if (User.Identity.IsAuthenticated)
                     {
                         <a asp-controller="Account"
                            asp-action="BecomeAHost"
-                           style="font-family: var(--font-body);
-                            font-size: var(--fs-sm);
-                            font-weight: 600;
-                            color: var(--color-text);
-                            text-decoration: none;
-                            padding: var(--space-2) var(--space-4);
-                            border-radius: var(--radius-pill);
-                            transition: background var(--duration-fast) var(--ease-smooth);">
-
+                           style="font-family: var(--font-body); font-size: var(--fs-sm); font-weight: 600; color: var(--color-text); text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast) var(--ease-smooth);">
                             @Localizer["HostYourHome"]
                         </a>
                     }
@@ -297,10 +205,7 @@
                 else
                 {
                     <a href="/Account/Login"
-                       style="color: var(--color-text);
-                        text-decoration: none;
-                        font-weight: 500;">
-
+                       style="color: var(--color-text); text-decoration: none; font-weight: 500;">
                         @Localizer["Login"]
                     </a>
 
@@ -316,15 +221,13 @@
     </header>
 
     <main class="container"
-          style="padding-top: var(--space-6);
-        padding-bottom: var(--space-8);">
+          style="padding-top: var(--space-6); padding-bottom: var(--space-8);">
 
         @RenderBody()
 
     </main>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/js/notifications.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
