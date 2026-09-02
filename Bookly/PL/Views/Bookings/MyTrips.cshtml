@@ -68,23 +68,21 @@
 
                                 @if (trip.Status == "Confirmed")
                                 {
-                                    <form asp-controller="Payments" asp-action="Checkout" method="post" style="margin: 0;">
-                                        <input type="hidden" name="bookingId" value="@trip.Id" />
-                                        <input type="hidden" name="method" value="1" />
-
-                                        <button type="submit"
-                                                class="btn-primary"
-                                                style="padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-xs); font-weight: 600; border: none; cursor: pointer;">
-                                            @Localizer["PayNow"]
-                                        </button>
-                                    </form>
+                                    <a asp-action="Details"
+                                       asp-route-id="@trip.Id"
+                                       class="btn-primary"
+                                       style="padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-xs); font-weight: 600; border: none; text-decoration: none; display: inline-block;">
+                                        @Localizer["PayNow"]
+                                    </a>
                                 }
-
-                                <a asp-action="Details"
-                                   asp-route-id="@trip.Id"
-                                   style="font-size: var(--fs-sm); text-decoration: none; font-weight: 600; color: var(--color-navy);">
-                                    @Localizer["Details"]
-                                </a>
+                                else
+                                {
+                                    <a asp-action="Details"
+                                       asp-route-id="@trip.Id"
+                                       style="font-size: var(--fs-sm); text-decoration: none; font-weight: 600; color: var(--color-navy);">
+                                        @Localizer["Details"]
+                                    </a>
+                                }
 
                                 @if (trip.Status != "Paid" &&
                                      trip.Status != "Completed" &&
@@ -165,23 +163,21 @@
 
                                 @if (trip.Status == "Confirmed")
                                 {
-                                    <form asp-controller="Payments" asp-action="Checkout" method="post" style="margin: 0;">
-                                        <input type="hidden" name="bookingId" value="@trip.Id" />
-                                        <input type="hidden" name="method" value="1" />
-
-                                        <button type="submit"
-                                                class="btn-primary"
-                                                style="padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-xs); font-weight: 600; border: none; cursor: pointer;">
-                                            @Localizer["PayNow"]
-                                        </button>
-                                    </form>
+                                    <a asp-action="Details"
+                                       asp-route-id="@trip.Id"
+                                       class="btn-primary"
+                                       style="padding: var(--space-1) var(--space-3); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-xs); font-weight: 600; border: none; text-decoration: none; display: inline-block;">
+                                        @Localizer["PayNow"]
+                                    </a>
                                 }
-
-                                <a asp-action="Details"
-                                   asp-route-id="@trip.Id"
-                                   style="font-size: var(--fs-sm); text-decoration: none; font-weight: 600; color: var(--color-navy);">
-                                    @Localizer["Details"]
-                                </a>
+                                else
+                                {
+                                    <a asp-action="Details"
+                                       asp-route-id="@trip.Id"
+                                       style="font-size: var(--fs-sm); text-decoration: none; font-weight: 600; color: var(--color-navy);">
+                                        @Localizer["Details"]
+                                    </a>
+                                }
 
                                 @if (trip.CanReview)
                                 {
