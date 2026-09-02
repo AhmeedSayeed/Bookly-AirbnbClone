@@ -43,3 +43,75 @@ function showToast(notification) {
 }
 
 document.addEventListener("DOMContentLoaded", initNotifications);
+
+function toggleNotifications(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('notificationDropdown');
+
+    if (dropdown.classList.contains('show')) {
+        dropdown.classList.remove('show');
+    } else {
+        dropdown.classList.add('show');
+        loadDropdownNotifications();
+    }
+}
+
+window.addEventListener('click', function (e) {
+    const dropdown = document.getElementById('notificationDropdown');
+    const bell = document.getElementById('notificationBellToggle');
+    if (dropdown && bell && !dropdown.contains(e.target) && !bell.contains(e.target)) {
+        dropdown.classList.remove('show');
+    }
+});
+
+function loadDropdownNotifications() {
+    const container = document.getElementById('notificationListBody');
+    container.innerHTML = `<div style="padding: 20px; text-align: center; color: gray; font-size: 13px;">Loading...</div>`;
+
+    fetch('/Notifications/GetDropdownList')
+        .then(response => response.json())
+        .then(data => {
+            if (!data || data.length === 0) {
+                container.innerHTML = `<div style="padding: 20px; text-align: center; color: gray; font-size: 13px;">No notifications found.</div>`;
+                return;
+            }
+
+            let html = '';
+            data.forEach(n => {
+                let unreadClass = n.isRead ? '' : 'unread';
+                let link = n.link ? n.link : 'javascript:void(0);';
+
+                html += `
+                    <a href="${link}" onclick="markAsReadAndNavigate(event, ${n.id}, '${n.link || ''}')" class="notification-item-pop ${unreadClass}">
+                        <p style="margin: 0 0 4px 0; font-size: 13px; color: var(--color-navy); font-weight: ${n.isRead ? '400' : '600'}; line-height: 1.4;">
+                            ${n.message}
+                        </p>
+                        <span style="font-size: 11px; color: var(--color-text-muted);">
+                            ${new Date(n.createdAt).toLocaleDateString()}
+                        </span>
+                    </a>
+                `;
+            });
+            container.innerHTML = html;
+        })
+        .catch(err => {
+            container.innerHTML = `<div style="padding: 20px; text-align: center; color: red; font-size: 13px;">Failed to load.</div>`;
+        });
+}
+
+function markAsReadAndNavigate(event, id, link) {
+    event.preventDefault();
+
+    fetch(`/Notifications/MarkAsReadAjax?id=${id}`, {
+        method: 'POST',
+        headers: {
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+        }
+    }).finally(() => {
+        if (link && link !== 'javascript:void(0);') {
+            window.location.href = link;
+        } else {
+            loadDropdownNotifications();
+        }
+    });
+}

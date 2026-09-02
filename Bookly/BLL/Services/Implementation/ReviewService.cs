@@ -139,6 +139,7 @@ namespace BLL.Services.Implementation
             var model = new HostResponseViewModel
             {
                 ReviewId = review.Id,
+                ListingId = review.Booking.ListingId,
                 Review = _mapper.Map<ReviewViewModel>(review)
             };
 

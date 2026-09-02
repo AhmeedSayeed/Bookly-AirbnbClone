@@ -389,7 +389,7 @@ namespace PL.Controllers
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 IsEssential = true
             };
 

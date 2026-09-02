@@ -121,7 +121,7 @@ namespace PL.Controllers
             }
 
             TempData["SuccessMessage"] = GetLocalizedMessage(response);
-            return RedirectToAction("MyListings", "Listings");
+            return RedirectToAction("Details", "Listings", new { id = model.ListingId });
         }
     }
 }
