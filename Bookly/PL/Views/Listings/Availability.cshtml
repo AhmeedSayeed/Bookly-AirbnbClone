@@ -1,7 +1,7 @@
-﻿@model BLL.ViewModels.Availability.AvailabilityCalendarViewModel
+@model BLL.ViewModels.Availability.AvailabilityCalendarViewModel
 
 @{
-    ViewData["Title"] = "Manage Availability - " + Model.ListingTitle;
+    ViewData["Title"] = Localizer["ManageAvailability"] + " - " + Model.ListingTitle;
 }
 
 <style>
@@ -44,11 +44,11 @@
         position: relative;
     }
 
-        .cal-day:hover:not(.cal-day--disabled):not(.cal-day--booked) {
-            border-color: var(--color-brass);
-            transform: scale(1.03);
-        }
-    /* States */
+    .cal-day:hover:not(.cal-day--disabled):not(.cal-day--booked) {
+        border-color: var(--color-brass);
+        transform: scale(1.03);
+    }
+
     .cal-day--disabled {
         background: var(--color-surface-sunk);
         color: var(--color-text-muted);
@@ -103,12 +103,15 @@
 
     <!-- Top Navigation -->
     <div style="margin-bottom: var(--space-5); margin-top: var(--space-4);">
-        <a asp-action="MyListings" style="color: var(--color-text-muted); text-decoration: none; font-size: var(--fs-sm); font-weight: 500;">
-            &larr; Back to My Listings
+        <a asp-action="MyListings"
+           style="color: var(--color-text-muted); text-decoration: none; font-size: var(--fs-sm); font-weight: 500;">
+            &larr; @Localizer["BackToMyListings"]
         </a>
+
         <h1 class="font-display" style="font-size: var(--fs-xl); margin-top: var(--space-2);">
-            Manage Calendar
+            @Localizer["ManageCalendar"]
         </h1>
+
         <p style="color: var(--color-text-muted); font-size: var(--fs-base);">
             @Model.ListingTitle
         </p>
@@ -118,24 +121,35 @@
     <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: var(--shadow-sm);">
 
         <div class="cal-header">
-            <button type="button" class="btn-primary" onclick="prevMonth()" style="padding: var(--space-2) var(--space-3); background: var(--color-surface-sunk); color: var(--color-text); border: none;">
-                &larr; Prev
+            <button type="button"
+                    class="btn-primary"
+                    onclick="prevMonth()"
+                    style="padding: var(--space-2) var(--space-3); background: var(--color-surface-sunk); color: var(--color-text); border: none;">
+                &larr; @Localizer["Previous"]
             </button>
-            <h2 id="monthYearTitle" class="font-display" style="margin: 0; font-size: var(--fs-lg); color: var(--color-navy);"></h2>
-            <button type="button" class="btn-primary" onclick="nextMonth()" style="padding: var(--space-2) var(--space-3); background: var(--color-surface-sunk); color: var(--color-text); border: none;">
-                Next &rarr;
+
+            <h2 id="monthYearTitle"
+                class="font-display"
+                style="margin: 0; font-size: var(--fs-lg); color: var(--color-navy);">
+            </h2>
+
+            <button type="button"
+                    class="btn-primary"
+                    onclick="nextMonth()"
+                    style="padding: var(--space-2) var(--space-3); background: var(--color-surface-sunk); color: var(--color-text); border: none;">
+                @Localizer["Next"] &rarr;
             </button>
         </div>
 
         <!-- Weekday Headers -->
         <div class="cal-grid" style="margin-bottom: var(--space-2);">
-            <div class="cal-day-name">Sun</div>
-            <div class="cal-day-name">Mon</div>
-            <div class="cal-day-name">Tue</div>
-            <div class="cal-day-name">Wed</div>
-            <div class="cal-day-name">Thu</div>
-            <div class="cal-day-name">Fri</div>
-            <div class="cal-day-name">Sat</div>
+            <div class="cal-day-name">@Localizer["SundayShort"]</div>
+            <div class="cal-day-name">@Localizer["MondayShort"]</div>
+            <div class="cal-day-name">@Localizer["TuesdayShort"]</div>
+            <div class="cal-day-name">@Localizer["WednesdayShort"]</div>
+            <div class="cal-day-name">@Localizer["ThursdayShort"]</div>
+            <div class="cal-day-name">@Localizer["FridayShort"]</div>
+            <div class="cal-day-name">@Localizer["SaturdayShort"]</div>
         </div>
 
         <!-- Days Grid -->
@@ -145,33 +159,46 @@
         <div class="cal-legend">
             <div class="cal-legend-item">
                 <div class="cal-legend-box" style="background: var(--color-surface);"></div>
-                <span>Available (Click to block)</span>
+                <span>@Localizer["AvailableClickToBlock"]</span>
             </div>
+
             <div class="cal-legend-item">
-                <div class="cal-legend-box" style="background: #FDF0ED; border-color: var(--color-clay);"></div>
-                <span>Blocked by you (Click to unblock)</span>
+                <div class="cal-legend-box"
+                     style="background: #FDF0ED; border-color: var(--color-clay);"></div>
+                <span>@Localizer["BlockedByYouClickToUnblock"]</span>
             </div>
+
             <div class="cal-legend-item">
                 <div class="cal-legend-box" style="background: var(--color-navy);"></div>
-                <span>Booked by Guest</span>
+                <span>@Localizer["BookedByGuest"]</span>
             </div>
         </div>
 
         <!-- Save Form -->
-        <form asp-action="Availability" method="post" id="availabilityForm" style="margin-top: var(--space-6);">
+        <form asp-action="Availability"
+              method="post"
+              id="availabilityForm"
+              style="margin-top: var(--space-6);">
+
             @Html.AntiForgeryToken()
+
             <input type="hidden" name="ListingId" value="@Model.ListingId" />
             <input type="hidden" name="ListingTitle" value="@Model.ListingTitle" />
 
-            <!-- Dynamic hidden inputs for BlockedDates will be injected here by JS -->
+            <!-- Dynamic hidden inputs for BlockedDates -->
             <div id="hiddenInputsContainer"></div>
 
             <div style="display: flex; justify-content: flex-end; gap: var(--space-3);">
-                <a asp-action="MyListings" class="btn-primary" style="background: transparent; border: 1px solid var(--color-border-strong); color: var(--color-text);">
-                    Cancel
+                <a asp-action="MyListings"
+                   class="btn-primary"
+                   style="background: transparent; border: 1px solid var(--color-border-strong); color: var(--color-text);">
+                    @Localizer["Cancel"]
                 </a>
-                <button type="submit" class="btn-primary" style="background: var(--color-brass); color: var(--color-navy);">
-                    Save Changes
+
+                <button type="submit"
+                        class="btn-primary"
+                        style="background: var(--color-brass); color: var(--color-navy);">
+                    @Localizer["SaveChanges"]
                 </button>
             </div>
         </form>
@@ -180,20 +207,44 @@
 
 @section Scripts {
     <script>
-        // Parse dates from backend model
-        const bookedDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BookedDates.Select(d => d.ToString("yyyy-MM-dd")))));
-        let blockedDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.BlockedDates.Select(d => d.ToString("yyyy-MM-dd")))));
+        const bookedDates = new Set(
+                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.BookedDates.Select(d => d.ToString("yyyy-MM-dd"))
+    ))
+                );
+
+        let blockedDates = new Set(
+                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                            Model.BlockedDates.Select(d => d.ToString("yyyy-MM-dd"))
+    ))
+                );
 
         let currentDate = new Date();
+
+        // Localized calendar data
+        const monthNames = [
+            "@Localizer["January"]",
+            "@Localizer["February"]",
+            "@Localizer["March"]",
+            "@Localizer["April"]",
+            "@Localizer["May"]",
+            "@Localizer["June"]",
+            "@Localizer["July"]",
+            "@Localizer["August"]",
+            "@Localizer["September"]",
+            "@Localizer["October"]",
+            "@Localizer["November"]",
+            "@Localizer["December"]"
+        ];
+
+        const bookedByGuestText = "@Localizer["BookedByGuest"]";
 
         function renderCalendar() {
             const year = currentDate.getFullYear();
             const month = currentDate.getMonth();
 
-            const monthNames = ["January", "February", "March", "April", "May", "June",
-                "July", "August", "September", "October", "November", "December"];
-
-            document.getElementById('monthYearTitle').innerText = `${monthNames[month]} ${year}`;
+            document.getElementById('monthYearTitle').innerText =
+                `${monthNames[month]} ${year}`;
 
             const firstDayIndex = new Date(year, month, 1).getDay();
             const lastDay = new Date(year, month + 1, 0).getDate();
@@ -213,21 +264,27 @@
             // Days of the month
             for (let day = 1; day <= lastDay; day++) {
                 const cellDate = new Date(year, month, day);
-                const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+                const dateString =
+                    `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
 
                 const dayCell = document.createElement('div');
+
                 dayCell.classList.add('cal-day');
                 dayCell.innerText = day;
 
                 if (cellDate < today) {
                     dayCell.classList.add('cal-day--disabled');
-                } else if (bookedDates.has(dateString)) {
+                }
+                else if (bookedDates.has(dateString)) {
                     dayCell.classList.add('cal-day--booked');
-                    dayCell.title = "Booked by guest";
-                } else if (blockedDates.has(dateString)) {
+                    dayCell.title = bookedByGuestText;
+                }
+                else if (blockedDates.has(dateString)) {
                     dayCell.classList.add('cal-day--blocked');
                     dayCell.onclick = () => toggleDate(dateString);
-                } else {
+                }
+                else {
                     dayCell.onclick = () => toggleDate(dateString);
                 }
 
@@ -240,23 +297,31 @@
         function toggleDate(dateString) {
             if (blockedDates.has(dateString)) {
                 blockedDates.delete(dateString);
-            } else {
+            }
+            else {
                 blockedDates.add(dateString);
             }
+
             renderCalendar();
         }
 
         function updateHiddenInputs() {
-            const container = document.getElementById('hiddenInputsContainer');
+            const container =
+                document.getElementById('hiddenInputsContainer');
+
             container.innerHTML = '';
 
             let index = 0;
+
             blockedDates.forEach(date => {
                 const input = document.createElement('input');
+
                 input.type = 'hidden';
                 input.name = `BlockedDates[${index}]`;
                 input.value = date;
+
                 container.appendChild(input);
+
                 index++;
             });
         }

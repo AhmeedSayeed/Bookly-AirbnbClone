@@ -28,6 +28,11 @@
             <span asp-validation-for="Password" class="form-error"></span>
         </div>
 
+        <div class="text-end mb-3">
+            <a asp-action="ForgotPassword" asp-controller="Account">
+                @Localizer["ForgotPassword"]
+            </a>
+        </div>
         @* <div class="form-group" style="display: flex; align-items: center; gap: var(--space-2);">
             <input asp-for="RememberMe" type="checkbox" style="accent-color: var(--color-navy); width: 18px; height: 18px;" />
             <label asp-for="RememberMe" style="font-size: var(--fs-sm); color: var(--color-text); margin: 0; cursor: pointer;">Remember me?</label>
@@ -38,8 +43,42 @@
         </button>
     </form>
 
+    <!-- Divider -->
+    <div style="display: flex; align-items: center; gap: var(--space-3); margin: var(--space-5) 0;">
+        <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+
+        <span style="font-size: var(--fs-sm); color: var(--color-text-muted);">
+            @Localizer["Or"]
+        </span>
+
+        <div style="flex: 1; height: 1px; background: var(--color-border);"></div>
+    </div>
+
+    <!-- Google Login -->
+    <a asp-controller="Account"
+       asp-action="GoogleLogin"
+       style="
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-3);
+        padding: var(--space-3);
+        border: 1px solid var(--color-border-strong);
+        border-radius: var(--radius-pill);
+        background: var(--color-surface);
+        color: var(--color-text);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: var(--fs-sm);
+        ">
+        <span style="font-size: 18px;">G</span>
+        @Localizer["ContinueWithGoogle"]
+    </a>
+
     <div class="auth-footer">
         @Localizer["DontHaveAccount"]
+
         <a asp-controller="Account" asp-action="Register">
             @Localizer["SignUp"]
         </a>

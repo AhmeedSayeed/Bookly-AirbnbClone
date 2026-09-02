@@ -11,6 +11,8 @@
     @Html.AntiForgeryToken()
 }
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
 <div style="max-width: var(--content-max); margin: 0 auto; padding: 0 var(--gutter); display: grid; grid-template-columns: 300px 1fr; gap: var(--space-6); margin-top: var(--space-6);">
 
     <!-- SEARCH SIDEBAR -->
@@ -30,6 +32,14 @@
                        value="@currentSearch?.City"
                        class="form-control"
                        style="width: 100%; padding: var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+            </div>
+
+            <div class="form-group" style="margin-bottom: var(--space-3);">
+                <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">Price Range ($)</label>
+                <div style="display: flex; gap: var(--space-2);">
+                    <input type="number" name="MinPrice" value="@currentSearch?.MinPrice" placeholder="Min" class="form-control" style="width: 50%; padding: var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+                    <input type="number" name="MaxPrice" value="@currentSearch?.MaxPrice" placeholder="Max" class="form-control" style="width: 50%; padding: var(--space-2); border-radius: var(--radius-sm); border: 1px solid var(--color-border);" />
+                </div>
             </div>
 
             <div style="margin-top: var(--space-4);">
@@ -68,6 +78,7 @@
 
     <!-- RESULTS GRID -->
     <div>
+        @* <div id="map" style="height: 350px; border-radius: var(--radius-md); margin-bottom: var(--space-5); border: 1px solid var(--color-border);"></div> *@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
 
             @if (Model.Items != null && Model.Items.Any())
@@ -140,9 +151,45 @@
     </div>
 </div>
 
-@if (isAuthenticated)
-{
-    @section Scripts {
+@section Scripts {
+    @* <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Map Initialization -->
+    <script>
+        const listings = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Items));
+        const map = L.map('map').setView([30.0444, 31.2357], 11);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        
+        const markers = [];
+        listings.forEach(item => {
+            if (item.Latitude && item.Longitude) {
+                const marker = L.marker([item.Latitude, item.Longitude]).addTo(map);
+
+                marker.bindPopup(`
+                    <div style="font-size: 13px; font-family: sans-serif;">
+                        <b>${item.Title}</b><br/>
+                        <span>$${item.PricePerNight} / night</span><br/>
+                        <a href="/Listings/Details/${item.Id}" style="color: #B08D57; font-weight: bold; text-decoration: none;">View Details &rarr;</a>
+                    </div>
+                `);
+
+                markers.push(marker);
+            }
+        });
+        
+        if (markers.length > 0) {
+            const group = new L.featureGroup(markers);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    </script> *@
+
+    @if (isAuthenticated)
+    {
+        <!-- Wishlist Toggle Logic -->
         <script>
             document.querySelectorAll('.wishlist-toggle-btn').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
@@ -160,12 +207,12 @@
                         },
                         body: 'listingId=' + encodeURIComponent(listingId)
                     })
-                        .then(function(res) { return res.json(); })
-                        .then(function(data) {
-                            if (data.success) {
-                                icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
-                            }
-                        });
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
+                        }
+                    });
                 });
             });
         </script>

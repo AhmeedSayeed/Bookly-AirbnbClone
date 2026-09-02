@@ -1,12 +1,12 @@
 @model BLL.ViewModels.Bookings.HostBookingsViewModel
 
 @{
-    ViewData["Title"] = "Host Reservation Requests";
+    ViewData["Title"] = Localizer["HostReservationRequests"];
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
     <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-6);">
-        Reservation Requests
+        @Localizer["ReservationRequests"]
     </h1>
 
     @if (TempData["SuccessMessage"] != null)
@@ -15,6 +15,7 @@
             @TempData["SuccessMessage"]
         </div>
     }
+
     @if (TempData["ErrorMessage"] != null)
     {
         <div style="padding: var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); margin-bottom: var(--space-4);">
@@ -25,53 +26,81 @@
     @if (Model.Requests != null && Model.Requests.Any())
     {
         <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+
             @foreach (var req in Model.Requests)
             {
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); flex-wrap: wrap; gap: var(--space-4);">
-                    
+
                     <!-- Guest & Property Info -->
                     <div style="display: flex; align-items: center; gap: var(--space-4);">
-                        <img src="@(string.IsNullOrEmpty(req.GuestPhotoUrl) ? "/images/avatar-placeholder.jpg" : req.GuestPhotoUrl)" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
+
+                        <img src="@(string.IsNullOrEmpty(req.GuestPhotoUrl) ? "/images/avatar-placeholder.jpg" : req.GuestPhotoUrl)"
+                             style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;" />
+
                         <div>
-                            <h3 class="font-display" style="font-size: var(--fs-md); margin: 0 0 2px 0;">@req.GuestName</h3>
-                            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); margin: 0;">Listing: <strong>@req.ListingTitle</strong></p>
+                            <h3 class="font-display"
+                                style="font-size: var(--fs-md); margin: 0 0 2px 0;">
+                                @req.GuestName
+                            </h3>
+
+                            <p style="font-size: var(--fs-sm); color: var(--color-text-muted); margin: 0;">
+                                @Localizer["Listing"]: <strong>@req.ListingTitle</strong>
+                            </p>
                         </div>
                     </div>
 
                     <!-- Dates & Financials -->
                     <div>
+
                         <p style="font-size: var(--fs-sm); margin: 0 0 2px 0;">
-                            📅 @req.CheckInDate.ToString("MMM dd") — @req.CheckOutDate.ToString("MMM dd, yyyy") (@req.NumberOfGuests guests)
+                            📅 @req.CheckInDate.ToString("MMM dd") —
+                            @req.CheckOutDate.ToString("MMM dd, yyyy")
+                            (@req.NumberOfGuests @Localizer["Guests"])
                         </p>
+
                         <p style="font-size: var(--fs-sm); margin: 0; font-weight: 700; color: var(--color-navy);">
-                            Total Payout: @req.TotalPrice.ToString("C")
+                            @Localizer["TotalPayout"]: @req.TotalPrice.ToString("C")
                         </p>
+
                     </div>
 
                     <!-- Status or Actions -->
                     <div>
+
                         @if (req.Status == "Pending")
                         {
                             <div style="display: flex; gap: var(--space-2);">
+
                                 <form asp-action="Respond" method="post" style="margin: 0;">
                                     <input type="hidden" name="id" value="@req.Id" />
                                     <input type="hidden" name="accept" value="true" />
-                                    <button type="submit" class="btn-primary" style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-sm); border: none; cursor: pointer;">Accept</button>
+
+                                    <button type="submit"
+                                            class="btn-primary"
+                                            style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-sm); border: none; cursor: pointer;">
+                                        @Localizer["Accept"]
+                                    </button>
                                 </form>
 
                                 <form asp-action="Respond" method="post" style="margin: 0;">
                                     <input type="hidden" name="id" value="@req.Id" />
                                     <input type="hidden" name="accept" value="false" />
-                                    <button type="submit" style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: transparent; color: var(--color-danger); border: 1px solid var(--color-danger); font-size: var(--fs-sm); font-weight: 600; cursor: pointer;">Reject</button>
+
+                                    <button type="submit"
+                                            style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: transparent; color: var(--color-danger); border: 1px solid var(--color-danger); font-size: var(--fs-sm); font-weight: 600; cursor: pointer;">
+                                        @Localizer["Reject"]
+                                    </button>
                                 </form>
+
                             </div>
                         }
                         else
                         {
                             <span style="padding: var(--space-2) var(--space-3); border-radius: var(--radius-pill); background: var(--color-surface-sunk); font-size: var(--fs-sm); font-weight: 600;">
-                                @req.Status
+                                @Localizer[req.Status.ToString()]
                             </span>
                         }
+
                     </div>
 
                 </div>
@@ -81,7 +110,10 @@
     else
     {
         <div style="text-align: center; padding: var(--space-8) 0;">
-            <p style="color: var(--color-text-muted);">You have no reservation requests at this time.</p>
+            <p style="color: var(--color-text-muted);">
+                @Localizer["NoReservationRequests"]
+            </p>
         </div>
     }
+
 </div>

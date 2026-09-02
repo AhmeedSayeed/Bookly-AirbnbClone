@@ -5,16 +5,13 @@
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
-    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-4);"> @Localizer["DashboardOverview"]</h1>
 
-    <!-- Admin Sub-Navigation -->
-    <div style="display: flex; gap: var(--space-4); margin-bottom: var(--space-6); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-border);">
-        <a asp-controller="Admin" asp-action="Dashboard" style="color: var(--color-navy); font-weight: 600; text-decoration: none; padding: var(--space-2) var(--space-4); background: var(--color-surface-sunk); border-radius: var(--radius-pill);"> @Localizer["Overview"]</a>
-        <a asp-controller="Admin" asp-action="Verifications" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);"> @Localizer["ReviewIds"]</a>
-        <a asp-controller="Admin" asp-action="Users" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">  @Localizer["ManageUsers"]</a>
-        <a asp-controller="Admin" asp-action="Listings" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">@Localizer["ModerateListings"]</a>
-        <a asp-controller="Admin" asp-action="Coupons" style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); transition: background var(--duration-fast);">Coupons</a>
-    </div>
+    <h1 class="font-display"
+        style="font-size: var(--fs-xl); margin-bottom: var(--space-4);">
+        @Localizer["DashboardOverview"]
+    </h1>
+
+    <partial name="_AdminNavigation" />
 
     @if (TempData["ErrorMessage"] != null)
     {
@@ -77,7 +74,8 @@
                 @foreach (var activity in Model.RecentActivity)
                 {
                     <li style="padding: var(--space-3) 0; border-bottom: 1px solid var(--color-border); font-size: var(--fs-sm); color: var(--color-text);">
-                        <span style="color: var(--color-brass); margin-right: var(--space-2);">●</span> @activity
+                        <span style="color: var(--color-brass); margin-right: var(--space-2);">●</span>
+                        @Localizer[activity.Type.ToString(), activity.Args]
                     </li>
                 }
             </ul>
@@ -90,3 +88,5 @@
         }
 
     </div>
+
+</div>

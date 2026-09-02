@@ -15,6 +15,8 @@ using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
 
 namespace PL.Controllers
 {
@@ -26,9 +28,16 @@ namespace PL.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IVerificationService _verificationService;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IEmailService _emailService;
 
-        public AccountController(UserManager<ApplicationUser> userManager,
-            IUserService userService, IAuthService authService, IVerificationService verificationService, IMapper mapper, IStringLocalizer<SharedResource> localizer)
+        public AccountController(
+            UserManager<ApplicationUser> userManager,
+            IUserService userService,
+            IAuthService authService,
+            IVerificationService verificationService,
+            IMapper mapper,
+            IStringLocalizer<SharedResource> localizer,
+            IEmailService emailService)
         {
             _userManager = userManager;
             _userService = userService;
@@ -36,6 +45,7 @@ namespace PL.Controllers
             _verificationService = verificationService;
             _mapper = mapper;
             _localizer = localizer;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -116,15 +126,54 @@ namespace PL.Controllers
             {
                 foreach (var error in response.Errors)
                 {
-                    ModelState.AddModelError(string.Empty, error);
+                    ModelState.AddModelError(
+                        string.Empty,
+                        _localizer[error].Value
+                    );
+                }
+
+                if (!string.IsNullOrEmpty(response.MessageKey))
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        _localizer[response.MessageKey].Value
+                    );
                 }
 
                 return View(model);
             }
 
-            SetTokenCookies(response.Data, false);
+            var confirmationLink = Url.Action(
+                nameof(ConfirmEmail),
+                "Account",
+                new
+                {
+                    userId = response.Data.UserId,
+                    token = response.Data.EmailConfirmationToken
+                },
+                Request.Scheme);
 
-            return RedirectToAction("Index", "Home");
+            try
+            {
+                await _emailService.SendEmailAsync(
+                    response.Data.Email,
+                    _localizer["ConfirmBooklyAccountSubject"].Value,
+                    _localizer["ConfirmBooklyAccountBody", confirmationLink].Value
+                );
+            }
+            catch (Exception)
+            {
+                // Error in sending email
+            }
+
+            return RedirectToAction(nameof(CheckEmail));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult CheckEmail()
+        {
+            return View();
         }
 
         [HttpGet]
@@ -153,8 +202,8 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                var message = response.Message == "AccountSuspended"
-                    ? _localizer["AccountSuspended"].Value
+                var message = !string.IsNullOrEmpty(response.MessageKey)
+                    ? _localizer[response.MessageKey].Value
                     : _localizer["InvalidEmailOrPassword"].Value;
 
                 ModelState.AddModelError(string.Empty, message);
@@ -184,11 +233,77 @@ namespace PL.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
+        public IActionResult GoogleLogin()
+        {
+            var redirectUrl = Url.Action(
+                nameof(GoogleResponse),
+                "Account");
+
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = redirectUrl
+            };
+
+            return Challenge(
+                properties,
+                GoogleDefaults.AuthenticationScheme);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync(
+                GoogleDefaults.AuthenticationScheme);
+
+            if (!result.Succeeded)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var email = result.Principal?.FindFirstValue(ClaimTypes.Email);
+            var firstName = result.Principal?.FindFirstValue(ClaimTypes.GivenName);
+            var lastName = result.Principal?.FindFirstValue(ClaimTypes.Surname);
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var response = await _authService.GoogleLoginAsync(
+                email,
+                firstName ?? "",
+                lastName ?? "");
+
+            if (!response.Succeeded || response.Data == null)
+            {
+                TempData["GoogleLoginError"] =
+                    !string.IsNullOrEmpty(response.MessageKey)
+                        ? _localizer[response.MessageKey].Value
+                        : _localizer["GoogleLoginFailed"].Value;
+
+                return RedirectToAction(nameof(Login));
+            }
+
+            // Create Bookly JWT cookies
+            SetTokenCookies(response.Data, true);
+
+            // Clear the temporary external authentication cookie
+            await HttpContext.SignOutAsync(
+                IdentityConstants.ExternalScheme);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpGet]
         [Authorize]
         public async Task<IActionResult> BecomeAHost()
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
+
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
@@ -197,7 +312,9 @@ namespace PL.Controllers
                 return RedirectToAction("MyListings", "Listings");
             }
 
-            var verificationResponse = await _verificationService.GetVerificationByUserIdAsync(userId);
+            var verificationResponse =
+                await _verificationService.GetVerificationByUserIdAsync(userId);
+
             var verification = verificationResponse.Data;
 
             if (verification != null)
@@ -211,10 +328,13 @@ namespace PL.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BecomeAHost(BecomeAHostViewModel model)
+        public async Task<IActionResult> BecomeAHost(
+            BecomeAHostViewModel model)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!int.TryParse(userIdClaim, out int userId)) return Unauthorized();
+
+            if (!int.TryParse(userIdClaim, out int userId))
+                return Unauthorized();
 
             var user = await _userManager.FindByIdAsync(userId.ToString());
 
@@ -227,8 +347,10 @@ namespace PL.Controllers
                     await _verificationService.GetVerificationByUserIdAsync(userId);
 
                 if (verificationResponse.Data != null)
+                {
                     ViewBag.VerificationStatus =
                         verificationResponse.Data.Status.ToString();
+                }
 
                 return View(model);
             }
@@ -259,13 +381,15 @@ namespace PL.Controllers
             return View();
         }
 
-        private void SetTokenCookies(AuthResultDto data, bool rememberMe)
+        private void SetTokenCookies(
+            AuthResultDto data,
+            bool rememberMe)
         {
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax,
                 IsEssential = true
             };
 
@@ -273,17 +397,171 @@ namespace PL.Controllers
             {
                 var accessOptions = cookieOptions;
                 accessOptions.Expires = data.AccessTokenExpiration;
-                Response.Cookies.Append("access_token", data.AccessToken, accessOptions);
+
+                Response.Cookies.Append(
+                    "access_token",
+                    data.AccessToken,
+                    accessOptions);
 
                 var refreshOptions = cookieOptions;
                 refreshOptions.Expires = data.RefreshTokenExpiration;
-                Response.Cookies.Append("refresh_token", data.RefreshToken, refreshOptions);
+
+                Response.Cookies.Append(
+                    "refresh_token",
+                    data.RefreshToken,
+                    refreshOptions);
             }
             else
             {
-                Response.Cookies.Append("access_token", data.AccessToken, cookieOptions);
-                Response.Cookies.Append("refresh_token", data.RefreshToken, cookieOptions);
+                Response.Cookies.Append(
+                    "access_token",
+                    data.AccessToken,
+                    cookieOptions);
+
+                Response.Cookies.Append(
+                    "refresh_token",
+                    data.RefreshToken,
+                    cookieOptions);
             }
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(
+            string userId,
+            string token)
+        {
+            if (string.IsNullOrEmpty(userId) ||
+                string.IsNullOrEmpty(token))
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return RedirectToAction(nameof(Login));
+            }
+
+            if (user.EmailConfirmed)
+            {
+                return View(true);
+            }
+
+            var result =
+                await _userManager.ConfirmEmailAsync(user, token);
+
+            if (!result.Succeeded)
+            {
+                return View(false);
+            }
+
+            return View(true);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(
+            ForgotPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var response =
+                await _authService.ForgotPasswordAsync(model);
+
+            if (response.Succeeded && response.Data != null)
+            {
+                var resetLink = Url.Action(
+                    "ResetPassword",
+                    "Account",
+                    new
+                    {
+                        userId = response.Data.UserId,
+                        token = response.Data.PasswordResetToken
+                    },
+                    Request.Scheme);
+
+                await _emailService.SendEmailAsync(
+                    response.Data.Email,
+                    _localizer["ResetBooklyPasswordSubject"].Value,
+                    _localizer["ResetBooklyPasswordBody", resetLink].Value
+                );
+            }
+
+            return RedirectToAction(nameof(CheckResetEmail));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(
+            string userId,
+            string token)
+        {
+            var model = new ResetPasswordDto
+            {
+                UserId = userId,
+                Token = token
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(
+            ResetPasswordDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var response =
+                await _authService.ResetPasswordAsync(model);
+
+            if (!response.Succeeded)
+            {
+                foreach (var error in response.Errors)
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        _localizer[error].Value
+                    );
+                }
+
+                if (!string.IsNullOrEmpty(response.MessageKey))
+                {
+                    ModelState.AddModelError(
+                        string.Empty,
+                        _localizer[response.MessageKey].Value
+                    );
+                }
+
+                return View(model);
+            }
+
+            return RedirectToAction(nameof(Login));
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult CheckResetEmail()
+        {
+            return View();
         }
     }
 }
+
