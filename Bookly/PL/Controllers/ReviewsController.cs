@@ -2,6 +2,7 @@
 using BLL.ViewModels.Reviews;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -11,10 +12,14 @@ namespace PL.Controllers
     public class ReviewsController : Controller
     {
         private readonly IReviewService _reviewService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public ReviewsController(IReviewService reviewService)
+        public ReviewsController(
+            IReviewService reviewService,
+            IStringLocalizer<SharedResource> localizer)
         {
             _reviewService = reviewService;
+            _localizer = localizer;
         }
 
         private int GetCurrentUserId()
@@ -22,6 +27,19 @@ namespace PL.Controllers
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             int.TryParse(userIdClaim, out int userId);
             return userId;
+        }
+
+        private string GetLocalizedMessage<T>(BLL.DTOs.Response<T> response)
+        {
+            if (!string.IsNullOrEmpty(response.MessageKey))
+            {
+                return _localizer[
+                    response.MessageKey,
+                    response.MessageArguments
+                ].Value;
+            }
+
+            return response.Message ?? string.Empty;
         }
 
         // GET: /Reviews/Create/{bookingId}
@@ -33,7 +51,7 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.Message;
+                TempData["ErrorMessage"] = GetLocalizedMessage(response);
                 return RedirectToAction("MyTrips", "Bookings");
             }
 
@@ -53,11 +71,15 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "Failed to submit review.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    GetLocalizedMessage(response)
+                );
+
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = response.Message;
+            TempData["SuccessMessage"] = GetLocalizedMessage(response);
             return RedirectToAction("MyTrips", "Bookings");
         }
 
@@ -70,7 +92,7 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.Message;
+                TempData["ErrorMessage"] = GetLocalizedMessage(response);
                 return RedirectToAction("MyListings", "Listings");
             }
 
@@ -90,12 +112,16 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, response.Message ?? "Failed to post response.");
+                ModelState.AddModelError(
+                    string.Empty,
+                    GetLocalizedMessage(response)
+                );
+
                 return View(model);
             }
 
-            TempData["SuccessMessage"] = response.Message;
-            return RedirectToAction("MyListings", "Listings");
+            TempData["SuccessMessage"] = GetLocalizedMessage(response);
+            return RedirectToAction("Details", "Listings", new { id = model.ListingId });
         }
     }
 }

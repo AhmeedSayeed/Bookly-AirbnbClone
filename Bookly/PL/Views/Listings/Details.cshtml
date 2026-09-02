@@ -1,7 +1,11 @@
 @model BLL.ViewModels.Listings.ListingDetailsViewModel
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = Model.Title;
+
+    // استخراج ID المستخدم الحالي لمعرفة إذا كان هو صاحب المكان
+    var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
@@ -112,7 +116,7 @@
                 @if (Model.Reviews.Any())
                 {
                     <span style="color: var(--color-brass); font-family: var(--font-body); font-size: var(--fs-base);">
-                        &#9733; @Model.AverageRating.ToString("0.0")
+                        &#9733; @Model.Reviews.Average(r => r.Rating).ToString("0.0")
                     </span>
                 }
             </h3>
@@ -165,9 +169,22 @@
 
                             @if (!string.IsNullOrEmpty(review.HostResponse))
                             {
-                                <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--color-surface-sunk); border-radius: var(--radius-sm);">
-                                    <strong style="font-size: var(--fs-sm);">@Localizer["ResponseFromHost"]</strong>
-                                    <p style="margin: var(--space-1) 0 0 0; font-size: var(--fs-sm);">@review.HostResponse</p>
+                                <!-- عرض رد الهوست لو موجود -->
+                                <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--color-surface-sunk); border-left: 3px solid var(--color-brass); border-radius: var(--radius-sm);">
+                                    <strong style="font-size: var(--fs-sm); display: block; margin-bottom: var(--space-1);">@Localizer["ResponseFromHost"]</strong>
+                                    <p style="margin: 0; font-size: var(--fs-sm);">@review.HostResponse</p>
+                                </div>
+                            }
+                            else if (User.Identity.IsAuthenticated && currentUserIdStr == Model.Host.Id.ToString())
+                            {
+                                <!-- زرار الرد يظهر للهوست فقط إذا لم يكن هناك رد -->
+                                <div style="margin-top: var(--space-3);">
+                                    <a asp-controller="Reviews" 
+                                       asp-action="Respond" 
+                                       asp-route-reviewId="@review.Id"
+                                       style="display: inline-block; padding: var(--space-1) var(--space-3); font-size: var(--fs-xs); font-weight: 600; background: transparent; color: var(--color-navy); border: 1px solid var(--color-navy); border-radius: var(--radius-pill); text-decoration: none; transition: background 0.2s;">
+                                        @Localizer["RespondToReview"]
+                                    </a>
                                 </div>
                             }
                             else if (User.Identity != null && User.Identity.IsAuthenticated &&
@@ -191,7 +208,7 @@
             <div style="padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); position: sticky; top: 100px; background: var(--color-surface);">
 
                 <h3 class="font-display" style="font-size: var(--fs-lg); color: var(--color-navy); margin-bottom: var(--space-4);">
-                    @Model.PricePerNight.ToString("C")
+                    @Model.PricePerNight.ToString("C0")
                     <span style="font-size: var(--fs-sm); font-family: var(--font-body); color: var(--color-text-muted);">
                         @Localizer["Night"]
                     </span>
@@ -224,9 +241,6 @@
                                    onchange="calculateTotal()" />
                         </div>
                     </div>
-
-                    <!-- INLINE ERROR MESSAGE CONTAINER -->
-                    <div id="booking-error-alert" style="display: none; padding: var(--space-2) var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-3);"></div>
 
                     <div style="margin-bottom: var(--space-4); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-sunk);">
                         <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Guests</label>
@@ -359,9 +373,10 @@
 
             if (nights > 0) {
                 const total = nights * pricePerNight;
-                document.getElementById('night-count-text').innerText = `$${pricePerNight} x ${nights} nights`;
-                document.getElementById('base-total-text').innerText = `$${total.toFixed(2)}`;
-                document.getElementById('final-total-text').innerText = `$${total.toFixed(2)}`;
+                // You can update this JS to format using the localized currency if needed
+                document.getElementById('night-count-text').innerText = `${pricePerNight} x ${nights} nights`;
+                document.getElementById('base-total-text').innerText = `${total.toFixed(2)}`;
+                document.getElementById('final-total-text').innerText = `${total.toFixed(2)}`;
                 calcContainer.style.display = 'block';
             } else {
                 calcContainer.style.display = 'none';

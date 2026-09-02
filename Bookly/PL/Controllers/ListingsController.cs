@@ -280,7 +280,7 @@ namespace PL.Controllers
             var response = await _listingService.GetAvailabilityCalendarAsync(id, currentUserId);
             if (!response.Succeeded || response.Data == null)
             {
-                TempData["ErrorMessage"] = response.Message ?? "Listing not found.";
+                TempData["ErrorMessage"] = response.Message ?? _localizer["ListingNotFound"].Value;
                 return RedirectToAction(nameof(MyListings));
             }
             return View(response.Data);
@@ -299,10 +299,10 @@ namespace PL.Controllers
             var response = await _listingService.UpdateAvailabilityCalendarAsync(model, currentUserId);
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.Message ?? "Failed to update calendar.";
+                TempData["ErrorMessage"] = response.Message ?? _localizer["FailedToUpdateCalendar"].Value;
                 return View(model);
             }
-            TempData["SuccessMessage"] = "Availability calendar updated successfully.";
+            TempData["SuccessMessage"] = _localizer["AvailabilityCalendarUpdatedSuccessfully"].Value;
             return RedirectToAction(nameof(MyListings));
         }
     }

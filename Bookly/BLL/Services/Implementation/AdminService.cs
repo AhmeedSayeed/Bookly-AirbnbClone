@@ -45,6 +45,10 @@ namespace BLL.Services.Implementation
         }
 
 
+        // =========================================================
+        // HOST VERIFICATIONS
+        // =========================================================
+
         public async Task<Response<IEnumerable<HostVerificationRequestViewModel>>> GetPendingVerificationsAsync()
         {
             var pending = await _verificationRepo.GetAllAsync(
@@ -66,6 +70,7 @@ namespace BLL.Services.Implementation
             return Response<IEnumerable<HostVerificationRequestViewModel>>.Success(viewModels);
         }
 
+
         public async Task<Response<bool>> ApproveVerificationAsync(int verificationId)
         {
             var verification = await _verificationRepo.GetAsync(
@@ -74,13 +79,34 @@ namespace BLL.Services.Implementation
                 Includes: v => v.User
             );
 
-            if (verification == null || verification.Status != HostVerificationStatus.Pending)
-                return Response<bool>.Fail(ResponseStatus.NotFound, "Verification not found or already processed.");
+            if (verification == null ||
+                verification.Status != HostVerificationStatus.Pending)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "VerificationNotFoundOrProcessed"
+                );
+            }
 
             verification.Status = HostVerificationStatus.Verified;
             verification.VerifiedAt = DateTime.UtcNow;
             verification.User.IsHost = true;
-            await _userManager.AddToRoleAsync(verification.User, "Host");
+
+            var roleResult = await _userManager.AddToRoleAsync(
+                verification.User,
+                "Host"
+            );
+
+            if (!roleResult.Succeeded)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.Error,
+                    "HostRoleAssignmentFailed",
+                    roleResult.Errors
+                        .Select(e => e.Description)
+                        .ToList()
+                );
+            }
 
             _verificationRepo.Update(verification);
             await _verificationRepo.SaveAsync();
@@ -88,12 +114,19 @@ namespace BLL.Services.Implementation
             await _notificationService.SendNotificationAsync(
                 verification.UserId,
                 "Your ID has been verified! You are now a Host.",
-                "/Listings/Create");
+                "/Listings/Create"
+            );
 
-            return Response<bool>.Success(true, "Host approved successfully.");
+            return Response<bool>.Success(
+                true,
+                "HostApprovedSuccessfully"
+            );
         }
 
-        public async Task<Response<bool>> RejectVerificationAsync(int verificationId, string reason = null)
+
+        public async Task<Response<bool>> RejectVerificationAsync(
+            int verificationId,
+            string reason = null)
         {
             var verification = await _verificationRepo.GetAsync(
                 selector: v => v,
@@ -101,28 +134,45 @@ namespace BLL.Services.Implementation
                 Includes: v => v.User
             );
 
-            if (verification == null || verification.Status != HostVerificationStatus.Pending)
-                return Response<bool>.Fail(ResponseStatus.NotFound, "Verification not found or already processed.");
+            if (verification == null ||
+                verification.Status != HostVerificationStatus.Pending)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "VerificationNotFoundOrProcessed"
+                );
+            }
 
             verification.Status = HostVerificationStatus.Rejected;
 
             _verificationRepo.Update(verification);
             await _verificationRepo.SaveAsync();
 
-            var notificationMessage = "Your host verification was rejected. Please review the ID guidelines and reapply.";
+            var notificationMessage =
+                "Your host verification was rejected. Please review the ID guidelines and reapply.";
+
             if (!string.IsNullOrWhiteSpace(reason))
             {
-                notificationMessage = $"Your host verification was rejected. Reason: {reason}";
+                notificationMessage =
+                    $"Your host verification was rejected. Reason: {reason}";
             }
 
             await _notificationService.SendNotificationAsync(
                 verification.UserId,
                 notificationMessage,
-                "/Account/BecomeAHost");
+                "/Account/BecomeAHost"
+            );
 
-            return Response<bool>.Success(true, "Host application rejected.");
+            return Response<bool>.Success(
+                true,
+                "HostApplicationRejected"
+            );
         }
 
+
+        // =========================================================
+        // USERS
+        // =========================================================
 
         public async Task<Response<AdminUsersViewModel>> GetAllUsersAsync()
         {
@@ -138,7 +188,9 @@ namespace BLL.Services.Implementation
                     FullName = $"{u.FirstName} {u.LastName}".Trim(),
                     Email = u.Email ?? string.Empty,
                     IsHost = u.IsHost,
-                    IsLockedOut = u.LockoutEnd.HasValue && u.LockoutEnd.Value > DateTimeOffset.UtcNow,
+                    IsLockedOut =
+                        u.LockoutEnd.HasValue &&
+                        u.LockoutEnd.Value > DateTimeOffset.UtcNow,
                     CreatedAt = u.CreatedAt
                 }).ToList()
             };
@@ -146,21 +198,53 @@ namespace BLL.Services.Implementation
             return Response<AdminUsersViewModel>.Success(vm);
         }
 
-        public async Task<Response<bool>> LockUserAsync(int userId, DateTimeOffset lockoutEnd)
+
+        public async Task<Response<bool>> LockUserAsync(
+            int userId,
+            DateTimeOffset lockoutEnd)
         {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return Response<bool>.Fail(ResponseStatus.NotFound, "User not found.");
+            var user = await _userManager.FindByIdAsync(
+                userId.ToString()
+            );
+
+            if (user == null)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "UserNotFound"
+                );
+            }
 
             if (await _userManager.IsInRoleAsync(user, "Admin"))
-                return Response<bool>.Fail(ResponseStatus.Unauthorized, "Cannot lock an Admin account.");
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.Unauthorized,
+                    "CannotLockAdmin"
+                );
+            }
 
-            var lockResult = await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+            var lockResult =
+                await _userManager.SetLockoutEndDateAsync(
+                    user,
+                    lockoutEnd
+                );
+
             if (!lockResult.Succeeded)
-                return Response<bool>.Fail(ResponseStatus.Error, "Failed to lock user.");
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.Error,
+                    "FailedToLockUser",
+                    lockResult.Errors
+                        .Select(e => e.Description)
+                        .ToList()
+                );
+            }
 
             var activeTokens = await _tokenRepo.GetAllAsync(
                 selector: rt => rt,
-                filter: rt => rt.UserId == userId && rt.RevokedAt == null
+                filter: rt =>
+                    rt.UserId == userId &&
+                    rt.RevokedAt == null
             );
 
             foreach (var token in activeTokens)
@@ -171,20 +255,58 @@ namespace BLL.Services.Implementation
             }
 
             await _tokenRepo.SaveAsync();
-            return Response<bool>.Success(true, "User locked out and sessions revoked.");
+
+            return Response<bool>.Success(
+                true,
+                "UserLockedSessionsRevoked"
+            );
         }
+
 
         public async Task<Response<bool>> UnlockUserAsync(int userId)
         {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return Response<bool>.Fail(ResponseStatus.NotFound, "User not found.");
+            var user = await _userManager.FindByIdAsync(
+                userId.ToString()
+            );
 
-            await _userManager.SetLockoutEndDateAsync(user, null);
-            return Response<bool>.Success(true, "User unlocked.");
+            if (user == null)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "UserNotFound"
+                );
+            }
+
+            var unlockResult =
+                await _userManager.SetLockoutEndDateAsync(
+                    user,
+                    null
+                );
+
+            if (!unlockResult.Succeeded)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.Error,
+                    "FailedToUnlockUser",
+                    unlockResult.Errors
+                        .Select(e => e.Description)
+                        .ToList()
+                );
+            }
+
+            return Response<bool>.Success(
+                true,
+                "UserUnlocked"
+            );
         }
 
 
-        public async Task<Response<AdminListingsViewModel>> GetAllListingsForModerationAsync()
+        // =========================================================
+        // LISTINGS
+        // =========================================================
+
+        public async Task<Response<AdminListingsViewModel>>
+            GetAllListingsForModerationAsync()
         {
             var listings = await _listingRepo.GetAllAsync(
                 selector: l => l,
@@ -198,7 +320,8 @@ namespace BLL.Services.Implementation
                 {
                     Id = l.Id,
                     Title = l.Title,
-                    HostName = $"{l.Host?.FirstName} {l.Host?.LastName}".Trim(),
+                    HostName =
+                        $"{l.Host?.FirstName} {l.Host?.LastName}".Trim(),
                     City = l.City,
                     IsActive = l.IsActive,
                     CreatedAt = l.CreatedAt
@@ -208,7 +331,10 @@ namespace BLL.Services.Implementation
             return Response<AdminListingsViewModel>.Success(vm);
         }
 
-        public async Task<Response<bool>> ModerateListingAsync(int listingId, bool isActive)
+
+        public async Task<Response<bool>> ModerateListingAsync(
+            int listingId,
+            bool isActive)
         {
             var listing = await _listingRepo.GetAsync(
                 selector: l => l,
@@ -216,9 +342,16 @@ namespace BLL.Services.Implementation
                 Includes: l => l.Host
             );
 
-            if (listing == null) return Response<bool>.Fail(ResponseStatus.NotFound, "Listing not found.");
+            if (listing == null)
+            {
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "ListingNotFound"
+                );
+            }
 
             listing.IsActive = isActive;
+
             _listingRepo.Update(listing);
             await _listingRepo.SaveAsync();
 
@@ -227,52 +360,88 @@ namespace BLL.Services.Implementation
                 await _notificationService.SendNotificationAsync(
                     listing.HostId,
                     $"Your listing '{listing.Title}' has been deactivated by an administrator.",
-                    $"/Listings/MyListings");
+                    "/Listings/MyListings"
+                );
             }
 
-            return Response<bool>.Success(true, "Listing moderation status updated.");
+            return Response<bool>.Success(
+                true,
+                "ListingModerationUpdated"
+            );
         }
 
 
-        public async Task<Response<AdminDashboardViewModel>> GetDashboardStatsAsync()
+        // =========================================================
+        // DASHBOARD
+        // =========================================================
+
+        public async Task<Response<AdminDashboardViewModel>>
+            GetDashboardStatsAsync()
         {
-            var totalUsers = await _userManager.Users.CountAsync();
-            var totalListings = await _listingRepo.Count();
-            var totalBookings = await _bookingRepo.Count();
+            var totalUsers =
+                await _userManager.Users.CountAsync();
 
-            var totalRevenue = await _paymentRepo.GetAllAsIQueryable()
-                .Where(p => p.Status == PaymentStatus.Success)
-                .SumAsync(p => p.Amount);
+            var totalListings =
+                await _listingRepo.Count();
 
-            var recentUsers = await _userManager.Users
-                .OrderByDescending(u => u.CreatedAt)
-                .Take(10)
-                .Select(u => new { u.CreatedAt, Text = $"New user registered: {u.FirstName} {u.LastName}" })
-                .ToListAsync();
+            var totalBookings =
+                await _bookingRepo.Count();
 
-            var recentListings = await _listingRepo.GetAllAsIQueryable()
-                .OrderByDescending(l => l.CreatedAt)
-                .Take(10)
-                .Select(l => new { l.CreatedAt, Text = $"New listing created: {l.Title}" })
-                .ToListAsync();
+            var totalRevenue =
+                await _paymentRepo
+                    .GetAllAsIQueryable()
+                    .Where(p => p.Status == PaymentStatus.Success)
+                    .SumAsync(p => p.Amount);
 
-            var recentBookings = await _bookingRepo.GetAllAsIQueryable()
-                .OrderByDescending(b => b.CreatedAt)
-                .Take(10)
-                .Select(b => new { b.CreatedAt, Text = $"New booking made for listing #{b.ListingId}" })
-                .ToListAsync();
 
-            var recentActivity = recentUsers
-                .Concat(recentListings)
-                .Concat(recentBookings)
-                .OrderByDescending(a => a.CreatedAt)
-                .Take(10)
-                .Select(a => a.Text)
-                .ToList();
+            var recentUsers =
+                await _userManager.Users
+                    .OrderByDescending(u => u.CreatedAt)
+                    .Take(10)
+                    .Select(u => new RecentActivityViewModel
+                    {
+                        Type = RecentActivityType.NewUserRegistered,
+                        CreatedAt = u.CreatedAt,
+                        Args = new object[] { u.FirstName, u.LastName }
+                    })
+                    .ToListAsync();
 
+            var recentListings =
+                await _listingRepo
+                    .GetAllAsIQueryable()
+                    .OrderByDescending(l => l.CreatedAt)
+                    .Take(10)
+                    .Select(l => new RecentActivityViewModel
+                    {
+                        Type = RecentActivityType.NewListingCreated,
+                        CreatedAt = l.CreatedAt,
+                        Args = new object[] { l.Title }
+                    })
+                    .ToListAsync();
+
+            var recentBookings =
+                await _bookingRepo
+                    .GetAllAsIQueryable()
+                    .OrderByDescending(b => b.CreatedAt)
+                    .Take(10)
+                    .Select(b => new RecentActivityViewModel
+                    {
+                        Type = RecentActivityType.NewBookingMade,
+                        CreatedAt = b.CreatedAt,
+                        Args = new object[] { b.ListingId }
+                    })
+                    .ToListAsync();
+
+            var recentActivity =
+                recentUsers
+                    .Concat(recentListings)
+                    .Concat(recentBookings)
+                    .OrderByDescending(a => a.CreatedAt)
+                    .Take(10)
+
+                    .ToList();
             var vm = new AdminDashboardViewModel
             {
-
                 TotalUsers = totalUsers,
                 TotalListings = totalListings,
                 TotalBookings = totalBookings,

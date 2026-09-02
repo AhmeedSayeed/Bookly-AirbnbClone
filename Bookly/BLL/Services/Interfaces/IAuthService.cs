@@ -21,5 +21,10 @@ namespace BLL.Services.Interfaces
         Task<Response<bool>> RevokeTokenAsync(string currentRefreshToken);
         Task<Response<ForgotPasswordResultDto>> ForgotPasswordAsync(ForgotPasswordDto model);
         Task<Response<bool>> ResetPasswordAsync(ResetPasswordDto model);
+        Task<Response<AuthResultDto>> GoogleLoginAsync(
+    string email,
+    string firstName,
+    string lastName);
+
     }
 }

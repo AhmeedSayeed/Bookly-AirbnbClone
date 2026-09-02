@@ -78,7 +78,7 @@
 
     <!-- RESULTS GRID -->
     <div>
-        <div id="map" style="height: 350px; border-radius: var(--radius-md); margin-bottom: var(--space-5); border: 1px solid var(--color-border);"></div>
+        @* <div id="map" style="height: 350px; border-radius: var(--radius-md); margin-bottom: var(--space-5); border: 1px solid var(--color-border);"></div> *@
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
 
             @if (Model.Items != null && Model.Items.Any())
@@ -152,7 +152,7 @@
 </div>
 
 @section Scripts {
-    <!-- Leaflet JS -->
+    @* <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     
     <!-- Map Initialization -->
@@ -185,7 +185,7 @@
             const group = new L.featureGroup(markers);
             map.fitBounds(group.getBounds().pad(0.1));
         }
-    </script>
+    </script> *@
 
     @if (isAuthenticated)
     {
@@ -217,5 +217,4 @@
             });
         </script>
     }
-}
 }

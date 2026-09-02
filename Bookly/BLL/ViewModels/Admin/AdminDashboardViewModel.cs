@@ -7,5 +7,5 @@ public class AdminDashboardViewModel
     public int TotalListings { get; set; }
     public int TotalBookings { get; set; }
     public decimal TotalRevenue { get; set; }
-    public List<string> RecentActivity { get; set; } = new();
+    public List<RecentActivityViewModel> RecentActivity { get; set; } = new();
 }

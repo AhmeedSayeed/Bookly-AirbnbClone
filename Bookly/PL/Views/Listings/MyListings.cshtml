@@ -10,7 +10,10 @@
         <h1 class="font-display" style="font-size: var(--fs-xl); margin: 0;">
             @Localizer["MyListings"]
         </h1>
-        <a asp-action="Create" class="btn-primary" style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);">
+
+        <a asp-action="Create"
+           class="btn-primary"
+           style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);">
             @Localizer["CreateNewListing"]
         </a>
     </div>
@@ -26,18 +29,22 @@
 
         @foreach (var item in Model)
         {
-            <div class="listing-card" style="display: flex; flex-direction: column; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform var(--duration-fast), box-shadow var(--duration-fast);">
+            <div class="listing-card"
+                 style="display: flex; flex-direction: column; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); transition: transform var(--duration-fast), box-shadow var(--duration-fast);">
 
                 <!-- Constrained Image Container -->
                 <div style="position: relative; padding-top: 66.66%; overflow: hidden; background: var(--color-surface-sunk);">
+
                     <img src="@(string.IsNullOrEmpty(item.PrimaryPhotoUrl) ? "/images/placeholder.jpg" : item.PrimaryPhotoUrl)"
                          alt="@item.Title"
                          style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover;" />
+
                 </div>
 
                 <div style="padding: var(--space-4); display: flex; flex-direction: column; flex-grow: 1;">
 
-                    <h2 class="font-display" style="font-size: var(--fs-md); margin: 0 0 var(--space-1) 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <h2 class="font-display"
+                        style="font-size: var(--fs-md); margin: 0 0 var(--space-1) 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         @item.Title
                     </h2>
 
@@ -46,12 +53,14 @@
                     </p>
 
                     <div style="display: flex; gap: var(--space-2); margin-top: auto;">
+
                         <a asp-action="Availability"
                            asp-route-id="@item.Id"
                            class="btn-primary"
                            style="flex: 1; text-align: center; background: var(--color-surface-sunk); color: var(--color-navy); border: 1px solid var(--color-border); padding: var(--space-2); border-radius: var(--radius-sm); font-size: var(--fs-sm); text-decoration: none;">
-                            Calendar
+                            @Localizer["Calendar"]
                         </a>
+
                         <a asp-action="Edit"
                            asp-route-id="@item.Id"
                            class="btn-primary"
@@ -64,12 +73,15 @@
                               method="post"
                               onsubmit="return confirm('@Localizer["ConfirmDeleteListing"]');"
                               style="flex: 1; margin: 0;">
+
                             <button type="submit"
                                     class="btn-primary"
                                     style="width: 100%; background: var(--color-surface-sunk); color: var(--color-danger); border: none; padding: var(--space-2); border-radius: var(--radius-sm); font-size: var(--fs-sm);">
                                 @Localizer["Delete"]
                             </button>
+
                         </form>
+
                     </div>
                 </div>
             </div>

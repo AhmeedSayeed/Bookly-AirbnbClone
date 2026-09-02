@@ -1,0 +1,33 @@
+﻿<div style="
+    display: flex;
+    gap: var(--space-4);
+    margin-bottom: var(--space-6);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    ">
+
+    <a asp-controller="Admin"
+       asp-action="Dashboard"
+       style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);">
+        @Localizer["Overview"]
+    </a>
+
+    <a asp-controller="Admin"
+       asp-action="Verifications"
+       style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);">
+        @Localizer["ReviewIds"]
+    </a>
+
+    <a asp-controller="Admin"
+       asp-action="Users"
+       style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);">
+        @Localizer["ManageUsers"]
+    </a>
+
+    <a asp-controller="Admin"
+       asp-action="Listings"
+       style="color: var(--color-text); font-weight: 500; text-decoration: none; padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill);">
+        @Localizer["ModerateListings"]
+    </a>
+
+</div>
