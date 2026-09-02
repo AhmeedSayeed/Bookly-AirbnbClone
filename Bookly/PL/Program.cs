@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Nest;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
@@ -103,7 +104,7 @@ namespace PL
                             .GetRequiredService<UserManager<ApplicationUser>>();
 
                         var userId = context.Principal?
-                            .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?
+                            .FindFirst(ClaimTypes.NameIdentifier)?
                             .Value;
 
                         if (string.IsNullOrEmpty(userId))
@@ -172,6 +173,18 @@ namespace PL
                 config.AddProfile<UserProfile>();
             });
 
+            var elasticUrl = builder.Configuration["Elasticsearch:Url"];
+            var defaultIndex = builder.Configuration["Elasticsearch:DefaultIndex"];
+
+            var settings = new ConnectionSettings(new Uri(elasticUrl))
+                .DefaultIndex(defaultIndex)
+                .EnableDebugMode();
+
+            var elasticClient = new ElasticClient(settings);
+            builder.Services.AddSingleton<IElasticClient>(elasticClient);
+
+            builder.Services.AddScoped<IElasticListingService, ElasticListingService>();
+
             builder.Services.AddValidatorsFromAssemblyContaining<BookingRequestViewModelValidator>();
             builder.Services.AddSignalR();
 
@@ -186,7 +199,7 @@ namespace PL
             builder.Services.AddScoped<IFileUploader, FileUploader>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
-            builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            builder.Services.AddScoped(typeof(DAL.Repository.Interfaces.IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<IHomeService, HomeService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IListingService, ListingService>();

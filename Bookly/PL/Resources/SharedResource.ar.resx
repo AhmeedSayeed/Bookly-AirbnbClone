@@ -1708,7 +1708,21 @@
 		<value>الحيوانات الأليفة مسموحة</value>
 	</data>
 	<data name="CancellationPolicyRequired" xml:space="preserve">
-  <value>سياسة الإلغاء مطلوبة.</value>
-</data>
-	
+      <value>سياسة الإلغاء مطلوبة.</value>
+    </data>
+	<data name="WhatAreYouLookingFor" xml:space="preserve">
+		<value>بتدور على إيه؟</value>
+	</data>
+	<data name="SearchPlaceholderExpressive" xml:space="preserve">
+		<value>جرب تكتب "فيلا في الساحل"، "شقة عالبحر"...</value>
+	</data>
+	<data name="SearchDestination" xml:space="preserve">
+		<value>ابحث بالمدينة، الاسم، أو الكلمات المفتاحية...</value>
+	</data>
+	<data name="PriceRange" xml:space="preserve">
+		<value>نطاق السعر</value>
+	</data>
+	<data name="ClearFilters" xml:space="preserve">
+		<value>مسح الفلاتر</value>
+	</data>
 </root>

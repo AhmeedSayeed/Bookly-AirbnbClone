@@ -1708,6 +1708,21 @@
 		<value>Pets allowed</value>
 	</data>
 	<data name="CancellationPolicyRequired" xml:space="preserve">
-  <value>Cancellation policy is required.</value>
-</data>
+      <value>Cancellation policy is required.</value>
+    </data>
+	<data name="WhatAreYouLookingFor" xml:space="preserve">
+		<value>What are you looking for?</value>
+	</data>
+	<data name="SearchPlaceholderExpressive" xml:space="preserve">
+		<value>e.g., "Villa with pool in Cairo", "Cozy beach house"...</value>
+	</data>
+	<data name="SearchDestination" xml:space="preserve">
+		<value>Search by city, title, or keywords...</value>
+	</data>
+	<data name="PriceRange" xml:space="preserve">
+		<value>Price Range</value>
+	</data>
+	<data name="ClearFilters" xml:space="preserve">
+		<value>Clear Filters</value>
+	</data>
 </root>
