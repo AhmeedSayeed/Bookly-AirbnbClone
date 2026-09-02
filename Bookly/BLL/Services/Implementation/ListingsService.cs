@@ -152,15 +152,9 @@ namespace BLL.Services.Implementation
                 .Include(l => l.Photos)
                 .Include(l => l.ListingAmenities)
                     .ThenInclude(la => la.Amenity)
-<<<<<<< HEAD
-               .Include(l => l.Bookings)
-                  .ThenInclude(b => b.Review)
-                    .ThenInclude(r => r.HostResponse);
-=======
                 .Include(l => l.Bookings)
                     .ThenInclude(b => b.Review)
                         .ThenInclude(r => r.HostResponse);
->>>>>>> 1d78647728deb23e0845e21ee93619e4bfb182db
 
             var listing = await query.FirstOrDefaultAsync(l => l.Id == id);
 

@@ -35,15 +35,16 @@ namespace PL.Controllers
                 return View(new HomeViewModel());
             }
 
-            // Mark which of the featured listings the current user has already wishlisted
+            // Mark which of these listings the current user has already wishlisted,
+            // so the heart icon renders filled without an extra request per card.
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var currentUserId = GetCurrentUserId();
                 var wishlistedIds = await _wishlistService.GetWishlistedListingIdsAsync(currentUserId);
 
-                foreach (var listing in response.Data.FeaturedListings)
+                foreach (var item in response.Data.FeaturedListings)
                 {
-                    listing.IsWishlisted = wishlistedIds.Contains(listing.Id);
+                    item.IsWishlisted = wishlistedIds.Contains(item.Id);
                 }
             }
 
