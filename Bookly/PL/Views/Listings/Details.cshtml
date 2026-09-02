@@ -275,6 +275,7 @@
 @section Scripts {
     <script>
         const pricePerNight = @Model.PricePerNight;
+        const unavailableDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UnavailableDates)));
 
         var detailsWishlistBtn = document.getElementById('details-wishlist-btn');
         if (detailsWishlistBtn) {
@@ -322,6 +323,20 @@
             calculateTotal();
         }
 
+        function hasUnavailableDatesInRange(startDateStr, endDateStr) {
+            let curr = new Date(startDateStr);
+            const end = new Date(endDateStr);
+
+            while (curr < end) {
+                const dateString = curr.toISOString().split('T')[0];
+                if (unavailableDates.has(dateString)) {
+                    return true;
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+            return false;
+        }
+
         function validateBookingForm(event) {
             const checkIn = document.getElementById('checkin-date').value;
             const checkOut = document.getElementById('checkout-date').value;
@@ -336,6 +351,13 @@
 
             if (new Date(checkOut) <= new Date(checkIn)) {
                 errorAlert.innerText = "Check-out date must be strictly after the check-in date.";
+                errorAlert.style.display = 'block';
+                event.preventDefault();
+                return false;
+            }
+
+            if (hasUnavailableDatesInRange(checkIn, checkOut)) {
+                errorAlert.innerText = "Selected dates include dates that are blocked or already booked by another guest.";
                 errorAlert.style.display = 'block';
                 event.preventDefault();
                 return false;
@@ -361,6 +383,13 @@
 
             if (checkOutDate <= checkInDate) {
                 errorAlert.innerText = "Check-out date must be after check-in date.";
+                errorAlert.style.display = 'block';
+                calcContainer.style.display = 'none';
+                return;
+            }
+
+            if (hasUnavailableDatesInRange(checkInVal, checkOutVal)) {
+                errorAlert.innerText = "Warning: These dates contain blocked or unavailable days.";
                 errorAlert.style.display = 'block';
                 calcContainer.style.display = 'none';
                 return;

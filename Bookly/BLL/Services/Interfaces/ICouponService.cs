@@ -1,4 +1,4 @@
-﻿using BLL.DTOs;
+using BLL.DTOs;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -14,5 +14,10 @@ namespace BLL.Services.Interfaces
 
         // to see active copouns
         Task<Response<List<CouponDto>>> GetActiveCouponsAsync();
+
+        // Admin Management
+        Task<Response<List<CouponDto>>> GetAllCouponsAsync();
+        Task<Response<int>> CreateCouponAsync(CreateCouponDto model);
+        Task<Response<bool>> DeleteCouponAsync(int id);
     }
 }

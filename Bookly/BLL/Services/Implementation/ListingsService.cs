@@ -152,15 +152,10 @@ namespace BLL.Services.Implementation
                 .Include(l => l.Photos)
                 .Include(l => l.ListingAmenities)
                     .ThenInclude(la => la.Amenity)
-<<<<<<< HEAD
-               .Include(l => l.Bookings)
-                  .ThenInclude(b => b.Review)
-                    .ThenInclude(r => r.HostResponse);
-=======
+                .Include(l => l.BlockedDates)
                 .Include(l => l.Bookings)
                     .ThenInclude(b => b.Review)
-                        .ThenInclude(r => r.HostResponse);
->>>>>>> 1d78647728deb23e0845e21ee93619e4bfb182db
+                      .ThenInclude(r => r.HostResponse);
 
             var listing = await query.FirstOrDefaultAsync(l => l.Id == id);
 
@@ -170,6 +165,31 @@ namespace BLL.Services.Implementation
                     "ListingNotFound");
 
             var viewModel = _mapper.Map<ListingDetailsViewModel>(listing);
+
+            var unavailable = new List<string>();
+            var today = DateTime.UtcNow.Date;
+
+            // 1. Blocked dates by host
+            unavailable.AddRange(listing.BlockedDates
+                .Where(bd => bd.Date.Date >= today)
+                .Select(bd => bd.Date.ToString("yyyy-MM-dd")));
+
+            // 2. Booked dates by guests
+            var activeBookings = listing.Bookings
+                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
+                .ToList();
+
+            foreach (var b in activeBookings)
+            {
+                for (var d = b.CheckInDate.Date; d < b.CheckOutDate.Date; d = d.AddDays(1))
+                {
+                    var str = d.ToString("yyyy-MM-dd");
+                    if (!unavailable.Contains(str))
+                        unavailable.Add(str);
+                }
+            }
+
+            viewModel.UnavailableDates = unavailable;
 
             return Response<ListingDetailsViewModel>.Success(viewModel);
         }
