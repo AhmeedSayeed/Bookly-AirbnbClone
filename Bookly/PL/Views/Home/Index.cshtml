@@ -68,12 +68,29 @@
         {
             <a href="/Listings/Details/@listing.Id" class="listing-card">
 
-                <div class="listing-card__image-wrapper">
+                <div class="listing-card__image-wrapper" style="position: relative;">
                     <img src="@(string.IsNullOrEmpty(listing.PrimaryPhotoUrl)
-                                                  ? "/images/placeholder.jpg"
-                                                  : listing.PrimaryPhotoUrl)"
+                                                                      ? "/images/placeholder.jpg"
+                                                                      : listing.PrimaryPhotoUrl)"
                          alt="@listing.Title"
                          class="listing-card__image" />
+
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        <button type="button"
+                                class="home-wishlist-btn"
+                                data-listing-id="@listing.Id"
+                                title="@Localizer["Wishlist"]"
+                                onclick="event.preventDefault(); event.stopPropagation(); toggleHomeWishlist(this);"
+                                style="position: absolute; top: var(--space-2); right: var(--space-2);
+                            width: 32px; height: 32px; border-radius: var(--radius-pill);
+                            border: none; background: rgba(255,255,255,0.85);
+                            display: flex; align-items: center; justify-content: center;
+                            cursor: pointer; z-index: 2;">
+                            <span class="home-wishlist-icon"
+                                  style="color: @(listing.IsWishlisted ? "var(--color-clay)" : "var(--color-text-muted)");">&#9829;</span>
+                        </button>
+                    }
                 </div>
 
                 <div class="listing-card__body">
@@ -117,3 +134,32 @@
     }
 
 </div>
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    @Html.AntiForgeryToken()
+
+    @section Scripts {
+        <script>
+            function toggleHomeWishlist(btn) {
+                var listingId = btn.getAttribute('data-listing-id');
+                var icon = btn.querySelector('.home-wishlist-icon');
+
+                fetch('@Url.Action("Toggle", "Wishlist")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: 'listingId=' + encodeURIComponent(listingId)
+                })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
+                        }
+                    });
+            }
+        </script>
+    }
+}
