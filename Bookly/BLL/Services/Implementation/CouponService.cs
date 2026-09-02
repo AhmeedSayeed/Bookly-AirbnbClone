@@ -66,6 +66,7 @@ namespace BLL.Services.Implementation
         {
             // 1. جلب الحجز والتحقق من صاحبه وحالته
             var booking = await _bookingRepo.GetAllAsIQueryable()
+                .Include(b => b.Listing)
                 .FirstOrDefaultAsync(b => b.Id == bookingId && b.GuestId == currentUserId);
 
             if (booking == null)
@@ -74,8 +75,17 @@ namespace BLL.Services.Implementation
             if (booking.Status != BookingStatus.Confirmed && booking.Status != BookingStatus.Pending)
                 return Response<CouponValidationResultDto>.Fail(ResponseStatus.ValidationError, "Coupons can only be applied to pending or confirmed bookings.");
 
-            // 2. فحص الكوبون
-            var validation = await ValidateCouponAsync(code, booking.TotalPrice);
+            int totalNights = Math.Max(1, (booking.CheckOutDate.Date - booking.CheckInDate.Date).Days);
+            decimal originalBasePrice = booking.Listing != null ? (totalNights * booking.Listing.PricePerNight) : booking.TotalPrice;
+
+            // منع تطبيق أكثر من كوبون على نفس الحجز
+            if (booking.TotalPrice < originalBasePrice)
+            {
+                return Response<CouponValidationResultDto>.Fail(ResponseStatus.ValidationError, "A coupon has already been applied to this booking.");
+            }
+
+            // 2. فحص الكوبون وحساب الخصم بناءً على السعر الأصلي
+            var validation = await ValidateCouponAsync(code, originalBasePrice);
             if (!validation.Succeeded || validation.Data == null)
                 return validation;
 
@@ -91,6 +101,7 @@ namespace BLL.Services.Implementation
 
             // 4. تحديث سعر الحجز الإجمالي
             booking.TotalPrice = validation.Data.NewTotalPrice;
+            booking.UpdatedAt = DateTime.UtcNow;
             _bookingRepo.Update(booking);
 
             await _bookingRepo.SaveAsync();
