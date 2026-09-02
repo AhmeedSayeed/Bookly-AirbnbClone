@@ -31,4 +31,6 @@ public class ListingDetailsViewModel
     public bool IsWishlisted { get; set; }
 
     public BookingFormViewModel Booking { get; set; } = new();
+
+    public List<string> UnavailableDates { get; set; } = new();
 }

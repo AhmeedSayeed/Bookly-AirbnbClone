@@ -10,38 +10,80 @@ public class ListingFormViewModelValidator : AbstractValidator<ListingFormViewMo
 
     public ListingFormViewModelValidator()
     {
-        RuleFor(x => x.Title).NotEmpty().MaximumLength(120);
-        RuleFor(x => x.Description).NotEmpty().MaximumLength(2000);
+        RuleFor(x => x.Title)
+            .NotEmpty()
+            .WithMessage("ListingTitleRequired")
+            .MaximumLength(120)
+            .WithMessage("ListingTitleMaximumLength");
+
+        RuleFor(x => x.Description)
+            .NotEmpty()
+            .WithMessage("ListingDescriptionRequired")
+            .MaximumLength(2000)
+            .WithMessage("ListingDescriptionMaximumLength");
 
         RuleFor(x => x.PropertyType)
             .IsInEnum()
-            .WithMessage("Invalid property type selected.");
+            .WithMessage("InvalidPropertyTypeSelected");
 
-        RuleFor(x => x.Address).NotEmpty();
-        RuleFor(x => x.City).NotEmpty();
-        RuleFor(x => x.Country).NotEmpty();
+        RuleFor(x => x.Address)
+            .NotEmpty()
+            .WithMessage("AddressRequired");
 
-        RuleFor(x => x.Latitude).InclusiveBetween(-90m, 90m).When(x => x.Latitude.HasValue);
-        RuleFor(x => x.Longitude).InclusiveBetween(-180m, 180m).When(x => x.Longitude.HasValue);
+        RuleFor(x => x.City)
+            .NotEmpty()
+            .WithMessage("CityRequired");
 
-        RuleFor(x => x.PricePerNight).GreaterThan(0).LessThanOrEqualTo(100000);
-        RuleFor(x => x.MaxGuests).InclusiveBetween(1, 50);
-        RuleFor(x => x.Bedrooms).InclusiveBetween(0, 20);
-        RuleFor(x => x.Bathrooms).InclusiveBetween(0, 20);
-        RuleFor(x => x.Beds).InclusiveBetween(0, 20);
+        RuleFor(x => x.Country)
+            .NotEmpty()
+            .WithMessage("CountryRequired");
+
+        RuleFor(x => x.Latitude)
+            .InclusiveBetween(-90m, 90m)
+            .When(x => x.Latitude.HasValue)
+            .WithMessage("LatitudeMustBeBetweenMinus90And90");
+
+        RuleFor(x => x.Longitude)
+            .InclusiveBetween(-180m, 180m)
+            .When(x => x.Longitude.HasValue)
+            .WithMessage("LongitudeMustBeBetweenMinus180And180");
+
+        RuleFor(x => x.PricePerNight)
+            .GreaterThan(0)
+            .WithMessage("PricePerNightMustBeGreaterThanZero")
+            .LessThanOrEqualTo(100000)
+            .WithMessage("PricePerNightMaximum");
+
+        RuleFor(x => x.MaxGuests)
+            .InclusiveBetween(1, 50)
+            .WithMessage("MaxGuestsMustBeBetween1And50");
+
+        RuleFor(x => x.Bedrooms)
+            .InclusiveBetween(0, 20)
+            .WithMessage("BedroomsMustBeBetween0And20");
+
+        RuleFor(x => x.Bathrooms)
+            .InclusiveBetween(0, 20)
+            .WithMessage("BathroomsMustBeBetween0And20");
+
+        RuleFor(x => x.Beds)
+            .InclusiveBetween(0, 20)
+            .WithMessage("BedsMustBeBetween0And20");
 
         RuleFor(x => x.CancellationPolicy)
             .IsInEnum()
-            .WithMessage("Invalid cancellation policy selected.");
+            .WithMessage("InvalidCancellationPolicySelected");
 
         RuleFor(x => x.SelectedAmenityIds)
             .Must(ids => ids == null || ids.Distinct().Count() == ids.Count)
-            .WithMessage("Duplicate amenities selected.");
+            .WithMessage("DuplicateAmenitiesSelected");
 
         RuleFor(x => x.NewPhotos)
             .Must(files => files == null || files.All(f => f.Length <= 5 * 1024 * 1024))
-            .WithMessage("Each photo must be 5MB or smaller.")
+            .WithMessage("PhotoMaximumSize");
+
+        RuleFor(x => x.NewPhotos)
             .Must(files => files == null || files.All(f => AllowedPhotoTypes.Contains(f.ContentType)))
-            .WithMessage("Photos must be JPEG, PNG, or WebP.");
+            .WithMessage("PhotoTypesNotAllowed");
     }
 }

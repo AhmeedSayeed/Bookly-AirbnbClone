@@ -57,9 +57,36 @@ namespace PL.Controllers
         private async Task LoadAmenitiesIntoViewBagAsync()
         {
             var amenitiesResponse = await _amenityService.GetAllAsync();
-            ViewBag.Amenities = amenitiesResponse.Succeeded
-                ? amenitiesResponse.Data
-                : new List<AmenityDto>();
+
+            if (!amenitiesResponse.Succeeded || amenitiesResponse.Data == null)
+            {
+                ViewBag.Amenities = new List<AmenityDto>();
+                return;
+            }
+
+            var amenityKeys = new Dictionary<int, string>
+    {
+        { 1, "AmenityWifi" },
+        { 2, "AmenityKitchen" },
+        { 3, "AmenityFreeParking" },
+        { 4, "AmenityAirConditioning" },
+        { 5, "AmenityPool" },
+        { 6, "AmenityWasher" },
+        { 7, "AmenityTV" },
+        { 8, "AmenityHeating" },
+        { 9, "AmenityDedicatedWorkspace" },
+        { 10, "AmenityPetsAllowed" }
+    };
+
+            foreach (var amenity in amenitiesResponse.Data)
+            {
+                if (amenityKeys.TryGetValue(amenity.Id, out var key))
+                {
+                    amenity.Name = _localizer[key].Value;
+                }
+            }
+
+            ViewBag.Amenities = amenitiesResponse.Data;
         }
 
         [HttpGet]

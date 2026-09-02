@@ -1,9 +1,11 @@
-
 using BLL.Services.Interfaces;
 using BLL.ViewModels.Bookings;
+using BLL.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -14,13 +16,16 @@ namespace PL.Controllers
     {
         private readonly IBookingService _bookingService;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IValidator<BookingRequestViewModel> _validator;
 
         public BookingsController(
             IBookingService bookingService,
-            IStringLocalizer<SharedResource> localizer)
+            IStringLocalizer<SharedResource> localizer,
+            IValidator<BookingRequestViewModel> validator)
         {
             _bookingService = bookingService;
             _localizer = localizer;
+            _validator = validator;
         }
 
         private int GetCurrentUserId()
@@ -51,10 +56,35 @@ namespace PL.Controllers
         public async Task<IActionResult> RequestBooking(
             BookingRequestViewModel request)
         {
+            // 1. DataAnnotations validation
             if (!ModelState.IsValid)
             {
                 TempData["ErrorMessage"] =
                     _localizer["PleaseFillBookingDetailsCorrectly"].Value;
+
+                return RedirectToAction(
+                    "Details",
+                    "Listings",
+                    new { id = request.ListingId });
+            }
+
+            // 2. FluentValidation
+            var validationResult = await _validator.ValidateAsync(request);
+
+            if (!validationResult.IsValid)
+            {
+                foreach (var error in validationResult.Errors)
+                {
+                    ModelState.AddModelError(
+                        error.PropertyName,
+                        _localizer[error.ErrorMessage]);
+                }
+
+                TempData["ErrorMessage"] =
+                    string.Join(
+                        " | ",
+                        validationResult.Errors.Select(error =>
+                            _localizer[error.ErrorMessage].Value));
 
                 return RedirectToAction(
                     "Details",

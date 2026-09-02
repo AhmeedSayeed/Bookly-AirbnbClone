@@ -1,8 +1,103 @@
-﻿@model BLL.ViewModels.Availability.AvailabilityCalendarViewModel
+@model BLL.ViewModels.Availability.AvailabilityCalendarViewModel
 
 @{
     ViewData["Title"] = Localizer["ManageAvailability"] + " - " + Model.ListingTitle;
 }
+
+<style>
+    .cal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-4);
+    }
+
+    .cal-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: var(--space-2);
+        text-align: center;
+    }
+
+    .cal-day-name {
+        font-weight: 600;
+        font-size: var(--fs-xs);
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        padding: var(--space-2) 0;
+    }
+
+    .cal-day {
+        aspect-ratio: 1 / 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        background: var(--color-surface);
+        font-size: var(--fs-sm);
+        font-weight: 500;
+        cursor: pointer;
+        user-select: none;
+        transition: all var(--duration-fast) var(--ease-smooth);
+        position: relative;
+    }
+
+    .cal-day:hover:not(.cal-day--disabled):not(.cal-day--booked) {
+        border-color: var(--color-brass);
+        transform: scale(1.03);
+    }
+
+    .cal-day--disabled {
+        background: var(--color-surface-sunk);
+        color: var(--color-text-muted);
+        opacity: 0.4;
+        cursor: not-allowed;
+        border-color: transparent;
+    }
+
+    .cal-day--booked {
+        background: var(--color-navy);
+        color: var(--color-text-inverse);
+        cursor: not-allowed;
+        border-color: var(--color-navy);
+    }
+
+    .cal-day--blocked {
+        background: #FDF0ED;
+        color: var(--color-clay);
+        border-color: var(--color-clay);
+        font-weight: 700;
+        text-decoration: line-through;
+    }
+
+    .cal-legend {
+        display: flex;
+        gap: var(--space-4);
+        margin-top: var(--space-5);
+        padding: var(--space-3);
+        background: var(--color-surface);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--color-border);
+        flex-wrap: wrap;
+    }
+
+    .cal-legend-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        font-size: var(--fs-xs);
+        color: var(--color-text-muted);
+    }
+
+    .cal-legend-box {
+        width: 16px;
+        height: 16px;
+        border-radius: 4px;
+        border: 1px solid var(--color-border);
+    }
+</style>
 
 <div style="max-width: 800px; margin: 0 auto; padding: 0 var(--gutter);">
 

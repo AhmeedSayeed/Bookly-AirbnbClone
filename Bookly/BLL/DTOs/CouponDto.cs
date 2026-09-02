@@ -1,4 +1,4 @@
-﻿namespace BLL.DTOs
+namespace BLL.DTOs
 {
     public class CouponDto
     {
@@ -19,5 +19,15 @@
         public decimal OriginalPrice { get; set; }
         public decimal NewTotalPrice { get; set; }
         public string Message { get; set; } = string.Empty;
+        public string? MessageKey { get; set; }
+        public string[]? MessageArgs { get; set; }
+    }
+
+    public class CreateCouponDto
+    {
+        public string Code { get; set; } = string.Empty;
+        public decimal DiscountPercent { get; set; }
+        public DateTime ExpiryDate { get; set; }
+        public int MaxUses { get; set; }
     }
 }

@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.Extensions.Localization
 @using System.Globalization
+@using System.Text.Json
 @using PL
 @inject UserManager<ApplicationUser> UserManager
 @inject IStringLocalizer<SharedResource> Localizer
@@ -103,7 +104,24 @@
 
                     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 
-                    <div class="user-menu-container" tabindex="0">
+                    <script>
+                                        window.booklyNotificationTemplates = @Html.Raw(JsonSerializer.Serialize(new
+                                            {
+                                                                                                HostVerificationApprovedNotification = Localizer["HostVerificationApprovedNotification"].Value,
+                                                                                                HostVerificationRejectedNotification = Localizer["HostVerificationRejectedNotification"].Value,
+                                                                                                HostVerificationRejectedWithReason = Localizer["HostVerificationRejectedWithReason"].Value,
+                                                                                                ListingDeactivatedNotification = Localizer["ListingDeactivatedNotification"].Value
+                                            }));
+
+                                        window.booklyI18n = {
+                                            view: @Html.Raw(JsonSerializer.Serialize(Localizer["View"].Value))
+                                                                                    };
+                    </script>
+
+                    <!-- User Menu -->
+
+                    <div class="user-menu-container"
+                         tabindex="0">
 
                         @if (hasPhoto)
                         {

@@ -4,10 +4,12 @@ namespace BLL.ViewModels.Account;
 
 public class LoginViewModel
 {
-    [Required, EmailAddress]
+    [Required(ErrorMessage = "EmailRequired")]
+    [EmailAddress(ErrorMessage = "EmailInvalid")]
     public string Email { get; set; } = string.Empty;
 
-    [Required, DataType(DataType.Password)]
+    [Required(ErrorMessage = "PasswordRequired")]
+    [DataType(DataType.Password)]
     public string Password { get; set; } = string.Empty;
 
     [Display(Name = "Remember Me")]

@@ -112,11 +112,11 @@ namespace BLL.Services.Implementation
             await _verificationRepo.SaveAsync();
 
             await _notificationService.SendNotificationAsync(
-                verification.UserId,
-                "Your ID has been verified! You are now a Host.",
-                "/Listings/Create"
-            );
-
+     verification.UserId,
+     "HostVerificationApprovedNotification",
+     null,
+     "/Listings/Create"
+ );
             return Response<bool>.Success(
                 true,
                 "HostApprovedSuccessfully"
@@ -148,20 +148,24 @@ namespace BLL.Services.Implementation
             _verificationRepo.Update(verification);
             await _verificationRepo.SaveAsync();
 
-            var notificationMessage =
-                "Your host verification was rejected. Please review the ID guidelines and reapply.";
-
             if (!string.IsNullOrWhiteSpace(reason))
             {
-                notificationMessage =
-                    $"Your host verification was rejected. Reason: {reason}";
+                await _notificationService.SendNotificationAsync(
+                    verification.UserId,
+                    "HostVerificationRejectedWithReason",
+                    new[] { reason },
+                    "/Account/BecomeAHost"
+                );
             }
-
-            await _notificationService.SendNotificationAsync(
-                verification.UserId,
-                notificationMessage,
-                "/Account/BecomeAHost"
-            );
+            else
+            {
+                await _notificationService.SendNotificationAsync(
+                    verification.UserId,
+                    "HostVerificationRejectedNotification",
+                    null,
+                    "/Account/BecomeAHost"
+                );
+            }
 
             return Response<bool>.Success(
                 true,
@@ -358,10 +362,11 @@ namespace BLL.Services.Implementation
             if (!isActive)
             {
                 await _notificationService.SendNotificationAsync(
-                    listing.HostId,
-                    $"Your listing '{listing.Title}' has been deactivated by an administrator.",
-                    "/Listings/MyListings"
-                );
+    listing.HostId,
+    "ListingDeactivatedNotification",
+    new[] { listing.Title },
+    "/Listings/MyListings"
+);
             }
 
             return Response<bool>.Success(

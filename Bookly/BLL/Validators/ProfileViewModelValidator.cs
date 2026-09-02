@@ -7,8 +7,20 @@ public class ProfileViewModelValidator : AbstractValidator<ProfileViewModel>
 {
     public ProfileViewModelValidator()
     {
-        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(50);
-        RuleFor(x => x.LastName).NotEmpty().MaximumLength(50);
-        RuleFor(x => x.Bio).MaximumLength(500);
+        RuleFor(x => x.FirstName)
+            .NotEmpty()
+            .WithMessage("FirstNameRequired")
+            .MaximumLength(50)
+            .WithMessage("FirstNameMaximumLength");
+
+        RuleFor(x => x.LastName)
+            .NotEmpty()
+            .WithMessage("LastNameRequired")
+            .MaximumLength(50)
+            .WithMessage("LastNameMaximumLength");
+
+        RuleFor(x => x.Bio)
+            .MaximumLength(500)
+            .WithMessage("BioMaximumLength");
     }
 }

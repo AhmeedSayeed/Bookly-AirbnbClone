@@ -1,14 +1,10 @@
 using BLL.DTOs;
 using BLL.Services.Interfaces;
-using BLL.Settings;
 using BLL.ViewModels.Account;
 using DAL.Enums;
 using DAL.Models.Identity;
 using DAL.Repository.Interfaces;
-using Microsoft.Extensions.Options;
 using System;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BLL.Services.Implementation
@@ -35,21 +31,33 @@ namespace BLL.Services.Implementation
             return Response<HostVerification>.Success(verification);
         }
 
-        public async Task<Response<bool>> SubmitVerificationAsync(int userId, BecomeAHostViewModel model)
+        public async Task<Response<bool>> SubmitVerificationAsync(
+            int userId,
+            BecomeAHostViewModel model)
         {
             var existingResponse = await GetVerificationByUserIdAsync(userId);
             var existing = existingResponse.Data;
 
             if (existing != null && existing.Status != HostVerificationStatus.Rejected)
             {
-                return Response<bool>.Fail(ResponseStatus.Conflict, "You already have a pending or verified application.");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.Conflict,
+                    "VerificationAlreadyPendingOrVerified"
+                );
             }
 
-            var uploadResponse = await _fileUploader.SaveFileAsync(model.IdDocument, "verifications", false);
+            var uploadResponse = await _fileUploader.SaveFileAsync(
+                model.IdDocument,
+                "verifications",
+                false);
 
             if (!uploadResponse.Succeeded)
             {
-                return Response<bool>.Fail(ResponseStatus.Error, $"File upload failed: {uploadResponse.Message}");
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.Error,
+                    "FileUploadFailed",
+                    new[] { uploadResponse.Message }
+                );
             }
 
             var documentUrl = uploadResponse.Data;
@@ -59,6 +67,7 @@ namespace BLL.Services.Implementation
                 existing.DocumentUrl = documentUrl;
                 existing.Status = HostVerificationStatus.Pending;
                 existing.SubmittedAt = DateTime.UtcNow;
+
                 _verificationRepo.Update(existing);
             }
             else
@@ -70,13 +79,19 @@ namespace BLL.Services.Implementation
                     Status = HostVerificationStatus.Pending,
                     SubmittedAt = DateTime.UtcNow
                 };
+
                 await _verificationRepo.AddAsync(verification);
             }
 
             var saved = await _verificationRepo.SaveAsync();
+
             return saved > 0
-                ? Response<bool>.Success(true, "Verification submitted successfully.")
-                : Response<bool>.Fail(ResponseStatus.Error, "Failed to submit verification.");
+                ? Response<bool>.SuccessWithKey(
+                    true,
+                    "VerificationSubmittedSuccessfully")
+                : Response<bool>.FailWithKey(
+                    ResponseStatus.Error,
+                    "FailedToSubmitVerification");
         }
     }
 }

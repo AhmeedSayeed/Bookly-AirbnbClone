@@ -3,18 +3,21 @@ using BLL.ViewModels.Availability;
 
 namespace BLL.Validators;
 
-public class AvailabilityCalendarViewModelValidator : AbstractValidator<AvailabilityCalendarViewModel>
+public class AvailabilityCalendarViewModelValidator
+    : AbstractValidator<AvailabilityCalendarViewModel>
 {
     public AvailabilityCalendarViewModelValidator()
     {
-        RuleFor(x => x.ListingId).GreaterThan(0);
+        RuleFor(x => x.ListingId)
+            .GreaterThan(0)
+            .WithMessage("ListingIdMustBeGreaterThanZero");
 
         RuleForEach(x => x.BlockedDates)
             .GreaterThanOrEqualTo(DateTime.Today)
-            .WithMessage("Blocked dates can't be in the past.");
+            .WithMessage("BlockedDatesCannotBeInPast");
 
         RuleFor(x => x.BlockedDates)
             .Must(dates => dates.Distinct().Count() == dates.Count)
-            .WithMessage("Duplicate blocked dates.");
+            .WithMessage("DuplicateBlockedDates");
     }
 }

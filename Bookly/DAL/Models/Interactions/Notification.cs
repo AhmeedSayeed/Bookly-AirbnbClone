@@ -9,9 +9,11 @@ namespace DAL.Models.Interactions
         
         // Foreign Key
         public int UserId { get; set; }
-        
-        public string Message { get; set; } = string.Empty;
+
+        public string? Message { get; set; }
+        public string? MessageKey { get; set; }
         public string? Link { get; set; }
+        public string? MessageArgsJson { get; set; }
         public bool IsRead { get; set; }
         public DateTime CreatedAt { get; set; }
 

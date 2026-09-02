@@ -7,12 +7,15 @@ public class BookingFormViewModel
     public int ListingId { get; set; }
     public decimal PricePerNight { get; set; }
 
-    [Required, DataType(DataType.Date)]
+    [Required(ErrorMessage = "CheckInDateRequired")]
+    [DataType(DataType.Date)]
     public DateTime CheckInDate { get; set; }
 
-    [Required, DataType(DataType.Date)]
+    [Required(ErrorMessage = "CheckOutDateRequired")]
+    [DataType(DataType.Date)]
     public DateTime CheckOutDate { get; set; }
 
-    [Required, Range(1, 50)]
+    [Required(ErrorMessage = "NumberOfGuestsRequired")]
+    [Range(1, 50, ErrorMessage = "NumberOfGuestsRange")]
     public int NumberOfGuests { get; set; } = 1;
 }

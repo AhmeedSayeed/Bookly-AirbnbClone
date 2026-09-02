@@ -1,7 +1,10 @@
 using BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using System.Linq;
 using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace PL.Controllers
@@ -10,10 +13,14 @@ namespace PL.Controllers
     public class NotificationsController : Controller
     {
         private readonly INotificationService _notificationService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public NotificationsController(INotificationService notificationService)
+        public NotificationsController(
+            INotificationService notificationService,
+            IStringLocalizer<SharedResource> localizer)
         {
             _notificationService = notificationService;
+            _localizer = localizer;
         }
 
         private int GetCurrentUserId()
@@ -72,7 +79,33 @@ namespace PL.Controllers
         {
             var userId = GetCurrentUserId();
             var response = await _notificationService.GetForUserAsync(userId, 1, 10);
-            return Json(response.Data.Notifications);
+
+            // ترجمة الإشعارات قبل إرسالها للجافاسكريبت
+            var notifications = response.Data.Notifications.Select(n =>
+            {
+                string[] args = null;
+                if (!string.IsNullOrEmpty(n.MessageArgsJson))
+                {
+                    try { args = JsonSerializer.Deserialize<string[]>(n.MessageArgsJson); } catch { }
+                }
+
+                var translatedText = !string.IsNullOrWhiteSpace(n.MessageKey)
+                    ? (args != null && args.Length > 0
+                        ? _localizer[n.MessageKey, args].Value
+                        : _localizer[n.MessageKey].Value)
+                    : n.LegacyMessage;
+
+                return new
+                {
+                    id = n.Id,
+                    message = translatedText,
+                    link = n.Link,
+                    isRead = n.IsRead,
+                    createdAt = n.CreatedAt
+                };
+            });
+
+            return Json(notifications);
         }
 
         [HttpPost]

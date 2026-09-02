@@ -4,15 +4,18 @@ namespace BLL.ViewModels.Bookings;
 
 public class BookingRequestViewModel
 {
-    [Required]
+    [Required(ErrorMessage = "ListingIdRequired")]
     public int ListingId { get; set; }
 
-    [Required, DataType(DataType.Date)]
+    [Required(ErrorMessage = "CheckInDateRequired")]
+    [DataType(DataType.Date)]
     public DateTime CheckInDate { get; set; }
 
-    [Required, DataType(DataType.Date)]
+    [Required(ErrorMessage = "CheckOutDateRequired")]
+    [DataType(DataType.Date)]
     public DateTime CheckOutDate { get; set; }
 
-    [Required, Range(1, 50)]
+    [Required(ErrorMessage = "NumberOfGuestsRequired")]
+    [Range(1, 50, ErrorMessage = "NumberOfGuestsRange")]
     public int NumberOfGuests { get; set; }
 }
