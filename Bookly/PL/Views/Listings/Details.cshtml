@@ -4,8 +4,12 @@
 @{
     ViewData["Title"] = Model.Title;
 
-    // استخراج ID المستخدم الحالي لمعرفة إذا كان هو صاحب المكان
     var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    // تحديد العملة وكلمة "ليالي" بناءً على لغة المتصفح الحالية
+    var isArabic = System.Threading.Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ar");
+    var currencySymbol = isArabic ? "ج.م" : "EGP";
+    var nightsLabel = Localizer["Nights"].Value;
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
@@ -56,7 +60,7 @@
         else
         {
             <div style="grid-column: 1 / -1; grid-row: 1 / 3; background: var(--color-surface-sunk); display: flex; align-items: center; justify-content: center; color: var(--color-text-muted);">
-                No photos available.
+                @Localizer["NoPhotosAvailable"]
             </div>
         }
     </div>
@@ -86,11 +90,31 @@
                 @Localizer["WhatThisPlaceOffers"]
             </h3>
 
+            @{
+                var amenityKeys = new Dictionary<string, string>
+    {
+        { "WiFi", "AmenityWifi" },
+        { "Kitchen", "AmenityKitchen" },
+        { "Free parking", "AmenityFreeParking" },
+        { "Air conditioning", "AmenityAirConditioning" },
+        { "Pool", "AmenityPool" },
+        { "Washer", "AmenityWasher" },
+        { "TV", "AmenityTV" },
+        { "Heating", "AmenityHeating" },
+        { "Dedicated workspace", "AmenityDedicatedWorkspace" },
+        { "Pets allowed", "AmenityPetsAllowed" }
+    };
+            }
+
             <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
                 @foreach (var amenity in Model.Amenities)
                 {
+                    var key = amenityKeys.TryGetValue(amenity, out var amenityKey)
+                        ? amenityKey
+                        : amenity;
+
                     <span style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); font-size: var(--fs-sm);">
-                        @amenity
+                        @Localizer[key]
                     </span>
                 }
             </div>
@@ -103,8 +127,9 @@
                 <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-2);">
                     @Localizer["CancellationPolicy"]
                 </h3>
+
                 <p style="color: var(--color-text-muted); font-size: var(--fs-sm);">
-                    @Model.CancellationPolicy
+                    @Localizer[Model.CancellationPolicy]
                 </p>
             </div>
         }
@@ -113,6 +138,7 @@
         <div style="margin-top: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-border);">
             <h3 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">
                 @Localizer["Reviews"] (@Model.Reviews.Count)
+
                 @if (Model.Reviews.Any())
                 {
                     <span style="color: var(--color-brass); font-family: var(--font-body); font-size: var(--fs-base);">
@@ -147,14 +173,17 @@
                                     {
                                         <span>@Localizer["Cleanliness"]: @review.CleanlinessRating</span>
                                     }
+
                                     @if (review.CommunicationRating.HasValue)
                                     {
                                         <span>@Localizer["Communication"]: @review.CommunicationRating</span>
                                     }
+
                                     @if (review.LocationRating.HasValue)
                                     {
                                         <span>@Localizer["Location"]: @review.LocationRating</span>
                                     }
+
                                     @if (review.ValueRating.HasValue)
                                     {
                                         <span>@Localizer["Value"]: @review.ValueRating</span>
@@ -214,7 +243,11 @@
                     </span>
                 </h3>
 
-                <form asp-controller="Bookings" asp-action="RequestBooking" method="post" onsubmit="return validateBookingForm(event)">
+                <form asp-controller="Bookings"
+                      asp-action="RequestBooking"
+                      method="post"
+                      onsubmit="return validateBookingForm(event)">
+
                     <input type="hidden" name="ListingId" value="@Model.Id" />
 
                     @if (TempData["BookingError"] != null)
@@ -225,26 +258,50 @@
                     }
 
                     <!-- CLIENT-SIDE INLINE ERROR ALERT -->
-                    <div id="booking-error-alert" style="display: none; padding: var(--space-2) var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-3);"></div>
+                    <div id="booking-error-alert"
+                         style="display: none; padding: var(--space-2) var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-3);">
+                    </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden;">
                         <div style="padding: var(--space-2); background: var(--color-surface-sunk);">
-                            <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Check-in</label>
-                            <input type="date" name="CheckInDate" id="checkin-date" required
+                            <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">
+                                @Localizer["CheckIn"]
+                            </label>
+
+                            <input type="date"
+                                   name="CheckInDate"
+                                   id="checkin-date"
+                                   required
                                    style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
                                    onchange="onCheckInChange()" />
                         </div>
+
                         <div style="padding: var(--space-2); background: var(--color-surface-sunk); border-left: 1px solid var(--color-border);">
-                            <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Checkout</label>
-                            <input type="date" name="CheckOutDate" id="checkout-date" required
+                            <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">
+                                @Localizer["CheckOut"]
+                            </label>
+
+                            <input type="date"
+                                   name="CheckOutDate"
+                                   id="checkout-date"
+                                   required
                                    style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
                                    onchange="calculateTotal()" />
                         </div>
                     </div>
 
                     <div style="margin-bottom: var(--space-4); padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-sunk);">
-                        <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Guests</label>
-                        <input type="number" name="NumberOfGuests" value="1" min="1" max="@Model.MaxGuests" required style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);" />
+                        <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">
+                            @Localizer["Guests"]
+                        </label>
+
+                        <input type="number"
+                               name="NumberOfGuests"
+                               value="1"
+                               min="1"
+                               max="@Model.MaxGuests"
+                               required
+                               style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);" />
                     </div>
 
                     <button type="submit"
@@ -260,9 +317,11 @@
                         <span id="night-count-text"></span>
                         <span id="base-total-text"></span>
                     </div>
+
                     <hr style="border: none; border-top: 1px solid var(--color-border); margin: var(--space-2) 0;" />
+
                     <div style="display: flex; justify-content: space-between; font-weight: 700; color: var(--color-navy);">
-                        <span>Total before taxes</span>
+                        <span>@Localizer["TotalBeforeTaxes"]</span>
                         <span id="final-total-text"></span>
                     </div>
                 </div>
@@ -274,7 +333,13 @@
 
 @section Scripts {
     <script>
-        const pricePerNight = @Model.PricePerNight;
+        // تمرير العملة والنصوص المترجمة من C# إلى JavaScript بأمان
+        const currencySymbol = "@Html.Raw(currencySymbol)";
+        const nightsText = "@Html.Raw(nightsLabel)";
+
+        // Only this formatting is intentionally culture-independent.
+        // Everything else is kept from the original behavior.
+        const pricePerNight = @Model.PricePerNight.ToString(System.Globalization.CultureInfo.InvariantCulture);
         const unavailableDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UnavailableDates)));
 
         var detailsWishlistBtn = document.getElementById('details-wishlist-btn');
@@ -320,6 +385,7 @@
                     checkoutInput.value = nextDayFormatted;
                 }
             }
+
             calculateTotal();
         }
 
@@ -343,14 +409,14 @@
             const errorAlert = document.getElementById('booking-error-alert');
 
             if (!checkIn || !checkOut) {
-                errorAlert.innerText = "Please select both check-in and check-out dates.";
+                errorAlert.innerText = '@Localizer["PleaseSelectBothDates"]';
                 errorAlert.style.display = 'block';
                 event.preventDefault();
                 return false;
             }
 
             if (new Date(checkOut) <= new Date(checkIn)) {
-                errorAlert.innerText = "Check-out date must be strictly after the check-in date.";
+                errorAlert.innerText = '@Localizer["CheckOutMustBeAfterCheckIn"]';
                 errorAlert.style.display = 'block';
                 event.preventDefault();
                 return false;
@@ -382,7 +448,7 @@
             const checkOutDate = new Date(checkOutVal);
 
             if (checkOutDate <= checkInDate) {
-                errorAlert.innerText = "Check-out date must be after check-in date.";
+                errorAlert.innerText = '@Localizer["CheckOutMustBeAfterCheckIn"]';
                 errorAlert.style.display = 'block';
                 calcContainer.style.display = 'none';
                 return;
@@ -402,10 +468,16 @@
 
             if (nights > 0) {
                 const total = nights * pricePerNight;
-                // You can update this JS to format using the localized currency if needed
-                document.getElementById('night-count-text').innerText = `${pricePerNight} x ${nights} nights`;
-                document.getElementById('base-total-text').innerText = `${total.toFixed(2)}`;
-                document.getElementById('final-total-text').innerText = `${total.toFixed(2)}`;
+
+                document.getElementById('night-count-text').innerText = 
+                    `${pricePerNight} ${currencySymbol} x ${nights} ${nightsText}`;
+
+                document.getElementById('base-total-text').innerText = 
+                    `${total.toFixed(2)} ${currencySymbol}`;
+
+                document.getElementById('final-total-text').innerText = 
+                    `${total.toFixed(2)} ${currencySymbol}`;
+
                 calcContainer.style.display = 'block';
             } else {
                 calcContainer.style.display = 'none';

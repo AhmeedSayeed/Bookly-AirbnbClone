@@ -15,42 +15,50 @@ public class ListingFormViewModel
 {
     public int? Id { get; set; }
 
-    [Required, MaxLength(120)]
+    [Required(ErrorMessage = "ListingTitleRequired")]
+    [MaxLength(120, ErrorMessage = "ListingTitleMaximumLength")]
     public string Title { get; set; } = string.Empty;
 
-    [Required, MaxLength(2000)]
+    [Required(ErrorMessage = "ListingDescriptionRequired")]
+    [MaxLength(2000, ErrorMessage = "ListingDescriptionMaximumLength")]
     public string Description { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "PropertyTypeRequired")]
     public PropertyType PropertyType { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "AddressRequired")]
     public string Address { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "CityRequired")]
     public string City { get; set; } = string.Empty;
 
-    [Required]
+    [Required(ErrorMessage = "CountryRequired")]
     public string Country { get; set; } = string.Empty;
 
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
 
-    [Required, Range(1, 100000)]
+    [Required(ErrorMessage = "PricePerNightRequired")]
+    [Range(1, 100000, ErrorMessage = "PricePerNightRange")]
     public decimal PricePerNight { get; set; }
 
-    [Required, Range(1, 50)]
+    [Required(ErrorMessage = "MaxGuestsRequired")]
+    [Range(1, 50, ErrorMessage = "MaxGuestsRange")]
     public int MaxGuests { get; set; }
 
-    [Required, Range(0, 20)]
+    [Required(ErrorMessage = "BedroomsRequired")]
+    [Range(0, 20, ErrorMessage = "BedroomsRange")]
     public int Bedrooms { get; set; }
 
-    [Required, Range(0, 20)]
+    [Required(ErrorMessage = "BathroomsRequired")]
+    [Range(0, 20, ErrorMessage = "BathroomsRange")]
     public int Bathrooms { get; set; }
 
-    [Required, Range(0, 20)]
+    [Required(ErrorMessage = "BedsRequired")]
+    [Range(0, 20, ErrorMessage = "BedsRange")]
     public int Beds { get; set; }
 
+    [Required(ErrorMessage = "CancellationPolicyRequired")]
     public CancellationPolicy CancellationPolicy { get; set; }
 
     public List<int> SelectedAmenityIds { get; set; } = new();

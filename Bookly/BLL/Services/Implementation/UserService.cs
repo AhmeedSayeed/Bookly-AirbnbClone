@@ -13,7 +13,10 @@ namespace BLL.Services
         private readonly IMapper _mapper;
         private readonly IFileUploader _fileUploader;
 
-        public UserService(UserManager<ApplicationUser> userManager, IMapper mapper, IFileUploader fileUploader)
+        public UserService(
+            UserManager<ApplicationUser> userManager,
+            IMapper mapper,
+            IFileUploader fileUploader)
         {
             _userManager = userManager;
             _mapper = mapper;
@@ -26,20 +29,28 @@ namespace BLL.Services
 
             if (user == null)
             {
-                return Response<ProfileDto>.Fail(ResponseStatus.NotFound, "User not found.");
+                return Response<ProfileDto>.Fail(
+                    ResponseStatus.NotFound,
+                    "UserNotFound"
+                );
             }
 
             var profileDto = _mapper.Map<ProfileDto>(user);
             return Response<ProfileDto>.Success(profileDto);
         }
 
-        public async Task<Response<bool>> UpdateUserProfileAsync(string userId, ProfileDto updatedData)
+        public async Task<Response<bool>> UpdateUserProfileAsync(
+            string userId,
+            ProfileDto updatedData)
         {
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
             {
-                return Response<bool>.Fail(ResponseStatus.NotFound, "User not found.");
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "UserNotFound"
+                );
             }
 
             user.FirstName = updatedData.FirstName;
@@ -55,11 +66,18 @@ namespace BLL.Services
                         _fileUploader.DeleteFile(user.ProfilePhotoUrl);
                     }
 
-                    var uploadResponse = await _fileUploader.SaveFileAsync(updatedData.ProfilePhoto, "profile-photos", true);
+                    var uploadResponse = await _fileUploader.SaveFileAsync(
+                        updatedData.ProfilePhoto,
+                        "profile-photos",
+                        true);
 
                     if (!uploadResponse.Succeeded)
                     {
-                        return Response<bool>.Fail(ResponseStatus.Error, $"File upload failed: {uploadResponse.Message}");
+                        return Response<bool>.FailWithKey(
+                            ResponseStatus.Error,
+                            "FileUploadFailed",
+                            new[] { uploadResponse.Message }
+                        );
                     }
 
                     var newPhotoUrl = uploadResponse.Data;
@@ -67,7 +85,11 @@ namespace BLL.Services
                 }
                 catch (Exception ex)
                 {
-                    return Response<bool>.Fail(ResponseStatus.Error, $"File upload failed: {ex.Message}");
+                    return Response<bool>.FailWithKey(
+                        ResponseStatus.Error,
+                        "FileUploadFailed",
+                        new[] { ex.Message }
+                    );
                 }
             }
 
@@ -75,11 +97,20 @@ namespace BLL.Services
 
             if (!result.Succeeded)
             {
-                var error = result.Errors.FirstOrDefault()?.Description ?? "Failed to update profile.";
-                return Response<bool>.Fail(ResponseStatus.Error, error);
+                var error = result.Errors.FirstOrDefault()?.Description
+                            ?? string.Empty;
+
+                return Response<bool>.FailWithKey(
+                    ResponseStatus.Error,
+                    "FailedToUpdateProfile",
+                    new[] { error }
+                );
             }
 
-            return Response<bool>.Success(true);
+            return Response<bool>.SuccessWithKey(
+                true,
+                "ProfileUpdatedSuccessfully"
+            );
         }
     }
 }

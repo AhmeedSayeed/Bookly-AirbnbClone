@@ -8,6 +8,7 @@ using DAL.Repository.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BLL.Services.Implementation
@@ -25,12 +26,17 @@ namespace BLL.Services.Implementation
             _hubContext = hubContext;
         }
 
-        public async Task<Response<bool>> SendNotificationAsync(int userId, string message, string? link = null)
+        public async Task<Response<bool>> SendNotificationAsync(
+            int userId,
+            string messageKey,
+            string[]? args = null,
+            string? link = null)
         {
             var notification = new Notification
             {
                 UserId = userId,
-                Message = message,
+                MessageKey = messageKey,
+                MessageArgsJson = args == null ? null : JsonSerializer.Serialize(args),
                 Link = link,
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow
@@ -42,7 +48,9 @@ namespace BLL.Services.Implementation
             var viewModel = new NotificationViewModel
             {
                 Id = notification.Id,
-                Message = notification.Message,
+                MessageKey = notification.MessageKey,
+                MessageArgsJson = notification.MessageArgsJson,
+                LegacyMessage = notification.Message,
                 Link = notification.Link,
                 IsRead = notification.IsRead,
                 CreatedAt = notification.CreatedAt
@@ -54,13 +62,18 @@ namespace BLL.Services.Implementation
             return Response<bool>.Success(true);
         }
 
-        public async Task<Response<NotificationsViewModel>> GetForUserAsync(int userId, int pageNumber, int pageSize)
+        public async Task<Response<NotificationsViewModel>> GetForUserAsync(
+            int userId,
+            int pageNumber,
+            int pageSize)
         {
             var pagedResult = await _notificationRepo.GetAllPaginatedAsync(
                 selector: n => new NotificationViewModel
                 {
                     Id = n.Id,
-                    Message = n.Message,
+                    MessageKey = n.MessageKey,
+                    MessageArgsJson = n.MessageArgsJson,
+                    LegacyMessage = n.Message,
                     Link = n.Link,
                     IsRead = n.IsRead,
                     CreatedAt = n.CreatedAt
@@ -71,7 +84,8 @@ namespace BLL.Services.Implementation
                 orderBy: q => q.OrderByDescending(n => n.CreatedAt)
             );
 
-            var unreadCount = await _notificationRepo.Count(n => n.UserId == userId && !n.IsRead);
+            var unreadCount = await _notificationRepo.Count(
+                n => n.UserId == userId && !n.IsRead);
 
             var vm = new NotificationsViewModel
             {
@@ -90,11 +104,15 @@ namespace BLL.Services.Implementation
 
         public async Task<Response<int>> GetUnreadCountAsync(int userId)
         {
-            var count = await _notificationRepo.Count(n => n.UserId == userId && !n.IsRead);
+            var count = await _notificationRepo.Count(
+                n => n.UserId == userId && !n.IsRead);
+
             return Response<int>.Success(count);
         }
 
-        public async Task<Response<bool>> MarkAsReadAsync(int notificationId, int userId)
+        public async Task<Response<bool>> MarkAsReadAsync(
+            int notificationId,
+            int userId)
         {
             var notification = await _notificationRepo.GetAsync(
                 selector: n => n,
@@ -102,7 +120,9 @@ namespace BLL.Services.Implementation
             );
 
             if (notification == null)
-                return Response<bool>.Fail(ResponseStatus.NotFound, "Notification not found.");
+                return Response<bool>.Fail(
+                    ResponseStatus.NotFound,
+                    "Notification not found.");
 
             if (!notification.IsRead)
             {
@@ -131,6 +151,7 @@ namespace BLL.Services.Implementation
             }
 
             await _notificationRepo.SaveAsync();
+
             return Response<bool>.Success(true);
         }
     }

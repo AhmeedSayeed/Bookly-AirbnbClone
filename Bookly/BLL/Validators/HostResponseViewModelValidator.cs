@@ -7,7 +7,14 @@ public class HostResponseViewModelValidator : AbstractValidator<HostResponseView
 {
     public HostResponseViewModelValidator()
     {
-        RuleFor(x => x.ReviewId).GreaterThan(0);
-        RuleFor(x => x.ResponseText).NotEmpty().MaximumLength(1000);
+        RuleFor(x => x.ReviewId)
+            .GreaterThan(0)
+            .WithMessage("ReviewIdMustBeGreaterThanZero");
+
+        RuleFor(x => x.ResponseText)
+            .NotEmpty()
+            .WithMessage("HostResponseRequired")
+            .MaximumLength(1000)
+            .WithMessage("HostResponseMaximumLength");
     }
 }

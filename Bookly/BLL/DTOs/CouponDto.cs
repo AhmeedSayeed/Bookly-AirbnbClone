@@ -19,6 +19,8 @@ namespace BLL.DTOs
         public decimal OriginalPrice { get; set; }
         public decimal NewTotalPrice { get; set; }
         public string Message { get; set; } = string.Empty;
+        public string? MessageKey { get; set; }
+        public string[]? MessageArgs { get; set; }
     }
 
     public class CreateCouponDto

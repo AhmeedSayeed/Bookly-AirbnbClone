@@ -25,7 +25,7 @@ namespace BLL.Services.Implementation
         public async Task<Response<CouponValidationResultDto>> ValidateCouponAsync(string code, decimal amount)
         {
             if (string.IsNullOrWhiteSpace(code))
-                return Response<CouponValidationResultDto>.Fail(ResponseStatus.ValidationError, "Please enter a coupon code.");
+                return Response<CouponValidationResultDto>.FailWithKey(ResponseStatus.ValidationError, "PleaseEnterCouponCode");
 
             var cleanCode = code.Trim().ToUpper();
 
@@ -34,15 +34,15 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(c => c.Code.ToUpper() == cleanCode);
 
             if (coupon == null)
-                return Response<CouponValidationResultDto>.Fail(ResponseStatus.NotFound, "Invalid coupon code.");
+                return Response<CouponValidationResultDto>.FailWithKey(ResponseStatus.NotFound, "InvalidCouponCode");
 
             // 2. التحقق من تاريخ الصلاحية
             if (coupon.ExpiryDate < DateTime.UtcNow)
-                return Response<CouponValidationResultDto>.Fail(ResponseStatus.ValidationError, "This coupon has expired.");
+                return Response<CouponValidationResultDto>.FailWithKey(ResponseStatus.ValidationError, "CouponExpired");
 
             // 3. التحقق من عدد مرات الاستخدام
             if (coupon.UsesCount >= coupon.MaxUses)
-                return Response<CouponValidationResultDto>.Fail(ResponseStatus.ValidationError, "This coupon has reached its maximum usage limit.");
+                return Response<CouponValidationResultDto>.FailWithKey(ResponseStatus.ValidationError, "CouponMaxUsageReached");
 
             // 4. حساب الخصم
             var discountAmount = Math.Round(amount * (coupon.DiscountPercent / 100m), 2);
@@ -56,7 +56,8 @@ namespace BLL.Services.Implementation
                 DiscountAmount = discountAmount,
                 OriginalPrice = amount,
                 NewTotalPrice = newPrice,
-                Message = $"Coupon applied successfully! ({coupon.DiscountPercent}% off)"
+                MessageKey = "CouponAppliedSuccessfully",
+                MessageArgs = new[] { coupon.DiscountPercent.ToString() }
             };
 
             return Response<CouponValidationResultDto>.Success(result);
@@ -70,10 +71,10 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(b => b.Id == bookingId && b.GuestId == currentUserId);
 
             if (booking == null)
-                return Response<CouponValidationResultDto>.Fail(ResponseStatus.NotFound, "Booking not found.");
+                return Response<CouponValidationResultDto>.FailWithKey(ResponseStatus.NotFound, "BookingNotFound");
 
             if (booking.Status != BookingStatus.Confirmed && booking.Status != BookingStatus.Pending)
-                return Response<CouponValidationResultDto>.Fail(ResponseStatus.ValidationError, "Coupons can only be applied to pending or confirmed bookings.");
+                return Response<CouponValidationResultDto>.FailWithKey(ResponseStatus.ValidationError, "CouponsOnlyForPendingOrConfirmed");
 
             int totalNights = Math.Max(1, (booking.CheckOutDate.Date - booking.CheckInDate.Date).Days);
             decimal originalBasePrice = booking.Listing != null ? (totalNights * booking.Listing.PricePerNight) : booking.TotalPrice;

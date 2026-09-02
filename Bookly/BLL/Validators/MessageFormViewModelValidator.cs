@@ -7,7 +7,14 @@ public class MessageFormViewModelValidator : AbstractValidator<MessageFormViewMo
 {
     public MessageFormViewModelValidator()
     {
-        RuleFor(x => x.ReceiverId).GreaterThan(0);
-        RuleFor(x => x.Content).NotEmpty().MaximumLength(2000);
+        RuleFor(x => x.ReceiverId)
+            .GreaterThan(0)
+            .WithMessage("ReceiverIdMustBeGreaterThanZero");
+
+        RuleFor(x => x.Content)
+            .NotEmpty()
+            .WithMessage("MessageContentRequired")
+            .MaximumLength(2000)
+            .WithMessage("MessageContentMaximumLength");
     }
 }

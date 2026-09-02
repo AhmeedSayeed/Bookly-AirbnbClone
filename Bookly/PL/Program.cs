@@ -5,6 +5,7 @@ using BLL.Services;
 using BLL.Services.Implementation;
 using BLL.Services.Interfaces;
 using BLL.Settings;
+using BLL.Validators;
 using DAL;
 using DAL.Models.Identity;
 using DAL.Repository.Implementation;
@@ -33,8 +34,10 @@ namespace PL
             });
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
-
+            builder.Services.AddControllersWithViews()
+                .AddDataAnnotationsLocalization(options =>
+                    options.DataAnnotationLocalizerProvider = (type, factory) =>
+                        factory.Create(typeof(SharedResource)));
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -169,8 +172,7 @@ namespace PL
                 config.AddProfile<UserProfile>();
             });
 
-            builder.Services.AddValidatorsFromAssemblyContaining<Program>();
-
+            builder.Services.AddValidatorsFromAssemblyContaining<BookingRequestViewModelValidator>();
             builder.Services.AddSignalR();
 
             builder.Services.AddHangfire(configuration => configuration

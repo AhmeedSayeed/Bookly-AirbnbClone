@@ -55,7 +55,7 @@
                 @Localizer["Revenue"]
             </p>
             <p class="font-display" style="font-size: var(--fs-xl); color: var(--color-navy); font-weight: 600;">
-                @Model.TotalRevenue.ToString("C")
+                @Model.TotalRevenue.ToString("N2", System.Globalization.CultureInfo.InvariantCulture) @Localizer["CurrencyEGP"]
             </p>
         </div>
 

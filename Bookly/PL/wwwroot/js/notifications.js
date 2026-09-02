@@ -5,6 +5,39 @@
 
 let unreadCount = 0;
 
+function resolveNotificationText(notification) {
+    if (notification.messageKey && window.booklyNotificationTemplates) {
+        const template = window.booklyNotificationTemplates[notification.messageKey];
+
+        if (template) {
+            let text = template;
+
+            if (notification.messageArgsJson) {
+                try {
+                    const args = JSON.parse(notification.messageArgsJson);
+
+                    args.forEach((arg, index) => {
+                        text = text.replace(
+                            new RegExp("\\{" + index + "\\}", "g"),
+                            arg ?? ""
+                        );
+                    });
+                } catch {
+                    // Keep the template unchanged if args cannot be parsed
+                }
+            }
+
+            return text;
+        }
+    }
+
+    return notification.legacyMessage || "";
+}
+
+function getLocalizedViewText() {
+    return window.booklyI18n?.view || "View";
+}
+
 async function initNotifications() {
     const res = await fetch("/Notifications/UnreadCount");
     unreadCount = await res.json();
@@ -29,13 +62,19 @@ function showToast(notification) {
     const container = document.getElementById("toastContainer");
     const toast = document.createElement("div");
     toast.className = "bookly-toast";
+
+    const message = resolveNotificationText(notification);
+    const viewText = getLocalizedViewText();
+
     toast.innerHTML = `
-        <span class="bookly-toast__message">${notification.message}</span>
-        ${notification.link ? `<a href="${notification.link}" class="bookly-toast__link">View</a>` : ""}
+        <span class="bookly-toast__message">${message}</span>
+        ${notification.link ? `<a href="${notification.link}" class="bookly-toast__link">${viewText}</a>` : ""}
     `;
+
     container.appendChild(toast);
 
     requestAnimationFrame(() => toast.classList.add("bookly-toast--visible"));
+
     setTimeout(() => {
         toast.classList.remove("bookly-toast--visible");
         toast.addEventListener("transitionend", () => toast.remove(), { once: true });

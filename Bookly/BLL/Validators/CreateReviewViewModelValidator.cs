@@ -7,13 +7,36 @@ public class CreateReviewViewModelValidator : AbstractValidator<CreateReviewView
 {
     public CreateReviewViewModelValidator()
     {
-        RuleFor(x => x.BookingId).GreaterThan(0);
-        RuleFor(x => x.Rating).InclusiveBetween(1, 5);
-        RuleFor(x => x.Comment).MaximumLength(1000);
+        RuleFor(x => x.BookingId)
+            .GreaterThan(0)
+            .WithMessage("BookingIdMustBeGreaterThanZero");
 
-        RuleFor(x => x.CleanlinessRating).InclusiveBetween(1, 5).When(x => x.CleanlinessRating.HasValue);
-        RuleFor(x => x.CommunicationRating).InclusiveBetween(1, 5).When(x => x.CommunicationRating.HasValue);
-        RuleFor(x => x.LocationRating).InclusiveBetween(1, 5).When(x => x.LocationRating.HasValue);
-        RuleFor(x => x.ValueRating).InclusiveBetween(1, 5).When(x => x.ValueRating.HasValue);
+        RuleFor(x => x.Rating)
+            .InclusiveBetween(1, 5)
+            .WithMessage("RatingMustBeBetween1And5");
+
+        RuleFor(x => x.Comment)
+            .MaximumLength(1000)
+            .WithMessage("ReviewCommentMaximumLength");
+
+        RuleFor(x => x.CleanlinessRating)
+            .InclusiveBetween(1, 5)
+            .When(x => x.CleanlinessRating.HasValue)
+            .WithMessage("RatingMustBeBetween1And5");
+
+        RuleFor(x => x.CommunicationRating)
+            .InclusiveBetween(1, 5)
+            .When(x => x.CommunicationRating.HasValue)
+            .WithMessage("RatingMustBeBetween1And5");
+
+        RuleFor(x => x.LocationRating)
+            .InclusiveBetween(1, 5)
+            .When(x => x.LocationRating.HasValue)
+            .WithMessage("RatingMustBeBetween1And5");
+
+        RuleFor(x => x.ValueRating)
+            .InclusiveBetween(1, 5)
+            .When(x => x.ValueRating.HasValue)
+            .WithMessage("RatingMustBeBetween1And5");
     }
 }
