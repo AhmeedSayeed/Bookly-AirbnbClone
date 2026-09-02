@@ -33,10 +33,16 @@ namespace PL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkAsRead(int id)
+        public async Task<IActionResult> MarkAsRead(int id, string? returnUrl = null)
         {
             var userId = GetCurrentUserId();
+
             await _notificationService.MarkAsReadAsync(id, userId);
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -59,6 +65,22 @@ namespace PL.Controllers
             var response = await _notificationService.GetUnreadCountAsync(userId);
 
             return Json(response.Data);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDropdownList()
+        {
+            var userId = GetCurrentUserId();
+            var response = await _notificationService.GetForUserAsync(userId, 1, 10);
+            return Json(response.Data.Notifications);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> MarkAsReadAjax(int id)
+        {
+            var userId = GetCurrentUserId();
+            await _notificationService.MarkAsReadAsync(id, userId);
+            return Ok();
         }
     }
 }

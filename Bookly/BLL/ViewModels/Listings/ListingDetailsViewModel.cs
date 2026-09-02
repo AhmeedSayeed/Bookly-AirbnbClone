@@ -27,5 +27,10 @@ public class ListingDetailsViewModel
     public List<ReviewViewModel> Reviews { get; set; } = new();
     public double AverageRating { get; set; }
 
+    // Whether the currently logged-in user has this listing saved to their wishlist
+    public bool IsWishlisted { get; set; }
+
     public BookingFormViewModel Booking { get; set; } = new();
+
+    public List<string> UnavailableDates { get; set; } = new();
 }

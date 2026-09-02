@@ -1,81 +1,269 @@
-@model NotificationsViewModel
+@model BLL.ViewModels.Notifications.NotificationsViewModel
+@using Microsoft.Extensions.Localization
+@inject IStringLocalizer<SharedResource> Localizer
 
 @{
     ViewData["Title"] = Localizer["Notifications"];
 }
 
-<div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-6);">
-        <h1 class="font-display" style="font-size: var(--fs-xl); margin: 0;">@Localizer["Notifications"]</h1>
+<style>
+    /* أنماط صفحة الإشعارات */
+    .notif-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: var(--space-6) var(--gutter);
+    }
+
+    .notif-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: var(--space-6);
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: var(--space-4);
+    }
+
+    .notif-card {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-4);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: var(--space-4);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        overflow: hidden;
+    }
+
+        .notif-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+    .notif-unread {
+        background: rgba(10, 37, 64, 0.02);
+        border-color: rgba(10, 37, 64, 0.1);
+    }
+
+    .notif-unread-bar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--color-navy);
+    }
+
+    .notif-icon-circle {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: var(--color-surface-sunk);
+        color: var(--color-text-muted);
+    }
+
+    .notif-unread .notif-icon-circle {
+        background: rgba(10, 37, 64, 0.08);
+        color: var(--color-navy);
+    }
+
+    .notif-content {
+        flex-grow: 1;
+    }
+
+    .notif-text {
+        margin: 0 0 var(--space-1) 0;
+        font-size: var(--fs-sm);
+        color: var(--color-navy);
+        line-height: 1.5;
+    }
+
+    .notif-date {
+        font-size: 11px;
+        color: var(--color-text-muted);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .notif-actions {
+        display: flex;
+        gap: var(--space-2);
+        flex-shrink: 0;
+        align-items: center;
+    }
+
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+    }
+
+    .btn-view {
+        background: rgba(193, 155, 118, 0.1);
+        color: var(--color-brass);
+    }
+
+        .btn-view:hover {
+            background: rgba(193, 155, 118, 0.2);
+        }
+
+    .btn-read {
+        background: transparent;
+        border: 1px solid var(--color-border);
+        color: var(--color-text-muted);
+    }
+
+        .btn-read:hover {
+            background: var(--color-surface-sunk);
+            color: var(--color-navy);
+            border-color: var(--color-navy);
+        }
+
+    .btn-mark-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(10, 37, 64, 0.05);
+        border: none;
+        color: var(--color-navy);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-pill);
+        font-size: var(--fs-sm);
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+        .btn-mark-all:hover {
+            background: rgba(10, 37, 64, 0.1);
+        }
+</style>
+
+<div class="notif-container">
+
+    <!-- Header -->
+    <div class="notif-header">
+        <div>
+            <h1 class="font-display" style="font-size: var(--fs-xl); margin: 0; color: var(--color-navy);">
+                @Localizer["Notifications"]
+            </h1>
+            @if (Model.UnreadCount > 0)
+            {
+                <p style="margin: var(--space-1) 0 0 0; color: var(--color-danger); font-size: var(--fs-sm); font-weight: 600;">
+                    @Model.UnreadCount @Localizer["Unread"]
+                </p>
+            }
+        </div>
 
         @if (Model.UnreadCount > 0)
         {
-            <form asp-action="MarkAllAsRead" method="post">
-                <button type="submit" style="background: transparent; border: none; color: var(--color-navy); font-size: var(--fs-sm); font-weight: 600; cursor: pointer; text-decoration: underline;">
+            <form asp-action="MarkAllAsRead" method="post" style="margin: 0;">
+                <button type="submit" class="btn-mark-all">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     @Localizer["MarkAllAsRead"]
                 </button>
             </form>
         }
     </div>
 
-    <div style="background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); border: 1px solid var(--color-border); overflow: hidden;">
-        @if (Model.Notifications.Any())
+    <!-- Notifications List -->
+    <div style="display: flex; flex-direction: column; gap: var(--space-3);">
+        @if (Model.Notifications != null && Model.Notifications.Any())
         {
-            <ul style="list-style: none; padding: 0; margin: 0;">
-                @foreach (var notification in Model.Notifications)
-                {
-                    var displayText = !string.IsNullOrWhiteSpace(notification.MessageKey)
-                        ? Localizer[notification.MessageKey, notification.Args]
-                        : notification.LegacyMessage;
+            @foreach (var notification in Model.Notifications)
+            {
+                var isUnread = !notification.IsRead;
+                
+                var displayText = !string.IsNullOrWhiteSpace(notification.MessageKey)
+                    ? Localizer[notification.MessageKey, notification.Args]
+                    : notification.LegacyMessage;
 
-                    <li style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); background: @(notification.IsRead ? "transparent" : "var(--color-surface-sunk)"); display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4);">
+                <div class="notif-card @(isUnread ? "notif-unread" : "")">
 
-                        <!-- Notification Content -->
-                        <div style="flex-grow: 1;">
-                            <p style="margin: 0 0 var(--space-1) 0; font-size: var(--fs-sm); color: var(--color-text); font-weight: @(notification.IsRead ? "400" : "600");">
-                                @displayText
-                            </p>
-                            <span style="font-size: var(--fs-xs); color: var(--color-text-muted);">
-                                @notification.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
-                            </span>
-                        </div>
+                    @if (isUnread)
+                    {
+                        <div class="notif-unread-bar"></div>
+                    }
 
-                        <!-- Actions (Link / Mark Read) -->
-                        <div style="display: flex; gap: var(--space-3); align-items: center;">
-                            @if (!string.IsNullOrEmpty(notification.Link))
-                            {
-                                <a href="@notification.Link" style="color: var(--color-brass); font-size: var(--fs-sm); font-weight: 600; text-decoration: none;">@Localizer["View"]</a>
-                            }
+                    <!-- Icon -->
+                    <div class="notif-icon-circle">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                    </div>
 
-                            @if (!notification.IsRead)
-                            {
-                                <form asp-action="MarkAsRead" method="post">
-                                    <input type="hidden" name="id" value="@notification.Id" />
-                                    <button type="submit" style="background: var(--color-surface); border: 1px solid var(--color-border-strong); color: var(--color-navy); font-size: var(--fs-xs); font-weight: 600; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); cursor: pointer;">
-                                        @Localizer["MarkRead"]
-                                    </button>
-                                </form>
-                            }
-                        </div>
-                    </li>
-                }
-            </ul>
+                    <!-- Content -->
+                    <div class="notif-content">
+                        <p class="notif-text" style="font-weight: @(isUnread ? "600" : "400");">
+                            @displayText
+                        </p>
+                        <span class="notif-date">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            @notification.CreatedAt.ToString("MMM dd, yyyy h:mm tt")
+                        </span>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="notif-actions">
+                        @if (!string.IsNullOrEmpty(notification.Link))
+                        {
+                            <form asp-action="MarkAsRead" method="post" style="margin: 0;">
+                                <input type="hidden" name="id" value="@notification.Id" />
+                                <input type="hidden" name="returnUrl" value="@notification.Link" />
+                                <button type="submit" class="btn-icon btn-view" title="@Localizer["View"]">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                                </button>
+                            </form>
+                        }
+
+                        @if (isUnread)
+                        {
+                            <form asp-action="MarkAsRead" method="post" style="margin: 0;">
+                                <input type="hidden" name="id" value="@notification.Id" />
+                                <button type="submit" class="btn-icon btn-read" title="@Localizer["MarkRead"]">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
 
             <!-- Pagination Controls -->
             @if (Model.PageInfo.TotalPages > 1)
             {
-                <div style="padding: var(--space-4); border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; background: var(--color-surface-sunk);">
-                    <p style="margin: 0; font-size: var(--fs-xs); color: var(--color-text-muted);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border);">
+                    <span style="font-size: var(--fs-xs); color: var(--color-text-muted);">
                         @Localizer["ShowingPage"] @Model.PageInfo.PageNumber @Localizer["Of"] @Model.PageInfo.TotalPages
-                    </p>
+                    </span>
                     <div style="display: flex; gap: var(--space-2);">
                         @if (Model.PageInfo.PageNumber > 1)
                         {
-                            <a href="?pageNumber=@(Model.PageInfo.PageNumber - 1)&pageSize=@Model.PageInfo.PageSize" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-text); text-decoration: none; font-size: var(--fs-sm); background: var(--color-surface);">@Localizer["Prev"]</a>
+                            <a href="?pageNumber=@(Model.PageInfo.PageNumber - 1)&pageSize=@Model.PageInfo.PageSize"
+                               style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-navy); text-decoration: none; font-size: var(--fs-sm); font-weight: 500; transition: background 0.2s;">
+                                &larr; @Localizer["Prev"]
+                            </a>
                         }
                         @if (Model.PageInfo.PageNumber < Model.PageInfo.TotalPages)
                         {
-                            <a href="?pageNumber=@(Model.PageInfo.PageNumber + 1)&pageSize=@Model.PageInfo.PageSize" style="padding: var(--space-2) var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); color: var(--color-text); text-decoration: none; font-size: var(--fs-sm); background: var(--color-surface);">@Localizer["Next"]</a>
+                            <a href="?pageNumber=@(Model.PageInfo.PageNumber + 1)&pageSize=@Model.PageInfo.PageSize"
+                               style="padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-navy); text-decoration: none; font-size: var(--fs-sm); font-weight: 500; transition: background 0.2s;">
+                                @Localizer["Next"] &rarr;
+                            </a>
                         }
                     </div>
                 </div>
@@ -83,8 +271,21 @@
         }
         else
         {
-            <div style="padding: var(--space-6); text-align: center; color: var(--color-text-muted);">
-                <p style="margin: 0; font-size: var(--fs-sm);">@Localizer["NoNotificationsYet"]</p>
+            <!-- Empty State -->
+            <div style="text-align: center; padding: var(--space-8) var(--space-4); background: var(--color-surface); border: 1px dashed var(--color-border-strong); border-radius: var(--radius-lg);">
+                <div style="width: 72px; height: 72px; margin: 0 auto var(--space-4) auto; background: rgba(10, 37, 64, 0.03); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--color-text-muted);">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        <line x1="21" y1="3" x2="3" y2="21" style="stroke: var(--color-border-strong);"></line>
+                    </svg>
+                </div>
+                <h3 class="font-display" style="margin: 0 0 var(--space-2) 0; font-size: var(--fs-lg); color: var(--color-navy);">
+                    @Localizer["NoNotificationsYet"]
+                </h3>
+                <p style="margin: 0; color: var(--color-text-muted); font-size: var(--fs-sm);">
+                    @Localizer["WhenYouGetUpdates"]
+                </p>
             </div>
         }
     </div>

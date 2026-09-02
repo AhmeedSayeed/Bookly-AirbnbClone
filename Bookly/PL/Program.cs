@@ -11,11 +11,13 @@ using DAL.Models.Identity;
 using DAL.Repository.Implementation;
 using DAL.Repository.Interfaces;
 using FluentValidation;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Globalization;
 using System.Security.Claims;
 using System.Text;
 namespace PL
@@ -173,6 +175,14 @@ namespace PL
             builder.Services.AddValidatorsFromAssemblyContaining<BookingRequestViewModelValidator>();
             builder.Services.AddSignalR();
 
+            builder.Services.AddHangfire(configuration => configuration
+                    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                    .UseSimpleAssemblyNameTypeSerializer()
+                    .UseRecommendedSerializerSettings()
+                    .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddHangfireServer();
+
             builder.Services.AddScoped<IFileUploader, FileUploader>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
@@ -195,14 +205,27 @@ namespace PL
             builder.Services.AddScoped<ICouponService, CouponService>();
 
             var app = builder.Build();
-            var supportedCultures = new[] { "en", "ar" };
 
-            var localizationOptions = new RequestLocalizationOptions()
-                .SetDefaultCulture("en")
-                .AddSupportedCultures(supportedCultures)
-                .AddSupportedUICultures(supportedCultures);
+            var enEgCulture = new CultureInfo("en-EG");
+            var arEgCulture = new CultureInfo("ar-EG");
+
+            enEgCulture.NumberFormat.CurrencyPositivePattern = 2;
+            enEgCulture.NumberFormat.CurrencyNegativePattern = 12;
+
+            arEgCulture.NumberFormat.CurrencyPositivePattern = 2;
+            arEgCulture.NumberFormat.CurrencyNegativePattern = 12;
+
+            var supportedCultures = new[] { enEgCulture, arEgCulture };
+
+            var localizationOptions = new RequestLocalizationOptions
+            {
+                DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(enEgCulture),
+                SupportedCultures = supportedCultures,
+                SupportedUICultures = supportedCultures
+            };
 
             app.UseRequestLocalization(localizationOptions);
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
@@ -215,6 +238,13 @@ namespace PL
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseHangfireDashboard();
+
+            RecurringJob.AddOrUpdate<IBookingService>(
+                "auto-complete-past-bookings",
+                service => service.AutoCompletePastBookingsAsync(),
+                Cron.Daily(0, 0));
 
             app.MapStaticAssets();
             app.MapControllerRoute(

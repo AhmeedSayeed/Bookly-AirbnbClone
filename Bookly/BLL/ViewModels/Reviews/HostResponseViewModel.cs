@@ -8,6 +8,7 @@ public class HostResponseViewModel
     public int ReviewId { get; set; }
 
     public ReviewViewModel Review { get; set; } = new();
+    public int ListingId { get; set; }
 
     [Required(ErrorMessage = "ResponseTextRequired")]
     [MaxLength(1000, ErrorMessage = "ResponseTextMaxLength")]

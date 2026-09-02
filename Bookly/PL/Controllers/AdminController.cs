@@ -13,13 +13,16 @@ namespace PL.Controllers
     public class AdminController : Controller
     {
         private readonly IAdminService _adminService;
+        private readonly ICouponService _couponService;
         private readonly IStringLocalizer<SharedResource> _localizer;
 
         public AdminController(
             IAdminService adminService,
+            ICouponService couponService,
             IStringLocalizer<SharedResource> localizer)
         {
             _adminService = adminService;
+            _couponService = couponService;
             _localizer = localizer;
         }
 
@@ -208,6 +211,37 @@ namespace PL.Controllers
                 : _localizer[response.Message].Value;
 
             return RedirectToAction(nameof(Listings));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Coupons()
+        {
+            var response = await _couponService.GetAllCouponsAsync();
+            return View(response.Data);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateCoupon(BLL.DTOs.CreateCouponDto model)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Please fill in all coupon fields correctly.";
+                return RedirectToAction(nameof(Coupons));
+            }
+
+            var response = await _couponService.CreateCouponAsync(model);
+            TempData[response.Succeeded ? "SuccessMessage" : "ErrorMessage"] = response.Message;
+            return RedirectToAction(nameof(Coupons));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCoupon(int id)
+        {
+            var response = await _couponService.DeleteCouponAsync(id);
+            TempData[response.Succeeded ? "SuccessMessage" : "ErrorMessage"] = response.Message;
+            return RedirectToAction(nameof(Coupons));
         }
     }
 }

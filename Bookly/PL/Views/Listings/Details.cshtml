@@ -1,12 +1,40 @@
 @model BLL.ViewModels.Listings.ListingDetailsViewModel
+@using System.Security.Claims
 
 @{
     ViewData["Title"] = Model.Title;
+
+    var currentUserIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    // تحديد العملة وكلمة "ليالي" بناءً على لغة المتصفح الحالية
+    var isArabic = System.Threading.Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ar");
+    var currencySymbol = isArabic ? "ج.م" : "EGP";
+    var nightsLabel = Localizer["Nights"].Value;
 }
 
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
-    <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-2);">@Model.Title</h1>
-    <p style="color: var(--color-text-muted); margin-bottom: var(--space-5);">@Model.City, @Model.Country</p>
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4);">
+        <div>
+            <h1 class="font-display" style="font-size: var(--fs-xl); margin-bottom: var(--space-2);">@Model.Title</h1>
+            <p style="color: var(--color-text-muted); margin-bottom: var(--space-5);">@Model.City, @Model.Country</p>
+        </div>
+
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            @Html.AntiForgeryToken()
+            <button type="button"
+                    id="details-wishlist-btn"
+                    data-listing-id="@Model.Id"
+                    title="@Localizer["Wishlist"]"
+                    style="flex-shrink: 0; width: 44px; height: 44px; border-radius: var(--radius-pill);
+                border: 1px solid var(--color-border); background: var(--color-surface);
+                display: flex; align-items: center; justify-content: center;
+                cursor: pointer; box-shadow: var(--shadow-sm);">
+                <span id="details-wishlist-icon"
+                      style="font-size: 20px; color: @(Model.IsWishlisted ? "var(--color-clay)" : "var(--color-text-muted)");">&#9829;</span>
+            </button>
+        }
+    </div>
 
     <!-- THE PHOTO MOSAIC -->
     <div class="mosaic" style="margin-bottom: var(--space-7); display: grid; grid-template-columns: 2fr 1fr 1fr; grid-template-rows: 250px 250px; gap: var(--space-2); position: relative; border-radius: var(--radius-lg); overflow: hidden;">
@@ -114,7 +142,7 @@
                 @if (Model.Reviews.Any())
                 {
                     <span style="color: var(--color-brass); font-family: var(--font-body); font-size: var(--fs-base);">
-                        &#9733; @Model.AverageRating.ToString("0.0")
+                        &#9733; @Model.Reviews.Average(r => r.Rating).ToString("0.0")
                     </span>
                 }
             </h3>
@@ -170,10 +198,33 @@
 
                             @if (!string.IsNullOrEmpty(review.HostResponse))
                             {
-                                <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--color-surface-sunk); border-radius: var(--radius-sm);">
-                                    <strong style="font-size: var(--fs-sm);">@Localizer["ResponseFromHost"]</strong>
-                                    <p style="margin: var(--space-1) 0 0 0; font-size: var(--fs-sm);">@review.HostResponse</p>
+                                <!-- عرض رد الهوست لو موجود -->
+                                <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--color-surface-sunk); border-left: 3px solid var(--color-brass); border-radius: var(--radius-sm);">
+                                    <strong style="font-size: var(--fs-sm); display: block; margin-bottom: var(--space-1);">@Localizer["ResponseFromHost"]</strong>
+                                    <p style="margin: 0; font-size: var(--fs-sm);">@review.HostResponse</p>
                                 </div>
+                            }
+                            else if (User.Identity.IsAuthenticated && currentUserIdStr == Model.Host.Id.ToString())
+                            {
+                                <!-- زرار الرد يظهر للهوست فقط إذا لم يكن هناك رد -->
+                                <div style="margin-top: var(--space-3);">
+                                    <a asp-controller="Reviews" 
+                                       asp-action="Respond" 
+                                       asp-route-reviewId="@review.Id"
+                                       style="display: inline-block; padding: var(--space-1) var(--space-3); font-size: var(--fs-xs); font-weight: 600; background: transparent; color: var(--color-navy); border: 1px solid var(--color-navy); border-radius: var(--radius-pill); text-decoration: none; transition: background 0.2s;">
+                                        @Localizer["RespondToReview"]
+                                    </a>
+                                </div>
+                            }
+                            else if (User.Identity != null && User.Identity.IsAuthenticated &&
+                                      int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int currentUserId) &&
+                                      currentUserId == Model.Host.Id)
+                            {
+                                <a asp-controller="Reviews" asp-action="Respond" asp-route-reviewId="@review.Id"
+                                   class="btn-primary"
+                                   style="display: inline-block; margin-top: var(--space-3); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-sm); font-weight: 600; text-decoration: none; box-shadow: var(--shadow-sm);">
+                                    @Localizer["RespondToReview"]
+                                </a>
                             }
                         </div>
                     }
@@ -186,8 +237,7 @@
             <div style="padding: var(--space-5); border: 1px solid var(--color-border); border-radius: var(--radius-md); box-shadow: var(--shadow-md); position: sticky; top: 100px; background: var(--color-surface);">
 
                 <h3 class="font-display" style="font-size: var(--fs-lg); color: var(--color-navy); margin-bottom: var(--space-4);">
-                    @Model.PricePerNight.ToString("C")
-
+                    @Model.PricePerNight.ToString("C0")
                     <span style="font-size: var(--fs-sm); font-family: var(--font-body); color: var(--color-text-muted);">
                         @Localizer["Night"]
                     </span>
@@ -283,9 +333,37 @@
 
 @section Scripts {
     <script>
+        // تمرير العملة والنصوص المترجمة من C# إلى JavaScript بأمان
+        const currencySymbol = "@Html.Raw(currencySymbol)";
+        const nightsText = "@Html.Raw(nightsLabel)";
+
         // Only this formatting is intentionally culture-independent.
         // Everything else is kept from the original behavior.
         const pricePerNight = @Model.PricePerNight.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        const unavailableDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UnavailableDates)));
+
+        var detailsWishlistBtn = document.getElementById('details-wishlist-btn');
+        if (detailsWishlistBtn) {
+            detailsWishlistBtn.addEventListener('click', function() {
+                var listingId = detailsWishlistBtn.getAttribute('data-listing-id');
+                var icon = document.getElementById('details-wishlist-icon');
+
+                fetch('@Url.Action("Toggle", "Wishlist")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: 'listingId=' + encodeURIComponent(listingId)
+                })
+                    .then(function(res) { return res.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            icon.style.color = data.isWishlisted ? 'var(--color-clay)' : 'var(--color-text-muted)';
+                        }
+                    });
+            });
+        }
 
         document.addEventListener("DOMContentLoaded", function() {
             const today = new Date().toISOString().split('T')[0];
@@ -311,6 +389,20 @@
             calculateTotal();
         }
 
+        function hasUnavailableDatesInRange(startDateStr, endDateStr) {
+            let curr = new Date(startDateStr);
+            const end = new Date(endDateStr);
+
+            while (curr < end) {
+                const dateString = curr.toISOString().split('T')[0];
+                if (unavailableDates.has(dateString)) {
+                    return true;
+                }
+                curr.setDate(curr.getDate() + 1);
+            }
+            return false;
+        }
+
         function validateBookingForm(event) {
             const checkIn = document.getElementById('checkin-date').value;
             const checkOut = document.getElementById('checkout-date').value;
@@ -325,6 +417,13 @@
 
             if (new Date(checkOut) <= new Date(checkIn)) {
                 errorAlert.innerText = '@Localizer["CheckOutMustBeAfterCheckIn"]';
+                errorAlert.style.display = 'block';
+                event.preventDefault();
+                return false;
+            }
+
+            if (hasUnavailableDatesInRange(checkIn, checkOut)) {
+                errorAlert.innerText = "Selected dates include dates that are blocked or already booked by another guest.";
                 errorAlert.style.display = 'block';
                 event.preventDefault();
                 return false;
@@ -353,6 +452,13 @@
                 errorAlert.style.display = 'block';
                 calcContainer.style.display = 'none';
                 return;
+            }
+
+            if (hasUnavailableDatesInRange(checkInVal, checkOutVal)) {
+                errorAlert.innerText = "Warning: These dates contain blocked or unavailable days.";
+                errorAlert.style.display = 'block';
+                calcContainer.style.display = 'none';
+                return;
             } else {
                 errorAlert.style.display = 'none';
             }
@@ -363,14 +469,14 @@
             if (nights > 0) {
                 const total = nights * pricePerNight;
 
-                document.getElementById("night-count-text").innerText =
-              `$${pricePerNight} x ${nights} @Html.Raw(Localizer["Nights"].Value)`;
+                document.getElementById('night-count-text').innerText = 
+                    `${pricePerNight} ${currencySymbol} x ${nights} ${nightsText}`;
 
-                document.getElementById('base-total-text').innerText =
-                    `$${total.toFixed(2)}`;
+                document.getElementById('base-total-text').innerText = 
+                    `${total.toFixed(2)} ${currencySymbol}`;
 
-                document.getElementById('final-total-text').innerText =
-                    `$${total.toFixed(2)}`;
+                document.getElementById('final-total-text').innerText = 
+                    `${total.toFixed(2)} ${currencySymbol}`;
 
                 calcContainer.style.display = 'block';
             } else {

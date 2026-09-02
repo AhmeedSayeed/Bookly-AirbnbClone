@@ -92,3 +92,98 @@ button.accept-policy {
     padding: 1px 6px;
     position: absolute;
 }
+
+/* --- Notification Bell Styles --- */
+.nav-bell-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    text-decoration: none;
+    color: var(--color-navy);
+    background: var(--color-surface);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+    margin-right: var(--space-2);
+}
+
+    /* Soft lift and shadow expand on hover */
+    .nav-bell-wrapper:hover {
+        background: var(--color-surface-sunk);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+
+        /* Trigger the ring animation on the SVG when hovering the wrapper */
+        .nav-bell-wrapper:hover .nav-bell-icon {
+            animation: gentle-ring 0.6s ease-in-out;
+        }
+
+/* The bell SVG */
+.nav-bell-icon {
+    transition: transform 0.3s ease;
+}
+
+/* Smooth ringing keyframes */
+@keyframes gentle-ring {
+    0% {
+        transform: rotate(0);
+    }
+
+    20% {
+        transform: rotate(15deg);
+    }
+
+    40% {
+        transform: rotate(-10deg);
+    }
+
+    60% {
+        transform: rotate(5deg);
+    }
+
+    80% {
+        transform: rotate(-2deg);
+    }
+
+    100% {
+        transform: rotate(0);
+    }
+}
+
+/* The red unread badge */
+.nav-bell-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: var(--color-danger, #d32f2f);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-bg); /* Creates a clean cut-out effect against the bell */
+    animation: pulse-soft 2.5s infinite; /* Very subtle pulse */
+}
+
+/* Subtle pulse to draw attention to unread notifications */
+@keyframes pulse-soft {
+    0% {
+        box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
+    }
+
+    70% {
+        box-shadow: 0 0 0 4px rgba(211, 47, 47, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+    }
+}
