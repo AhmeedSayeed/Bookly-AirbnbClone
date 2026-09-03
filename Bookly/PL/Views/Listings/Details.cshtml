@@ -230,15 +230,13 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden;">
                         <div style="padding: var(--space-2); background: var(--color-surface-sunk);">
                             <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Check-in</label>
-                            <input type="date" name="CheckInDate" id="checkin-date" required
-                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
-                                   onchange="onCheckInChange()" />
+                            <input type="text" name="CheckInDate" id="checkin-date" placeholder="YYYY-MM-DD" readonly required
+                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm); cursor: pointer;" />
                         </div>
                         <div style="padding: var(--space-2); background: var(--color-surface-sunk); border-left: 1px solid var(--color-border);">
                             <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">Checkout</label>
-                            <input type="date" name="CheckOutDate" id="checkout-date" required
-                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
-                                   onchange="calculateTotal()" />
+                            <input type="text" name="CheckOutDate" id="checkout-date" placeholder="YYYY-MM-DD" readonly required
+                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm); cursor: pointer;" />
                         </div>
                     </div>
 
@@ -272,10 +270,34 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .flatpickr-calendar {
+        border-radius: var(--radius-md) !important;
+        box-shadow: var(--shadow-md) !important;
+        border: 1px solid var(--color-border) !important;
+        font-family: inherit !important;
+    }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+        background: var(--color-navy) !important;
+        border-color: var(--color-navy) !important;
+        color: #fff !important;
+    }
+    .flatpickr-day.flatpickr-disabled, .flatpickr-day.flatpickr-disabled:hover {
+        color: var(--color-text-muted) !important;
+        background: #FDF0ED !important;
+        text-decoration: line-through !important;
+        opacity: 0.6 !important;
+        cursor: not-allowed !important;
+    }
+</style>
+
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         const pricePerNight = @Model.PricePerNight;
-        const unavailableDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UnavailableDates)));
+        const unavailableDatesList = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UnavailableDates));
+        const unavailableDates = new Set(unavailableDatesList);
 
         var detailsWishlistBtn = document.getElementById('details-wishlist-btn');
         if (detailsWishlistBtn) {
@@ -300,28 +322,32 @@
             });
         }
 
-        document.addEventListener("DOMContentLoaded", function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('checkin-date').setAttribute('min', today);
+        let checkoutPicker;
+
+        const checkinPicker = flatpickr("#checkin-date", {
+            minDate: "today",
+            dateFormat: "Y-m-d",
+            disable: unavailableDatesList,
+            onChange: function(selectedDates, dateStr) {
+                if (selectedDates.length > 0) {
+                    const nextDay = new Date(selectedDates[0].getTime() + 86400000);
+                    checkoutPicker.set('minDate', nextDay);
+                    if (checkoutPicker.selectedDates.length > 0 && checkoutPicker.selectedDates[0] <= selectedDates[0]) {
+                        checkoutPicker.clear();
+                    }
+                }
+                calculateTotal();
+            }
         });
 
-        function onCheckInChange() {
-            const checkInVal = document.getElementById('checkin-date').value;
-            const checkoutInput = document.getElementById('checkout-date');
-
-            if (checkInVal) {
-                let nextDay = new Date(checkInVal);
-                nextDay.setDate(nextDay.getDate() + 1);
-                const nextDayFormatted = nextDay.toISOString().split('T')[0];
-
-                checkoutInput.setAttribute('min', nextDayFormatted);
-
-                if (checkoutInput.value && checkoutInput.value <= checkInVal) {
-                    checkoutInput.value = nextDayFormatted;
-                }
+        checkoutPicker = flatpickr("#checkout-date", {
+            minDate: new Date(Date.now() + 86400000),
+            dateFormat: "Y-m-d",
+            disable: unavailableDatesList,
+            onChange: function(selectedDates, dateStr) {
+                calculateTotal();
             }
-            calculateTotal();
-        }
+        });
 
         function hasUnavailableDatesInRange(startDateStr, endDateStr) {
             let curr = new Date(startDateStr);
@@ -402,7 +428,6 @@
 
             if (nights > 0) {
                 const total = nights * pricePerNight;
-                // You can update this JS to format using the localized currency if needed
                 document.getElementById('night-count-text').innerText = `${pricePerNight} x ${nights} nights`;
                 document.getElementById('base-total-text').innerText = `${total.toFixed(2)}`;
                 document.getElementById('final-total-text').innerText = `${total.toFixed(2)}`;
