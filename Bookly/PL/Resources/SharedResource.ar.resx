@@ -1728,4 +1728,22 @@
 	<data name="MyWishlist" xml:space="preserve">
 		<value>مفضلاتي</value>
 	</data>
+	<data name="Messages" xml:space="preserve">
+		<value>الرسائل</value>
+	</data>
+	<data name="Messages" xml:space="preserve">
+    <value>الرسائل</value>
+			</data>
+			<data name="NoMessagesYet" xml:space="preserve">
+			    <value>لا توجد رسائل حتى الآن.</value>
+			</data>
+			<data name="SelectConversationToStart" xml:space="preserve">
+			    <value>اختر محادثة لبدء الدردشة.</value>
+			</data>
+			<data name="TypeMessage" xml:space="preserve">
+			    <value>اكتب رسالة...</value>
+			</data>
+			<data name="ContactHost" xml:space="preserve">
+			    <value>تواصل مع المُضيف</value>
+			</data>
 </root>

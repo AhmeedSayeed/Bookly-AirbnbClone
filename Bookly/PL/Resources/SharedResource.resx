@@ -1728,4 +1728,22 @@
 	<data name="MyWishlist" xml:space="preserve">
 		<value>My Wishlist</value>
 	</data>
+	<data name="Messages" xml:space="preserve">
+		<value>Messages</value>
+	</data>
+	<data name="Messages" xml:space="preserve">
+    <value>Messages</value>
+</data>
+<data name="NoMessagesYet" xml:space="preserve">
+    <value>No messages yet.</value>
+</data>
+<data name="SelectConversationToStart" xml:space="preserve">
+    <value>Select a conversation to start chatting.</value>
+</data>
+<data name="TypeMessage" xml:space="preserve">
+    <value>Type a message...</value>
+</data>
+<data name="ContactHost" xml:space="preserve">
+    <value>Contact Host</value>
+</data>
 </root>

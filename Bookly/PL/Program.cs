@@ -216,6 +216,7 @@ namespace PL
             builder.Services.AddScoped<IWishlistService, WishlistService>();
             builder.Services.AddScoped<IReviewService, ReviewService>();
             builder.Services.AddScoped<ICouponService, CouponService>();
+            builder.Services.AddScoped<IChatService, ChatService>();
 
             var app = builder.Build();
 
@@ -266,6 +267,7 @@ namespace PL
                 .WithStaticAssets();
 
             app.MapHub<NotificationHub>("/hubs/notifications");
+            app.MapHub<ChatHub>("/hubs/chat");
 
             app.Run();
         }

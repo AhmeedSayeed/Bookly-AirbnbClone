@@ -1,6 +1,6 @@
 ﻿const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/hubs/notifications")   // no accessTokenFactory needed -- the JWT cookie
-    .withAutomaticReconnect()          // rides along automatically, same-origin
+    .withUrl("/hubs/notifications")
+    .withAutomaticReconnect()
     .build();
 
 let unreadCount = 0;
@@ -154,3 +154,26 @@ function markAsReadAndNavigate(event, id, link) {
         }
     });
 }
+
+// ----------------------------------------------------
+// Chat Notifications (Integrated using existing Toast)
+// ----------------------------------------------------
+const chatConnection = new signalR.HubConnectionBuilder()
+    .withUrl("/hubs/chat")
+    .build();
+
+chatConnection.on("ReceiveChatNotification", function (notification) {
+    // 1. Update the bell counter correctly once
+    unreadCount++;
+    updateBadge();
+
+    // 2. Show the toast using the exact same style as system notifications
+    showToast({
+        legacyMessage: `New message from ${notification.senderName}: ${notification.messageSnippet}`,
+        link: `/Chat/Inbox?conversationId=${notification.conversationId}`
+    });
+});
+
+chatConnection.start().catch(function (err) {
+    console.error("SignalR Chat Connection Error: ", err.toString());
+});
