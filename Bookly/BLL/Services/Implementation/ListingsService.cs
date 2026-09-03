@@ -1,10 +1,11 @@
 using AutoMapper;
 using BLL.DTOs;
-using BLL.DTOs.Listing;
 using BLL.DTOs.Elasticsearch;
+using BLL.DTOs.Listing;
 using BLL.Services.Interfaces;
-using BLL.ViewModels.Listings;
 using BLL.ViewModels.Availability;
+using BLL.ViewModels.Common;
+using BLL.ViewModels.Listings;
 using DAL.Enums;
 using DAL.Models.Common;
 using DAL.Models.Property;
@@ -33,10 +34,89 @@ namespace BLL.Services.Implementation
             _mapper = mapper;
         }
 
-        public async Task<Response<PagedResult<ListingCardDto>>> SearchListingsAsync(ListingSearchRequestDto request)
+        public async Task<Response<PagedResult<ListingCardViewModel>>> SearchListingsAsync(ListingSearchRequestDto request)
         {
             var pagedListings = await _elasticService.SearchAsync(request);
-            return Response<PagedResult<ListingCardDto>>.Success(pagedListings);
+
+            // Fetch current ratings for the resulting listings from the database
+            var listingIds = pagedListings.Items.Select(i => i.Id).ToList();
+
+            var listingsData = await _listingRepo.GetAllAsIQueryable()
+                .Where(l => listingIds.Contains(l.Id))
+                .Include(l => l.Bookings)
+                    .ThenInclude(b => b.Review)
+                .ToListAsync();
+
+            var viewModels = new List<ListingCardViewModel>();
+
+            foreach (var item in pagedListings.Items)
+            {
+                var dbListing = listingsData.FirstOrDefault(l => l.Id == item.Id);
+
+                double avgRating = 0;
+                int reviewCount = 0;
+
+                if (dbListing != null)
+                {
+                    var reviews = dbListing.Bookings
+                        .Where(b => b.Review != null)
+                        .Select(b => b.Review)
+                        .ToList();
+
+                    if (reviews.Any())
+                    {
+                        avgRating = reviews.Average(r => r.Rating);
+                        reviewCount = reviews.Count;
+                    }
+                }
+
+                viewModels.Add(new ListingCardViewModel
+                {
+                    Id = item.Id,
+                    Title = item.Title,
+                    City = item.City,
+                    Country = "", // Elasticsearch currently doesn't map country in DTO
+                    PricePerNight = item.PricePerNight,
+                    PrimaryPhotoUrl = item.ThumbnailUrl,
+                    AverageRating = avgRating,
+                    ReviewCount = reviewCount,
+                    IsWishlisted = false // Will be set in the controller
+                });
+            }
+
+            var result = new PagedResult<ListingCardViewModel>
+            {
+                Items = viewModels,
+                TotalCount = pagedListings.TotalCount,
+                PageIndex = pagedListings.PageIndex,
+                PageSize = pagedListings.PageSize
+            };
+
+            return Response<PagedResult<ListingCardViewModel>>.Success(result);
+        }
+
+        public async Task<(decimal MinPrice, decimal MaxPrice)> GetGlobalMinMaxPriceAsync()
+        {
+            var listings = await _listingRepo.GetAllAsIQueryable()
+                .Where(l => l.IsActive)
+                .ToListAsync();
+
+            var hasListings = listings.Any();
+
+            if (!hasListings)
+            {
+                return (0, 2000);
+            }
+
+            var minPrice = listings.Min(l => l.PricePerNight);
+            var maxPrice = listings.Max(l => l.PricePerNight);
+
+            if (minPrice == maxPrice)
+            {
+                maxPrice = minPrice + 500;
+            }
+
+            return (minPrice, maxPrice);
         }
 
         public async Task<Response<int>> CreateAsync(ListingFormViewModel model, int hostId)

@@ -1725,4 +1725,7 @@
 	<data name="ClearFilters" xml:space="preserve">
 		<value>Clear Filters</value>
 	</data>
+	<data name="MyWishlist" xml:space="preserve">
+		<value>My Wishlist</value>
+	</data>
 </root>

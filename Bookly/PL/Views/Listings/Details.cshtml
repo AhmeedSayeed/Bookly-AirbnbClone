@@ -12,6 +12,13 @@
     var nightsLabel = Localizer["Nights"].Value;
 }
 
+<!-- تضمين ستايل Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+@if (isArabic)
+{
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/airbnb.css">
+}
+
 <div style="max-width: var(--content-max); margin: 0 auto; padding: var(--space-6) var(--gutter);">
     <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-4);">
         <div>
@@ -92,18 +99,18 @@
 
             @{
                 var amenityKeys = new Dictionary<string, string>
-    {
-        { "WiFi", "AmenityWifi" },
-        { "Kitchen", "AmenityKitchen" },
-        { "Free parking", "AmenityFreeParking" },
-        { "Air conditioning", "AmenityAirConditioning" },
-        { "Pool", "AmenityPool" },
-        { "Washer", "AmenityWasher" },
-        { "TV", "AmenityTV" },
-        { "Heating", "AmenityHeating" },
-        { "Dedicated workspace", "AmenityDedicatedWorkspace" },
-        { "Pets allowed", "AmenityPetsAllowed" }
-    };
+                {
+                    { "WiFi", "AmenityWifi" },
+                    { "Kitchen", "AmenityKitchen" },
+                    { "Free parking", "AmenityFreeParking" },
+                    { "Air conditioning", "AmenityAirConditioning" },
+                    { "Pool", "AmenityPool" },
+                    { "Washer", "AmenityWasher" },
+                    { "TV", "AmenityTV" },
+                    { "Heating", "AmenityHeating" },
+                    { "Dedicated workspace", "AmenityDedicatedWorkspace" },
+                    { "Pets allowed", "AmenityPetsAllowed" }
+                };
             }
 
             <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
@@ -198,7 +205,6 @@
 
                             @if (!string.IsNullOrEmpty(review.HostResponse))
                             {
-                                <!-- عرض رد الهوست لو موجود -->
                                 <div style="margin-top: var(--space-3); padding: var(--space-3); background: var(--color-surface-sunk); border-left: 3px solid var(--color-brass); border-radius: var(--radius-sm);">
                                     <strong style="font-size: var(--fs-sm); display: block; margin-bottom: var(--space-1);">@Localizer["ResponseFromHost"]</strong>
                                     <p style="margin: 0; font-size: var(--fs-sm);">@review.HostResponse</p>
@@ -206,25 +212,14 @@
                             }
                             else if (User.Identity.IsAuthenticated && currentUserIdStr == Model.Host.Id.ToString())
                             {
-                                <!-- زرار الرد يظهر للهوست فقط إذا لم يكن هناك رد -->
                                 <div style="margin-top: var(--space-3);">
-                                    <a asp-controller="Reviews" 
-                                       asp-action="Respond" 
+                                    <a asp-controller="Reviews"
+                                       asp-action="Respond"
                                        asp-route-reviewId="@review.Id"
                                        style="display: inline-block; padding: var(--space-1) var(--space-3); font-size: var(--fs-xs); font-weight: 600; background: transparent; color: var(--color-navy); border: 1px solid var(--color-navy); border-radius: var(--radius-pill); text-decoration: none; transition: background 0.2s;">
                                         @Localizer["RespondToReview"]
                                     </a>
                                 </div>
-                            }
-                            else if (User.Identity != null && User.Identity.IsAuthenticated &&
-                                      int.TryParse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value, out int currentUserId) &&
-                                      currentUserId == Model.Host.Id)
-                            {
-                                <a asp-controller="Reviews" asp-action="Respond" asp-route-reviewId="@review.Id"
-                                   class="btn-primary"
-                                   style="display: inline-block; margin-top: var(--space-3); padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); background: var(--color-navy); color: var(--color-surface); font-size: var(--fs-sm); font-weight: 600; text-decoration: none; box-shadow: var(--shadow-sm);">
-                                    @Localizer["RespondToReview"]
-                                </a>
                             }
                         </div>
                     }
@@ -257,36 +252,39 @@
                         </div>
                     }
 
-                    <!-- CLIENT-SIDE INLINE ERROR ALERT -->
                     <div id="booking-error-alert"
                          style="display: none; padding: var(--space-2) var(--space-3); background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border-radius: var(--radius-sm); font-size: var(--fs-sm); margin-bottom: var(--space-3);">
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-3); border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden;">
+
+                        <!-- Check In -->
                         <div style="padding: var(--space-2); background: var(--color-surface-sunk);">
                             <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">
                                 @Localizer["CheckIn"]
                             </label>
 
-                            <input type="date"
+                            <!-- تم تغيير type إلى text ليعمل مع مكتبة Flatpickr -->
+                            <input type="text"
                                    name="CheckInDate"
                                    id="checkin-date"
+                                   placeholder="YYYY-MM-DD"
                                    required
-                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
-                                   onchange="onCheckInChange()" />
+                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm); outline: none; cursor: pointer;" />
                         </div>
 
+                        <!-- Check Out -->
                         <div style="padding: var(--space-2); background: var(--color-surface-sunk); border-left: 1px solid var(--color-border);">
                             <label style="font-size: 10px; text-transform: uppercase; display: block; color: var(--color-text-muted);">
                                 @Localizer["CheckOut"]
                             </label>
 
-                            <input type="date"
+                            <input type="text"
                                    name="CheckOutDate"
                                    id="checkout-date"
+                                   placeholder="YYYY-MM-DD"
                                    required
-                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm);"
-                                   onchange="calculateTotal()" />
+                                   style="width: 100%; border: none; background: transparent; font-size: var(--fs-sm); outline: none; cursor: pointer;" />
                         </div>
                     </div>
 
@@ -332,15 +330,129 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    @if (isArabic)
+    {
+        <script src="https://npmcdn.com/flatpickr/dist/l10n/ar.js"></script>
+    }
+
     <script>
-        // تمرير العملة والنصوص المترجمة من C# إلى JavaScript بأمان
         const currencySymbol = "@Html.Raw(currencySymbol)";
         const nightsText = "@Html.Raw(nightsLabel)";
-
-        // Only this formatting is intentionally culture-independent.
-        // Everything else is kept from the original behavior.
         const pricePerNight = @Model.PricePerNight.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        const unavailableDates = new Set(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UnavailableDates)));
+
+        const unavailableDatesArr = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.UnavailableDates));
+
+        function getNextUnavailableDate(checkInDateStr) {
+            let checkInDate = new Date(checkInDateStr);
+            let nextDate = null;
+
+            let sortedUnavailable = unavailableDatesArr
+                .map(d => new Date(d))
+                .sort((a, b) => a - b);
+
+            for (let i = 0; i < sortedUnavailable.length; i++) {
+                if (sortedUnavailable[i] > checkInDate) {
+                    nextDate = sortedUnavailable[i];
+                    break;
+                }
+            }
+            return nextDate;
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+
+            const localeSetting = "@isArabic" === "True" ? "ar" : "default";
+
+            let checkoutPicker = flatpickr("#checkout-date", {
+                locale: localeSetting,
+                minDate: "today",
+                disable: unavailableDatesArr,
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr, instance) {
+                    calculateTotal();
+                }
+            });
+
+            let checkinPicker = flatpickr("#checkin-date", {
+                locale: localeSetting,
+                minDate: "today",
+                disable: unavailableDatesArr,
+                dateFormat: "Y-m-d",
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (selectedDates.length > 0) {
+                        let checkinDate = new Date(selectedDates[0]);
+
+                        let minCheckOut = new Date(checkinDate);
+                        minCheckOut.setDate(minCheckOut.getDate() + 1);
+                        checkoutPicker.set('minDate', minCheckOut);
+
+                        let maxCheckOut = getNextUnavailableDate(dateStr);
+                        if (maxCheckOut) {
+                            checkoutPicker.set('maxDate', maxCheckOut);
+                        } else {
+                            checkoutPicker.set('maxDate', null); 
+                        }
+
+                        let currentCheckout = checkoutPicker.selectedDates[0];
+                        if (currentCheckout && (currentCheckout <= checkinDate || (maxCheckOut && currentCheckout > maxCheckOut))) {
+                            checkoutPicker.clear();
+                        }
+                    }
+                    calculateTotal();
+                }
+            });
+        });
+
+        function calculateTotal() {
+            const checkInVal = document.getElementById('checkin-date').value;
+            const checkOutVal = document.getElementById('checkout-date').value;
+            const calcContainer = document.getElementById('price-calculation');
+
+            if (!checkInVal || !checkOutVal) {
+                calcContainer.style.display = 'none';
+                return;
+            }
+
+            const checkInDate = new Date(checkInVal);
+            const checkOutDate = new Date(checkOutVal);
+
+            const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+            const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+            if (nights > 0) {
+                const total = nights * pricePerNight;
+
+                document.getElementById('night-count-text').innerText =
+                    `${pricePerNight} ${currencySymbol} x ${nights} ${nightsText}`;
+
+                document.getElementById('base-total-text').innerText =
+                    `${total.toFixed(2)} ${currencySymbol}`;
+
+                document.getElementById('final-total-text').innerText =
+                    `${total.toFixed(2)} ${currencySymbol}`;
+
+                calcContainer.style.display = 'block';
+            } else {
+                calcContainer.style.display = 'none';
+            }
+        }
+
+        function validateBookingForm(event) {
+            const checkIn = document.getElementById('checkin-date').value;
+            const checkOut = document.getElementById('checkout-date').value;
+            const errorAlert = document.getElementById('booking-error-alert');
+
+            if (!checkIn || !checkOut) {
+                errorAlert.innerText = '@Localizer["PleaseSelectBothDates"]';
+                errorAlert.style.display = 'block';
+                event.preventDefault();
+                return false;
+            }
+
+            errorAlert.style.display = 'none';
+            return true;
+        }
 
         var detailsWishlistBtn = document.getElementById('details-wishlist-btn');
         if (detailsWishlistBtn) {
@@ -363,125 +475,6 @@
                         }
                     });
             });
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('checkin-date').setAttribute('min', today);
-        });
-
-        function onCheckInChange() {
-            const checkInVal = document.getElementById('checkin-date').value;
-            const checkoutInput = document.getElementById('checkout-date');
-
-            if (checkInVal) {
-                let nextDay = new Date(checkInVal);
-                nextDay.setDate(nextDay.getDate() + 1);
-                const nextDayFormatted = nextDay.toISOString().split('T')[0];
-
-                checkoutInput.setAttribute('min', nextDayFormatted);
-
-                if (checkoutInput.value && checkoutInput.value <= checkInVal) {
-                    checkoutInput.value = nextDayFormatted;
-                }
-            }
-
-            calculateTotal();
-        }
-
-        function hasUnavailableDatesInRange(startDateStr, endDateStr) {
-            let curr = new Date(startDateStr);
-            const end = new Date(endDateStr);
-
-            while (curr < end) {
-                const dateString = curr.toISOString().split('T')[0];
-                if (unavailableDates.has(dateString)) {
-                    return true;
-                }
-                curr.setDate(curr.getDate() + 1);
-            }
-            return false;
-        }
-
-        function validateBookingForm(event) {
-            const checkIn = document.getElementById('checkin-date').value;
-            const checkOut = document.getElementById('checkout-date').value;
-            const errorAlert = document.getElementById('booking-error-alert');
-
-            if (!checkIn || !checkOut) {
-                errorAlert.innerText = '@Localizer["PleaseSelectBothDates"]';
-                errorAlert.style.display = 'block';
-                event.preventDefault();
-                return false;
-            }
-
-            if (new Date(checkOut) <= new Date(checkIn)) {
-                errorAlert.innerText = '@Localizer["CheckOutMustBeAfterCheckIn"]';
-                errorAlert.style.display = 'block';
-                event.preventDefault();
-                return false;
-            }
-
-            if (hasUnavailableDatesInRange(checkIn, checkOut)) {
-                errorAlert.innerText = "Selected dates include dates that are blocked or already booked by another guest.";
-                errorAlert.style.display = 'block';
-                event.preventDefault();
-                return false;
-            }
-
-            errorAlert.style.display = 'none';
-            return true;
-        }
-
-        function calculateTotal() {
-            const checkInVal = document.getElementById('checkin-date').value;
-            const checkOutVal = document.getElementById('checkout-date').value;
-            const calcContainer = document.getElementById('price-calculation');
-            const errorAlert = document.getElementById('booking-error-alert');
-
-            if (!checkInVal || !checkOutVal) {
-                calcContainer.style.display = 'none';
-                return;
-            }
-
-            const checkInDate = new Date(checkInVal);
-            const checkOutDate = new Date(checkOutVal);
-
-            if (checkOutDate <= checkInDate) {
-                errorAlert.innerText = '@Localizer["CheckOutMustBeAfterCheckIn"]';
-                errorAlert.style.display = 'block';
-                calcContainer.style.display = 'none';
-                return;
-            }
-
-            if (hasUnavailableDatesInRange(checkInVal, checkOutVal)) {
-                errorAlert.innerText = "Warning: These dates contain blocked or unavailable days.";
-                errorAlert.style.display = 'block';
-                calcContainer.style.display = 'none';
-                return;
-            } else {
-                errorAlert.style.display = 'none';
-            }
-
-            const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
-            const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-            if (nights > 0) {
-                const total = nights * pricePerNight;
-
-                document.getElementById('night-count-text').innerText = 
-                    `${pricePerNight} ${currencySymbol} x ${nights} ${nightsText}`;
-
-                document.getElementById('base-total-text').innerText = 
-                    `${total.toFixed(2)} ${currencySymbol}`;
-
-                document.getElementById('final-total-text').innerText = 
-                    `${total.toFixed(2)} ${currencySymbol}`;
-
-                calcContainer.style.display = 'block';
-            } else {
-                calcContainer.style.display = 'none';
-            }
         }
     </script>
 }

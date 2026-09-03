@@ -65,18 +65,18 @@ namespace PL.Controllers
             }
 
             var amenityKeys = new Dictionary<int, string>
-    {
-        { 1, "AmenityWifi" },
-        { 2, "AmenityKitchen" },
-        { 3, "AmenityFreeParking" },
-        { 4, "AmenityAirConditioning" },
-        { 5, "AmenityPool" },
-        { 6, "AmenityWasher" },
-        { 7, "AmenityTV" },
-        { 8, "AmenityHeating" },
-        { 9, "AmenityDedicatedWorkspace" },
-        { 10, "AmenityPetsAllowed" }
-    };
+            {
+                { 1, "AmenityWifi" },
+                { 2, "AmenityKitchen" },
+                { 3, "AmenityFreeParking" },
+                { 4, "AmenityAirConditioning" },
+                { 5, "AmenityPool" },
+                { 6, "AmenityWasher" },
+                { 7, "AmenityTV" },
+                { 8, "AmenityHeating" },
+                { 9, "AmenityDedicatedWorkspace" },
+                { 10, "AmenityPetsAllowed" }
+            };
 
             foreach (var amenity in amenitiesResponse.Data)
             {
@@ -94,34 +94,21 @@ namespace PL.Controllers
         {
             await LoadAmenitiesIntoViewBagAsync();
 
-            var response = await _listingService.SearchListingsAsync(searchRequest);
-
             ViewBag.CurrentSearch = searchRequest;
 
-            decimal minPrice = 0;
-            decimal maxPrice = 10000;
+            var response = await _listingService.SearchListingsAsync(searchRequest);
 
-            if (response.Succeeded && response.Data?.Items != null && response.Data.Items.Any())
-            {
-                var prices = response.Data.Items.Select(l => l.PricePerNight).ToList();
-                if (prices.Any())
-                {
-                    minPrice = prices.Min();
-                    maxPrice = prices.Max();
-                    if (minPrice == maxPrice) maxPrice = minPrice + 500;
-                }
-            }
 
-            ViewBag.MinAvailablePrice = minPrice;
-            ViewBag.MaxAvailablePrice = maxPrice;
+            var globalPrices = await _listingService.GetGlobalMinMaxPriceAsync();
+
+            ViewBag.MinAvailablePrice = globalPrices.MinPrice;
+            ViewBag.MaxAvailablePrice = globalPrices.MaxPrice;
 
             if (!response.Succeeded || response.Data == null)
             {
                 return View(new PagedResult<ListingCardDto>());
             }
 
-            // Mark which of these listings the current user has already wishlisted,
-            // so the heart icon renders filled without an extra request per card.
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var currentUserId = GetCurrentUserId();
@@ -190,9 +177,7 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] =
-                    _localizer["MustBeVerifiedHostToPublish"].Value;
-
+                TempData["InfoMessage"] = _localizer["MustBeVerifiedHostToPublish"].Value;
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -207,18 +192,12 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    response.Message ?? _localizer["FailedToCreateListing"].Value
-                );
-
+                ModelState.AddModelError(string.Empty, response.Message ?? _localizer["FailedToCreateListing"].Value);
                 await LoadAmenitiesIntoViewBagAsync();
                 return View(model);
             }
 
-            TempData["SuccessMessage"] =
-                _localizer["ListingCreatedSuccessfully"].Value;
-
+            TempData["SuccessMessage"] = _localizer["ListingCreatedSuccessfully"].Value;
             return RedirectToAction(nameof(MyListings));
         }
 
@@ -228,9 +207,7 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] =
-                    _localizer["MustBeVerifiedHostToEdit"].Value;
-
+                TempData["InfoMessage"] = _localizer["MustBeVerifiedHostToEdit"].Value;
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -250,9 +227,7 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] =
-                    _localizer["MustBeVerifiedHostToEdit"].Value;
-
+                TempData["InfoMessage"] = _localizer["MustBeVerifiedHostToEdit"].Value;
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -267,18 +242,12 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                ModelState.AddModelError(
-                    string.Empty,
-                    response.Message ?? _localizer["FailedToUpdateListing"].Value
-                );
-
+                ModelState.AddModelError(string.Empty, response.Message ?? _localizer["FailedToUpdateListing"].Value);
                 await LoadAmenitiesIntoViewBagAsync();
                 return View(model);
             }
 
-            TempData["SuccessMessage"] =
-                _localizer["ListingUpdatedSuccessfully"].Value;
-
+            TempData["SuccessMessage"] = _localizer["ListingUpdatedSuccessfully"].Value;
             return RedirectToAction(nameof(MyListings));
         }
 
@@ -289,9 +258,7 @@ namespace PL.Controllers
         {
             if (!await IsCurrentUserHostAsync())
             {
-                TempData["InfoMessage"] =
-                    _localizer["MustBeVerifiedHostToDelete"].Value;
-
+                TempData["InfoMessage"] = _localizer["MustBeVerifiedHostToDelete"].Value;
                 return RedirectToAction("BecomeAHost", "Account");
             }
 
@@ -300,17 +267,16 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] =
-                    response.Message ?? _localizer["FailedToDeleteListing"].Value;
+                TempData["ErrorMessage"] = response.Message ?? _localizer["FailedToDeleteListing"].Value;
             }
             else
             {
-                TempData["SuccessMessage"] =
-                    _localizer["ListingDeletedSuccessfully"].Value;
+                TempData["SuccessMessage"] = _localizer["ListingDeletedSuccessfully"].Value;
             }
 
             return RedirectToAction(nameof(MyListings));
         }
+
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> Availability(int id)
@@ -329,6 +295,7 @@ namespace PL.Controllers
             }
             return View(response.Data);
         }
+
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]

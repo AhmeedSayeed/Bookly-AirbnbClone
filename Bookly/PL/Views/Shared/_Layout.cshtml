@@ -224,6 +224,13 @@
 
                             </a>
 
+                            <!-- My Wishlist -->
+                            <a asp-controller="Wishlist"
+                               asp-action="Index"
+                               class="user-dropdown-item">
+                                @Localizer["MyWishlist"]
+                            </a>
+
 
                             <!-- Host Dashboard -->
                             @if (User.IsInRole("Host") || User.IsInRole("Admin"))

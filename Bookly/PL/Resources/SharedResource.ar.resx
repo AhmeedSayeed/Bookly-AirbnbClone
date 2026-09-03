@@ -1725,4 +1725,7 @@
 	<data name="ClearFilters" xml:space="preserve">
 		<value>مسح الفلاتر</value>
 	</data>
+	<data name="MyWishlist" xml:space="preserve">
+		<value>مفضلاتي</value>
+	</data>
 </root>

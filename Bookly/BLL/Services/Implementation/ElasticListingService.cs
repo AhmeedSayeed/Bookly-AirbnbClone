@@ -34,6 +34,7 @@ namespace BLL.Services.Implementation
         public async Task<PagedResult<ListingCardDto>> SearchAsync(ListingSearchRequestDto request)
         {
             var mustClauses = new List<Func<QueryContainerDescriptor<ListingDocument>, QueryContainer>>();
+            var filterClauses = new List<Func<QueryContainerDescriptor<ListingDocument>, QueryContainer>>();
             var mustNotClauses = new List<Func<QueryContainerDescriptor<ListingDocument>, QueryContainer>>();
 
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
@@ -41,17 +42,22 @@ namespace BLL.Services.Implementation
                 mustClauses.Add(q => q
                     .MultiMatch(m => m
                         .Fields(f => f
-                            .Field(doc => doc.Title, boost: 2)
-                            .Field(doc => doc.City, boost: 1.5)
-                            .Field(doc => doc.Description))
+                            .Field(doc => doc.Title, boost: 3)
+                            .Field(doc => doc.City, boost: 2.5)
+                            .Field(doc => doc.Description, boost: 1.3))
                         .Query(request.SearchTerm)
-                        .Fuzziness(Fuzziness.Auto)
+                        .Type(TextQueryType.CrossFields)
+                        .MinimumShouldMatch("75%")
                     ));
+            }
+            else
+            {
+                mustClauses.Add(q => q.MatchAll());
             }
 
             if (request.MinPrice.HasValue || request.MaxPrice.HasValue)
             {
-                mustClauses.Add(q => q
+                filterClauses.Add(q => q
                     .Range(r => r
                         .Field(f => f.PricePerNight)
                         .GreaterThanOrEquals(request.MinPrice > 0 ? (double?)request.MinPrice : null)
@@ -59,26 +65,26 @@ namespace BLL.Services.Implementation
                     ));
             }
 
-            ApplyRangeFilter(mustClauses, request.GuestsRange, f => f.MaxGuests);
-            ApplyRangeFilter(mustClauses, request.BedroomsRange, f => f.Bedrooms);
-            ApplyRangeFilter(mustClauses, request.BathroomsRange, f => f.Bathrooms);
+            ApplyRangeFilter(filterClauses, request.GuestsRange, f => f.MaxGuests);
+            ApplyRangeFilter(filterClauses, request.BedroomsRange, f => f.Bedrooms);
+            ApplyRangeFilter(filterClauses, request.BathroomsRange, f => f.Bathrooms);
 
             if (request.AmenityIds != null && request.AmenityIds.Any())
             {
                 foreach (var amenityId in request.AmenityIds)
                 {
-                    mustClauses.Add(q => q.Term(t => t.Field(f => f.AmenityIds).Value(amenityId)));
+                    filterClauses.Add(q => q.Term(t => t.Field(f => f.AmenityIds).Value(amenityId)));
                 }
             }
 
             if (request.PropertyTypes != null && request.PropertyTypes.Any())
             {
-                mustClauses.Add(q => q.Terms(t => t.Field(f => f.PropertyType.Suffix("keyword")).Terms(request.PropertyTypes)));
+                filterClauses.Add(q => q.Terms(t => t.Field(f => f.PropertyType.Suffix("keyword")).Terms(request.PropertyTypes)));
             }
 
             if (request.CancellationPolicies != null && request.CancellationPolicies.Any())
             {
-                mustClauses.Add(q => q.Terms(t => t.Field(f => f.CancellationPolicy.Suffix("keyword")).Terms(request.CancellationPolicies)));
+                filterClauses.Add(q => q.Terms(t => t.Field(f => f.CancellationPolicy.Suffix("keyword")).Terms(request.CancellationPolicies)));
             }
 
             if (request.CheckIn.HasValue && request.CheckOut.HasValue)
@@ -96,17 +102,25 @@ namespace BLL.Services.Implementation
                     ));
             }
 
-            var response = await _elasticClient.SearchAsync<ListingDocument>(s => s
-                .From((request.PageNumber - 1) * request.PageSize)
-                .Size(request.PageSize)
-                .Query(q => q
-                    .Bool(b => b
-                        .Must(mustClauses)
-                        .MustNot(mustNotClauses)
-                    )
-                )
-                .Sort(so => so.Descending(f => f.CreatedAt))
-            );
+            var response = await _elasticClient.SearchAsync<ListingDocument>(s =>
+            {
+                s.From((request.PageNumber - 1) * request.PageSize)
+                 .Size(request.PageSize)
+                 .Query(q => q
+                     .Bool(b => b
+                         .Must(mustClauses)
+                         .Filter(filterClauses)
+                         .MustNot(mustNotClauses)
+                     )
+                 );
+
+                if (string.IsNullOrWhiteSpace(request.SearchTerm))
+                {
+                    s.Sort(so => so.Descending(f => f.CreatedAt));
+                }
+
+                return s;
+            });
 
             var items = response.Documents.Select(doc => new ListingCardDto
             {
