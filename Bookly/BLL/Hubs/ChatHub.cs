@@ -14,7 +14,9 @@ namespace BLL.Hubs
         private readonly IChatService _chatService;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public ChatHub(IChatService chatService, UserManager<ApplicationUser> userManager)
+        public ChatHub(
+            IChatService chatService,
+            UserManager<ApplicationUser> userManager)
         {
             _chatService = chatService;
             _userManager = userManager;

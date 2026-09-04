@@ -10,12 +10,12 @@ public class RegisterViewModel
 
     [Required(ErrorMessage = "FirstNameRequired")]
     [MinLength(2)]
-    [Display(Name = "First Name")]
+    [Display(Name = "FirstName")]
     public string FirstName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "LastNameRequired")]
     [MinLength(2)]
-    [Display(Name = "Last Name")]
+    [Display(Name = "LastName")]
     public string LastName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "PasswordRequired")]
@@ -26,6 +26,6 @@ public class RegisterViewModel
     [Required(ErrorMessage = "ConfirmPasswordRequired")]
     [DataType(DataType.Password)]
     [Compare(nameof(Password), ErrorMessage = "PasswordMismatch")]
-    [Display(Name = "Confirm Password")]
+    [Display(Name = "ConfirmPassword")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }

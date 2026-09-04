@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace BLL.Services.Implementation
@@ -155,7 +156,12 @@ namespace BLL.Services.Implementation
             var notification = new Notification
             {
                 UserId = receiverId,
-                Message = $"New message from {senderName}",
+                MessageKey = "NewMessageFrom",
+                MessageArgsJson = JsonSerializer.Serialize(new[]
+                {
+                    senderName,
+                    content
+                }),
                 Link = $"/Chat/Inbox?conversationId={conversationId}",
                 IsRead = false,
                 CreatedAt = DateTime.UtcNow

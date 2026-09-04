@@ -68,7 +68,7 @@
                                 <a href="/Notifications" style="background: none; border: none; color: var(--color-brass); font-size: 12px; font-weight: 600; text-decoration: none;">@Localizer["ViewAll"]</a>
                             </div>
                             <div class="notification-list-body" id="notificationListBody">
-                                <div style="padding: 20px; text-align: center; color: var(--color-text-muted); font-size: 13px;">Loading...</div>
+                                <div style="padding: 20px; text-align: center; color: var(--color-text-muted); font-size: 13px;">@Localizer["Loading"]</div>
                             </div>
                         </div>
                     </div>
@@ -82,9 +82,15 @@
                             HostVerificationApprovedNotification = Localizer["HostVerificationApprovedNotification"].Value,
                             HostVerificationRejectedNotification = Localizer["HostVerificationRejectedNotification"].Value,
                             HostVerificationRejectedWithReason = Localizer["HostVerificationRejectedWithReason"].Value,
-                            ListingDeactivatedNotification = Localizer["ListingDeactivatedNotification"].Value
+                            ListingDeactivatedNotification = Localizer["ListingDeactivatedNotification"].Value,
+                             NewMessageFrom = Localizer["NewMessageFrom"].Value,
                         }));
-                        window.booklyI18n = { view: @Html.Raw(JsonSerializer.Serialize(Localizer["View"].Value)) };
+                                        window.booklyI18n = {
+                                            view: @Html.Raw(JsonSerializer.Serialize(Localizer["View"].Value)),
+                                            loading: @Html.Raw(JsonSerializer.Serialize(Localizer["Loading"].Value)),
+                                            noNotificationsFound: @Html.Raw(JsonSerializer.Serialize(Localizer["NoNotificationsFound"].Value)),
+                                            failedToLoad: @Html.Raw(JsonSerializer.Serialize(Localizer["FailedToLoad"].Value))
+                                        };
                     </script>
 
                     <!-- User Menu -->

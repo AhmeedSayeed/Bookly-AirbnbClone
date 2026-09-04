@@ -15,8 +15,9 @@ namespace DAL.Models.Configurations.Reservations
                 .IsRequired()
                 .HasMaxLength(DataSchemaConstants.CouponCodeLength);
 
-            builder.HasIndex(c => c.Code).IsUnique();
-
+            builder.HasIndex(c => c.Code)
+       .IsUnique()
+       .HasFilter("[IsDeleted] = 0");
             builder.Property(c => c.DiscountPercent)
                 .HasColumnType(DataSchemaConstants.PercentageColumnType);
         }

@@ -15,7 +15,8 @@ namespace BLL.Services.Implementation
     {
         private readonly IRepository<Wishlist> _wishlistRepo;
 
-        public WishlistService(IRepository<Wishlist> wishlistRepo)
+        public WishlistService(
+            IRepository<Wishlist> wishlistRepo)
         {
             _wishlistRepo = wishlistRepo;
         }
@@ -61,7 +62,7 @@ namespace BLL.Services.Implementation
             {
                 _wishlistRepo.Delete(existingEntry.Id);
                 await _wishlistRepo.SaveAsync();
-                return Response<bool>.Success(false, "Removed from wishlist");
+                return Response<bool>.SuccessWithKey(false, "RemovedFromWishlist");
             }
 
             var newEntry = new Wishlist
@@ -73,7 +74,7 @@ namespace BLL.Services.Implementation
             await _wishlistRepo.AddAsync(newEntry);
             await _wishlistRepo.SaveAsync();
 
-            return Response<bool>.Success(true, "Added to wishlist");
+            return Response<bool>.SuccessWithKey(true, "AddedToWishlist");
         }
 
         public async Task<bool> IsWishlistedAsync(int userId, int listingId)

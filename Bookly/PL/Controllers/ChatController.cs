@@ -2,7 +2,9 @@ using BLL.Services.Interfaces;
 using DAL.Models.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -13,11 +15,16 @@ namespace PL.Controllers
     {
         private readonly IChatService _chatService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public ChatController(IChatService chatService, UserManager<ApplicationUser> userManager)
+        public ChatController(
+            IChatService chatService,
+            UserManager<ApplicationUser> userManager,
+            IStringLocalizer<SharedResource> localizer)
         {
             _chatService = chatService;
             _userManager = userManager;
+            _localizer = localizer;
         }
 
         // GET: /Chat/Inbox
@@ -31,7 +38,10 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.MessageKey ?? response.Message;
+                TempData["ErrorMessage"] = !string.IsNullOrWhiteSpace(response.MessageKey)
+                    ? _localizer[response.MessageKey].Value
+                    : response.Message;
+
                 return RedirectToAction("Index", "Home");
             }
 
@@ -52,7 +62,13 @@ namespace PL.Controllers
             var response = await _chatService.GetConversationMessagesAsync(conversationId, userId);
 
             if (!response.Succeeded)
-                return BadRequest(new { success = false, message = response.MessageKey ?? response.Message });
+                return BadRequest(new
+                {
+                    success = false,
+                    message = !string.IsNullOrWhiteSpace(response.MessageKey)
+                        ? _localizer[response.MessageKey].Value
+                        : response.Message
+                });
 
             await _chatService.MarkConversationAsReadAsync(conversationId, userId);
 
@@ -77,7 +93,10 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.MessageKey ?? response.Message;
+                TempData["ErrorMessage"] = !string.IsNullOrWhiteSpace(response.MessageKey)
+                    ? _localizer[response.MessageKey].Value
+                    : response.Message;
+
                 return RedirectToAction("Details", "Listings", new { id = listingId });
             }
 

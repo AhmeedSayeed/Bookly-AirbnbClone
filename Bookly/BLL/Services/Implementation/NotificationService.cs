@@ -120,9 +120,9 @@ namespace BLL.Services.Implementation
             );
 
             if (notification == null)
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
-                    "Notification not found.");
+                    "NotificationNotFound");
 
             if (!notification.IsRead)
             {

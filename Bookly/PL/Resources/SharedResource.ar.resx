@@ -1746,4 +1746,167 @@
 			<data name="ContactHost" xml:space="preserve">
 			    <value>تواصل مع المُضيف</value>
 			</data>
+	<data name="ManageCouponsAdmin" xml:space="preserve">
+  <value>إدارة الكوبونات - المسؤول</value>
+</data>
+	<data name="CouponManagement" xml:space="preserve">
+  <value>إدارة الكوبونات</value>
+</data>
+	<data name="Coupons" xml:space="preserve">
+  <value>الكوبونات</value>
+</data>
+	<data name="CreateNewCoupon" xml:space="preserve">
+  <value>إنشاء كوبون جديد</value>
+</data>
+	<data name="CouponCode" xml:space="preserve">
+  <value>رمز الكوبون</value>
+</data>
+	<data name="CouponCodePlaceholder" xml:space="preserve">
+  <value>مثال: SUMMER25</value>
+</data>
+	<data name="DiscountPercent" xml:space="preserve">
+  <value>نسبة الخصم (%)</value>
+</data>
+	<data name="ExpiryDate" xml:space="preserve">
+  <value>تاريخ الانتهاء</value>
+</data>
+	<data name="MaxUses" xml:space="preserve">
+  <value>الحد الأقصى للاستخدام</value>
+</data>
+	<data name="CreateCoupon" xml:space="preserve">
+  <value>إنشاء الكوبون</value>
+</data>
+	<data name="ActiveAndExpiredCoupons" xml:space="preserve">
+  <value>الكوبونات النشطة والمنتهية</value>
+</data>
+	<data name="Total" xml:space="preserve">
+  <value>الإجمالي:</value>
+</data>
+	<data name="Code" xml:space="preserve">
+  <value>الرمز</value>
+</data>
+	<data name="Discount" xml:space="preserve">
+  <value>الخصم</value>
+</data>
+	<data name="Usage" xml:space="preserve">
+  <value>الاستخدام</value>
+</data>
+	<data name="Status" xml:space="preserve">
+  <value>الحالة</value>
+</data>
+	<data name="Action" xml:space="preserve">
+  <value>الإجراء</value>
+</data>
+	<data name="Expired" xml:space="preserve">
+  <value>منتهي</value>
+</data>
+	<data name="MaxedOut" xml:space="preserve">
+  <value>اكتمل الحد الأقصى</value>
+</data>
+	<data name="Active" xml:space="preserve">
+  <value>نشط</value>
+</data>
+	<data name="Delete" xml:space="preserve">
+  <value>حذف</value>
+</data>
+	<data name="ConfirmDeleteCoupon" xml:space="preserve">
+  <value>هل أنت متأكد أنك تريد حذف هذا الكوبون؟</value>
+</data>
+	<data name="NoCouponsCreated" xml:space="preserve">
+  <value>لم يتم إنشاء أي كوبونات بعد. استخدم النموذج الموجود على اليسار لإنشاء أول كوبون لك.</value>
+</data>
+	<data name="CouponFieldsInvalid" xml:space="preserve">
+  <value>يرجى إدخال جميع بيانات الكوبون بشكل صحيح.</value>
+</data>
+
+	<data name="CouponAlreadyApplied" xml:space="preserve">
+  <value>تم تطبيق كوبون بالفعل على هذا الحجز.</value>
+</data>
+	<data name="CouponCodeRequired" xml:space="preserve">
+  <value>رمز الكوبون مطلوب.</value>
+</data>
+	<data name="CouponDiscountPercentInvalid" xml:space="preserve">
+  <value>يجب أن تكون نسبة الخصم بين 1 و100.</value>
+</data>
+	<data name="CouponExpiryDateInvalid" xml:space="preserve">
+  <value>يجب أن يكون تاريخ الانتهاء في المستقبل.</value>
+</data>
+	<data name="CouponMaxUsesInvalid" xml:space="preserve">
+  <value>يجب أن يكون الحد الأقصى للاستخدام أكبر من 0.</value>
+</data>
+	<data name="CouponCodeAlreadyExists" xml:space="preserve">
+  <value>يوجد كوبون بهذا الرمز بالفعل.</value>
+</data>
+	<data name="CouponCreatedSuccessfully" xml:space="preserve">
+  <value>تم إنشاء الكوبون بنجاح.</value>
+</data>
+	<data name="CouponCreationFailed" xml:space="preserve">
+  <value>فشل إنشاء الكوبون.</value>
+</data>
+	<data name="CouponNotFound" xml:space="preserve">
+  <value>الكوبون غير موجود.</value>
+</data>
+	<data name="CouponDeletedSuccessfully" xml:space="preserve">
+  <value>تم حذف الكوبون بنجاح.</value>
+</data>
+	<data name="CouponDeletionFailed" xml:space="preserve">
+  <value>فشل حذف الكوبون.</value>
+</data>
+	<data name="Loading" xml:space="preserve">
+  <value>جاري التحميل...</value>
+</data>
+	<data name="NoNotificationsFound" xml:space="preserve">
+  <value>لا توجد إشعارات.</value>
+</data>
+	<data name="FailedToLoad" xml:space="preserve">
+  <value>فشل التحميل.</value>
+</data>
+	<data name="NewMessageFrom" xml:space="preserve">
+  <value>رسالة جديدة من {0}: {1}</value>
+</data>
+	<data name="Avatar" xml:space="preserve">
+    <value>الصورة الشخصية</value>
+</data>
+
+	<data name="Name" xml:space="preserve">
+    <value>الاسم</value>
+</data>
+
+	<data name="Listing" xml:space="preserve">
+    <value>العقار</value>
+</data>
+
+	<data name="FailedToSendMessage" xml:space="preserve">
+    <value>فشل إرسال الرسالة.</value>
+</data>
+	<data name="NotificationNotFound" xml:space="preserve">
+    <value>الإشعار غير موجود.</value>
+</data>
+	<data name="ViewAll" xml:space="preserve">
+    <value>عرض الكل</value>
+</data>
+
+	<data name="Unread" xml:space="preserve">
+    <value>غير مقروء</value>
+</data>
+	<data name="ProcessingPayment" xml:space="preserve">
+  <value>جاري معالجة الدفع...</value>
+</data>
+
+	<data name="FinalizingBookingPleaseWait" xml:space="preserve">
+  <value>جاري إنهاء حجزك، يرجى الانتظار...</value>
+</data>
+	<data name="UnknownListing" xml:space="preserve">
+  <value>إعلان غير معروف</value>
+</data>
+
+	<data name="StartedConversation" xml:space="preserve">
+  <value>بدأ محادثة</value>
+</data>
+	<data name="RemovedFromWishlist" xml:space="preserve">
+  <value>تمت الإزالة من المفضلة</value>
+</data>
+	<data name="AddedToWishlist" xml:space="preserve">
+  <value>تمت الإضافة إلى المفضلة</value>
+</data>
 </root>

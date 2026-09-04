@@ -468,7 +468,7 @@
             const errorAlert = document.getElementById('booking-error-alert');
 
             if (!checkIn || !checkOut) {
-                errorAlert.innerText = '@Localizer["PleaseSelectBothDates"]';
+                errorAlert.innerText = '@Html.Raw(Localizer["PleaseSelectBothDates"])';
                 errorAlert.style.display = 'block';
                 event.preventDefault();
                 return false;

@@ -3,9 +3,10 @@ using BLL.ViewModels.Admin;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
-using System;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Localization;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace PL.Controllers
 {
@@ -64,8 +65,7 @@ namespace PL.Controllers
             var relativePath = url.TrimStart('/', '\\');
             var physicalPath = Path.Combine(
                 env.WebRootPath,
-                relativePath
-            );
+                relativePath);
 
             if (!System.IO.File.Exists(physicalPath))
                 return View("DocumentNotFound");
@@ -79,12 +79,8 @@ namespace PL.Controllers
                 contentType = "application/octet-stream";
             }
 
-            return PhysicalFile(
-                physicalPath,
-                contentType
-            );
+            return PhysicalFile(physicalPath, contentType);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -104,7 +100,6 @@ namespace PL.Controllers
             return RedirectToAction(nameof(Verifications));
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RejectVerification(
@@ -112,10 +107,7 @@ namespace PL.Controllers
             string reason)
         {
             var response =
-                await _adminService.RejectVerificationAsync(
-                    id,
-                    reason
-                );
+                await _adminService.RejectVerificationAsync(id, reason);
 
             TempData[
                 response.Succeeded
@@ -128,26 +120,20 @@ namespace PL.Controllers
             return RedirectToAction(nameof(Verifications));
         }
 
-
         [HttpGet]
         public async Task<IActionResult> Users()
         {
-            var response =
-                await _adminService.GetAllUsersAsync();
-
+            var response = await _adminService.GetAllUsersAsync();
             return View(response.Data);
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LockUser(int id)
         {
-            var response =
-                await _adminService.LockUserAsync(
-                    id,
-                    DateTimeOffset.UtcNow.AddYears(100)
-                );
+            var response = await _adminService.LockUserAsync(
+                id,
+                DateTimeOffset.UtcNow.AddYears(100));
 
             TempData[
                 response.Succeeded
@@ -159,14 +145,12 @@ namespace PL.Controllers
 
             return RedirectToAction(nameof(Users));
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UnlockUser(int id)
         {
-            var response =
-                await _adminService.UnlockUserAsync(id);
+            var response = await _adminService.UnlockUserAsync(id);
 
             TempData[
                 response.Succeeded
@@ -178,7 +162,6 @@ namespace PL.Controllers
 
             return RedirectToAction(nameof(Users));
         }
-
 
         [HttpGet]
         public async Task<IActionResult> Listings()
@@ -189,7 +172,6 @@ namespace PL.Controllers
             return View(response.Data);
         }
 
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ModerateListing(
@@ -197,10 +179,7 @@ namespace PL.Controllers
             bool isActive)
         {
             var response =
-                await _adminService.ModerateListingAsync(
-                    id,
-                    isActive
-                );
+                await _adminService.ModerateListingAsync(id, isActive);
 
             TempData[
                 response.Succeeded
@@ -222,16 +201,27 @@ namespace PL.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CreateCoupon(BLL.DTOs.CreateCouponDto model)
+        public async Task<IActionResult> CreateCoupon(
+            BLL.DTOs.CreateCouponDto model)
         {
             if (!ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Please fill in all coupon fields correctly.";
+                TempData["ErrorMessage"] =
+                    _localizer["CouponFieldsInvalid"].Value;
+
                 return RedirectToAction(nameof(Coupons));
             }
 
             var response = await _couponService.CreateCouponAsync(model);
-            TempData[response.Succeeded ? "SuccessMessage" : "ErrorMessage"] = response.Message;
+
+            TempData[
+                response.Succeeded
+                    ? "SuccessMessage"
+                    : "ErrorMessage"
+            ] = response.MessageKey != null
+                ? _localizer[response.MessageKey].Value
+                : response.Message;
+
             return RedirectToAction(nameof(Coupons));
         }
 
@@ -240,7 +230,15 @@ namespace PL.Controllers
         public async Task<IActionResult> DeleteCoupon(int id)
         {
             var response = await _couponService.DeleteCouponAsync(id);
-            TempData[response.Succeeded ? "SuccessMessage" : "ErrorMessage"] = response.Message;
+
+            TempData[
+                response.Succeeded
+                    ? "SuccessMessage"
+                    : "ErrorMessage"
+            ] = response.MessageKey != null
+                ? _localizer[response.MessageKey].Value
+                : response.Message;
+
             return RedirectToAction(nameof(Coupons));
         }
     }

@@ -6,13 +6,14 @@ using BLL.ViewModels.Availability;
 using BLL.ViewModels.Listings;
 using DAL.Models.Common;
 using DAL.Models.Identity;
+using DAL.Models.Interactions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Localization;
 
 namespace PL.Controllers
 {
@@ -129,7 +130,21 @@ namespace PL.Controllers
             var response = await _listingService.GetDetailsAsync(id);
 
             if (!response.Succeeded)
-                return NotFound(response.Message);
+            {
+                var message = !string.IsNullOrWhiteSpace(response.MessageKey)
+                    ? _localizer[response.MessageKey].Value
+                    : response.Message;
+
+                return NotFound(message);
+            }
+            if (!response.Succeeded)
+            {
+                var message = !string.IsNullOrWhiteSpace(response.MessageKey)
+                      ? _localizer[response.MessageKey].Value
+                      : response.Message;
+
+                return NotFound(message);
+            }
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {

@@ -2,6 +2,7 @@ using BLL.Services.Interfaces;
 using DAL.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 using System.IO;
 using System.Security.Claims;
 using System.Text;
@@ -12,10 +13,14 @@ namespace PL.Controllers
     public class PaymentsController : Controller
     {
         private readonly IPaymentService _paymentService;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
-        public PaymentsController(IPaymentService paymentService)
+        public PaymentsController(
+            IPaymentService paymentService,
+            IStringLocalizer<SharedResource> localizer)
         {
             _paymentService = paymentService;
+            _localizer = localizer;
         }
 
         private int GetCurrentUserId()
@@ -35,7 +40,10 @@ namespace PL.Controllers
 
             if (!response.Succeeded)
             {
-                TempData["ErrorMessage"] = response.Message;
+                TempData["ErrorMessage"] = !string.IsNullOrWhiteSpace(response.MessageKey)
+                    ? _localizer[response.MessageKey].Value
+                    : response.Message;
+
                 return RedirectToAction("Details", "Bookings", new { id = bookingId });
             }
 
@@ -72,9 +80,9 @@ namespace PL.Controllers
             string redirectScript = $@"
                     <!DOCTYPE html>
                     <html>
-                    <head><title>Processing Payment...</title></head>
+                    <head><title>{_localizer["ProcessingPayment"]}</title></head>
                     <body style='font-family: sans-serif; text-align: center; padding-top: 50px;'>
-                        <p>Finalizing your booking, please wait...</p>
+                        <p>{_localizer["FinalizingBookingPleaseWait"]}</p>
                         <script>
                             // Break out of iframe and navigate the main browser window
                             window.top.location.href = '/Bookings/MyTrips';

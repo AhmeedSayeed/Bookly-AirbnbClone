@@ -230,7 +230,7 @@
                          onclick="loadConversation(@conv.Id, this)">
 
                         <img src="@(string.IsNullOrEmpty(conv.OtherUserPhotoUrl) ? "/images/default-avatar.png" : conv.OtherUserPhotoUrl)"
-                             class="conversation-avatar" alt="Avatar" />
+                             class="conversation-avatar" alt="@Localizer["Avatar"]" />
 
                         <div class="conversation-info">
                             <div class="conversation-name">
@@ -273,8 +273,8 @@
 
             <div class="chat-header">
                 <div style="flex-grow: 1;">
-                    <strong id="chat-header-name" style="font-size: var(--fs-md); display: block;">Name</strong>
-                    <span id="chat-header-listing" style="font-size: 12px; color: var(--color-text-muted);">Listing</span>
+                    <strong id="chat-header-name" style="font-size: var(--fs-md); display: block;">Localizer["Name"]</strong>
+                    <span id="chat-header-listing" style="font-size: 12px; color: var(--color-text-muted);">@Localizer["Listing"]</span>
                 </div>
             </div>
 
@@ -407,7 +407,7 @@
             hubConnection.invoke("SendMessage", convId, receiverId, content)
                 .catch(err => {
                     console.error("Error sending message:", err);
-                    alert("Failed to send message.");
+                    alert("@Localizer["FailedToSendMessage"]");
                 });
         }
 

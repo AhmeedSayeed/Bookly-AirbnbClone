@@ -1746,4 +1746,167 @@
 <data name="ContactHost" xml:space="preserve">
     <value>Contact Host</value>
 </data>
+	<data name="ManageCouponsAdmin" xml:space="preserve">
+  <value>Manage Coupons - Admin</value>
+</data>
+	<data name="CouponManagement" xml:space="preserve">
+  <value>Coupon Management</value>
+</data>
+	<data name="Coupons" xml:space="preserve">
+  <value>Coupons</value>
+</data>
+	<data name="CreateNewCoupon" xml:space="preserve">
+  <value>Create New Coupon</value>
+</data>
+	<data name="CouponCode" xml:space="preserve">
+  <value>Coupon Code</value>
+</data>
+	<data name="CouponCodePlaceholder" xml:space="preserve">
+  <value>e.g. SUMMER25</value>
+</data>
+	<data name="DiscountPercent" xml:space="preserve">
+  <value>Discount Percent (%)</value>
+</data>
+	<data name="ExpiryDate" xml:space="preserve">
+  <value>Expiry Date</value>
+</data>
+	<data name="MaxUses" xml:space="preserve">
+  <value>Max Uses</value>
+</data>
+	<data name="CreateCoupon" xml:space="preserve">
+  <value>Create Coupon</value>
+</data>
+	<data name="ActiveAndExpiredCoupons" xml:space="preserve">
+  <value>Active &amp; Expired Coupons</value>
+</data>
+	<data name="Total" xml:space="preserve">
+  <value>Total:</value>
+</data>
+	<data name="Code" xml:space="preserve">
+  <value>Code</value>
+</data>
+	<data name="Discount" xml:space="preserve">
+  <value>Discount</value>
+</data>
+	<data name="Usage" xml:space="preserve">
+  <value>Usage</value>
+</data>
+	<data name="Status" xml:space="preserve">
+  <value>Status</value>
+</data>
+	<data name="Action" xml:space="preserve">
+  <value>Action</value>
+</data>
+	<data name="Expired" xml:space="preserve">
+  <value>Expired</value>
+</data>
+	<data name="MaxedOut" xml:space="preserve">
+  <value>Maxed Out</value>
+</data>
+	<data name="Active" xml:space="preserve">
+  <value>Active</value>
+</data>
+	<data name="Delete" xml:space="preserve">
+  <value>Delete</value>
+</data>
+	<data name="ConfirmDeleteCoupon" xml:space="preserve">
+  <value>Are you sure you want to delete this coupon?</value>
+</data>
+	<data name="NoCouponsCreated" xml:space="preserve">
+  <value>No coupons created yet. Use the form on the left to create your first coupon.</value>
+</data>
+	<data name="CouponFieldsInvalid" xml:space="preserve">
+  <value>Please fill in all coupon fields correctly.</value>
+</data>
+
+	<data name="CouponAlreadyApplied" xml:space="preserve">
+  <value>A coupon has already been applied to this booking.</value>
+</data>
+	<data name="CouponCodeRequired" xml:space="preserve">
+  <value>Coupon code is required.</value>
+</data>
+	<data name="CouponDiscountPercentInvalid" xml:space="preserve">
+  <value>Discount percent must be between 1 and 100.</value>
+</data>
+	<data name="CouponExpiryDateInvalid" xml:space="preserve">
+  <value>Expiry date must be in the future.</value>
+</data>
+	<data name="CouponMaxUsesInvalid" xml:space="preserve">
+  <value>Max uses must be greater than 0.</value>
+</data>
+	<data name="CouponCodeAlreadyExists" xml:space="preserve">
+  <value>A coupon with this code already exists.</value>
+</data>
+	<data name="CouponCreatedSuccessfully" xml:space="preserve">
+  <value>Coupon created successfully.</value>
+</data>
+	<data name="CouponCreationFailed" xml:space="preserve">
+  <value>Failed to create coupon.</value>
+</data>
+	<data name="CouponNotFound" xml:space="preserve">
+  <value>Coupon not found.</value>
+</data>
+	<data name="CouponDeletedSuccessfully" xml:space="preserve">
+  <value>Coupon deleted successfully.</value>
+</data>
+	<data name="CouponDeletionFailed" xml:space="preserve">
+  <value>Failed to delete coupon.</value>
+</data>
+	<data name="Loading" xml:space="preserve">
+  <value>Loading...</value>
+</data>
+	<data name="NoNotificationsFound" xml:space="preserve">
+  <value>No notifications found.</value>
+</data>
+	<data name="FailedToLoad" xml:space="preserve">
+  <value>Failed to load.</value>
+</data>
+	<data name="NewMessageFrom" xml:space="preserve">
+  <value>New message from {0}: {1}</value>
+</data>
+	<data name="Avatar" xml:space="preserve">
+    <value>Avatar</value>
+</data>
+
+	<data name="Name" xml:space="preserve">
+    <value>Name</value>
+</data>
+
+	<data name="Listing" xml:space="preserve">
+    <value>Listing</value>
+</data>
+
+	<data name="FailedToSendMessage" xml:space="preserve">
+    <value>Failed to send message.</value>
+</data>
+	<data name="NotificationNotFound" xml:space="preserve">
+    <value>Notification not found.</value>
+</data>
+	<data name="ViewAll" xml:space="preserve">
+    <value>View All</value>
+</data>
+
+	<data name="Unread" xml:space="preserve">
+    <value>Unread</value>
+</data>
+	<data name="ProcessingPayment" xml:space="preserve">
+  <value>Processing Payment...</value>
+</data>
+
+	<data name="FinalizingBookingPleaseWait" xml:space="preserve">
+  <value>Finalizing your booking, please wait...</value>
+</data>
+	<data name="UnknownListing" xml:space="preserve">
+  <value>Unknown Listing</value>
+</data>
+
+	<data name="StartedConversation" xml:space="preserve">
+  <value>Started a conversation</value>
+</data>
+	<data name="RemovedFromWishlist" xml:space="preserve">
+  <value>Removed from wishlist</value>
+</data>
+	<data name="AddedToWishlist" xml:space="preserve">
+  <value>Added to wishlist</value>
+</data>
 </root>

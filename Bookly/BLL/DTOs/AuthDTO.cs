@@ -37,7 +37,7 @@ namespace BLL.DTOs.Auth
         [Required]
         public string Password { get; set; } = string.Empty;
 
-        [Display(Name = "Remember Me")]
+        [Display(Name = "RememberMe")]
         public bool RememberMe { get; set; }
     }
 

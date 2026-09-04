@@ -9,12 +9,12 @@ public class ProfileViewModel
 
     [Required(ErrorMessage = "FirstNameRequired")]
     [StringLength(100)]
-    [Display(Name = "First Name")]
+    [Display(Name = "FirstName")]
     public string FirstName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "LastNameRequired")]
     [StringLength(100)]
-    [Display(Name = "Last Name")]
+    [Display(Name = "LastName")]
     public string LastName { get; set; } = string.Empty;
 
     public string Email { get; set; } = string.Empty;

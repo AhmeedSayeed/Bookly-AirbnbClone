@@ -82,7 +82,7 @@ namespace BLL.Services.Implementation
             if (verification == null ||
                 verification.Status != HostVerificationStatus.Pending)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
                     "VerificationNotFoundOrProcessed"
                 );
@@ -99,7 +99,7 @@ namespace BLL.Services.Implementation
 
             if (!roleResult.Succeeded)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.Error,
                     "HostRoleAssignmentFailed",
                     roleResult.Errors
@@ -117,7 +117,7 @@ namespace BLL.Services.Implementation
      null,
      "/Listings/Create"
  );
-            return Response<bool>.Success(
+            return Response<bool>.SuccessWithKey(
                 true,
                 "HostApprovedSuccessfully"
             );
@@ -137,7 +137,7 @@ namespace BLL.Services.Implementation
             if (verification == null ||
                 verification.Status != HostVerificationStatus.Pending)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
                     "VerificationNotFoundOrProcessed"
                 );
@@ -167,7 +167,7 @@ namespace BLL.Services.Implementation
                 );
             }
 
-            return Response<bool>.Success(
+            return Response<bool>.SuccessWithKey(
                 true,
                 "HostApplicationRejected"
             );
@@ -213,7 +213,7 @@ namespace BLL.Services.Implementation
 
             if (user == null)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
                     "UserNotFound"
                 );
@@ -221,7 +221,7 @@ namespace BLL.Services.Implementation
 
             if (await _userManager.IsInRoleAsync(user, "Admin"))
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.Unauthorized,
                     "CannotLockAdmin"
                 );
@@ -235,7 +235,7 @@ namespace BLL.Services.Implementation
 
             if (!lockResult.Succeeded)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.Error,
                     "FailedToLockUser",
                     lockResult.Errors
@@ -260,7 +260,7 @@ namespace BLL.Services.Implementation
 
             await _tokenRepo.SaveAsync();
 
-            return Response<bool>.Success(
+            return Response<bool>.SuccessWithKey(
                 true,
                 "UserLockedSessionsRevoked"
             );
@@ -275,7 +275,7 @@ namespace BLL.Services.Implementation
 
             if (user == null)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
                     "UserNotFound"
                 );
@@ -289,7 +289,7 @@ namespace BLL.Services.Implementation
 
             if (!unlockResult.Succeeded)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.Error,
                     "FailedToUnlockUser",
                     unlockResult.Errors
@@ -298,7 +298,7 @@ namespace BLL.Services.Implementation
                 );
             }
 
-            return Response<bool>.Success(
+            return Response<bool>.SuccessWithKey(
                 true,
                 "UserUnlocked"
             );
@@ -348,7 +348,7 @@ namespace BLL.Services.Implementation
 
             if (listing == null)
             {
-                return Response<bool>.Fail(
+                return Response<bool>.FailWithKey(
                     ResponseStatus.NotFound,
                     "ListingNotFound"
                 );
@@ -369,7 +369,7 @@ namespace BLL.Services.Implementation
 );
             }
 
-            return Response<bool>.Success(
+            return Response<bool>.SuccessWithKey(
                 true,
                 "ListingModerationUpdated"
             );
