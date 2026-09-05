@@ -30,7 +30,7 @@ namespace BLL.Services
             var pagedResult = await _listingRepo.GetAllPaginatedEnhancedAsync<Listing>(
                 selector: l => l,
                 pageNumber: 1,
-                pageSize: 8,
+                pageSize: 30,
                 filter: l => l.IsActive,
                 expandable: false,
                 orderBy: q => q.OrderByDescending(l => l.CreatedAt),

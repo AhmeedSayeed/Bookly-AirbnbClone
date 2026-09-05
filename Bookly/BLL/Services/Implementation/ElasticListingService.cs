@@ -40,15 +40,33 @@ namespace BLL.Services.Implementation
             if (!string.IsNullOrWhiteSpace(request.SearchTerm))
             {
                 mustClauses.Add(q => q
-                    .MultiMatch(m => m
-                        .Fields(f => f
-                            .Field(doc => doc.Title, boost: 3)
-                            .Field(doc => doc.City, boost: 2.5)
-                            .Field(doc => doc.Description, boost: 1.3))
-                        .Query(request.SearchTerm)
-                        .Type(TextQueryType.CrossFields)
-                        .MinimumShouldMatch("75%")
-                    ));
+                    .Bool(b => b
+                        .Should(
+                            s => s.MultiMatch(m => m
+                                .Fields(f => f
+                                    .Field(doc => doc.Title, boost: 3)
+                                    .Field(doc => doc.City, boost: 2.5)
+                                    .Field(doc => doc.Description, boost: 1.3))
+                                .Query(request.SearchTerm)
+                                .Type(TextQueryType.CrossFields)
+                                .MinimumShouldMatch("75%")
+                            ),
+
+                            s => s.MultiMatch(m => m
+                                .Fields(f => f
+                                    .Field(doc => doc.Title, boost: 2)
+                                    .Field(doc => doc.City, boost: 1.5)
+                                    .Field(doc => doc.Description, boost: 1))
+                                .Query(request.SearchTerm)
+                                .Type(TextQueryType.MostFields)
+                                .Fuzziness(Fuzziness.Auto)
+                                .PrefixLength(1)
+                                .MinimumShouldMatch("75%")
+                            )
+                        )
+                        .MinimumShouldMatch(1)
+                    )
+                );
             }
             else
             {
