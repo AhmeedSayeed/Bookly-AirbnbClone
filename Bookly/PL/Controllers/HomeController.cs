@@ -26,16 +26,15 @@ namespace PL.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int page = 1)
         {
-            var response = await _homeService.GetHomeDataAsync();
+            var response = await _homeService.GetHomeDataAsync(page, 12);
 
             if (!response.Succeeded)
             {
                 return View(new HomeViewModel());
             }
 
-            // Mark which of the featured listings the current user has already wishlisted
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
                 var currentUserId = GetCurrentUserId();

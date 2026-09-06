@@ -24,17 +24,20 @@ namespace BLL.Services.Implementation
         private readonly PaymobSettings _settings;
         private readonly IRepository<Booking> _bookingRepo;
         private readonly IRepository<Payment> _paymentRepo;
+        private readonly INotificationService _notificationService;
 
         public PaymentService(
             HttpClient httpClient,
             IOptions<PaymobSettings> settings,
             IRepository<Booking> bookingRepo,
-            IRepository<Payment> paymentRepo)
+            IRepository<Payment> paymentRepo,
+            INotificationService notificationService)
         {
             _httpClient = httpClient;
             _settings = settings.Value;
             _bookingRepo = bookingRepo;
             _paymentRepo = paymentRepo;
+            _notificationService = notificationService;
         }
 
         public async Task<Response<string>> InitiatePaymentAsync(int bookingId, int userId, PaymentMethod method)
@@ -46,8 +49,10 @@ namespace BLL.Services.Implementation
 
             if (booking == null)
                 return Response<string>.FailWithKey(ResponseStatus.NotFound, "PaymentBookingNotFound");
+
             if (booking.Status != BookingStatus.Confirmed)
                 return Response<string>.FailWithKey(ResponseStatus.ValidationError, "OnlyConfirmedBookingsCanBePaid");
+
             int amountCents = (int)(booking.TotalPrice * 100);
             int selectedIntegrationId = method == PaymentMethod.MobileWallet
                 ? _settings.WalletIntegrationId
@@ -124,6 +129,7 @@ namespace BLL.Services.Implementation
                     ResponseStatus.Error,
                     "PaymentGatewayCheckoutSecretFailed"
                 );
+
             var existingPayment = await _paymentRepo.GetAllAsIQueryable()
                 .FirstOrDefaultAsync(p => p.BookingId == booking.Id);
 
@@ -160,10 +166,8 @@ namespace BLL.Services.Implementation
         public async Task<Response<bool>> ProcessWebhookAsync(string requestBody)
         {
             if (string.IsNullOrWhiteSpace(requestBody))
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.ValidationError,
-                    "EmptyWebhookPayload"
-                );
+                return Response<bool>.FailWithKey(ResponseStatus.ValidationError, "EmptyWebhookPayload");
+
             JsonDocument document;
             try
             {
@@ -171,16 +175,12 @@ namespace BLL.Services.Implementation
             }
             catch (JsonException)
             {
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.ValidationError,
-                    "InvalidJsonPayload"
-                );
+                return Response<bool>.FailWithKey(ResponseStatus.ValidationError, "InvalidJsonPayload");
             }
 
             using (document)
             {
                 var root = document.RootElement;
-
                 JsonElement target = root;
                 if (root.TryGetProperty("data", out var dataElem))
                     target = dataElem;
@@ -227,6 +227,7 @@ namespace BLL.Services.Implementation
                     {
                         payment = await _paymentRepo.GetAllAsIQueryable()
                             .Include(p => p.Booking)
+                                .ThenInclude(b => b.Listing)
                             .FirstOrDefaultAsync(p => p.BookingId == bookingId);
                     }
                 }
@@ -235,6 +236,7 @@ namespace BLL.Services.Implementation
                 {
                     payment = await _paymentRepo.GetAllAsIQueryable()
                         .Include(p => p.Booking)
+                            .ThenInclude(b => b.Listing)
                         .FirstOrDefaultAsync(p => p.PaymobOrderId == intentionId);
                 }
 
@@ -242,14 +244,13 @@ namespace BLL.Services.Implementation
                 {
                     payment = await _paymentRepo.GetAllAsIQueryable()
                         .Include(p => p.Booking)
+                            .ThenInclude(b => b.Listing)
                         .FirstOrDefaultAsync(p => p.PaymobOrderId == orderId);
                 }
 
                 if (payment == null)
-                    return Response<bool>.FailWithKey(
-                        ResponseStatus.NotFound,
-                        "PaymentRecordNotFoundForWebhook"
-                    );
+                    return Response<bool>.FailWithKey(ResponseStatus.NotFound, "PaymentRecordNotFoundForWebhook");
+
                 payment.PaymobTransactionId = transactionId;
                 payment.Status = isSuccess ? PaymentStatus.Success : PaymentStatus.Failed;
                 payment.PaidAt = isSuccess ? DateTime.UtcNow : null;
@@ -258,15 +259,28 @@ namespace BLL.Services.Implementation
                 {
                     payment.Booking.Status = BookingStatus.Paid;
                     _bookingRepo.Update(payment.Booking);
+
+                    // Notify guest about successful payment
+                    await _notificationService.SendNotificationAsync(
+                        payment.Booking.GuestId,
+                        "PaymentSuccessfulNotification",
+                        new[] { payment.Booking.Listing.Title },
+                        $"/Bookings/Details/{payment.Booking.Id}"
+                    );
+
+                    // Notify host that the booking is now fully paid
+                    await _notificationService.SendNotificationAsync(
+                        payment.Booking.Listing.HostId,
+                        "BookingPaidHostNotification",
+                        new[] { payment.Booking.Listing.Title },
+                        $"/Bookings/HostDetails/{payment.Booking.Id}"
+                    );
                 }
 
                 _paymentRepo.Update(payment);
                 await _paymentRepo.SaveAsync();
 
-                return Response<bool>.SuccessWithKey(
-                    true,
-                    "WebhookProcessedSuccessfully"
-                );
+                return Response<bool>.SuccessWithKey(true, "WebhookProcessedSuccessfully");
             }
         }
 
@@ -274,6 +288,7 @@ namespace BLL.Services.Implementation
         {
             var payment = await _paymentRepo.GetAllAsIQueryable()
                 .Include(p => p.Booking)
+                    .ThenInclude(b => b.Listing)
                 .FirstOrDefaultAsync(p => p.BookingId == bookingId);
 
             if (payment != null && payment.Booking != null && payment.Status != PaymentStatus.Success)
@@ -285,6 +300,21 @@ namespace BLL.Services.Implementation
                 _bookingRepo.Update(payment.Booking);
                 _paymentRepo.Update(payment);
                 await _paymentRepo.SaveAsync();
+
+                // Trigger notifications for direct confirmation fallback
+                await _notificationService.SendNotificationAsync(
+                    payment.Booking.GuestId,
+                    "PaymentSuccessfulNotification",
+                    new[] { payment.Booking.Listing.Title },
+                    $"/Bookings/Details/{payment.Booking.Id}"
+                );
+
+                await _notificationService.SendNotificationAsync(
+                    payment.Booking.Listing.HostId,
+                    "BookingPaidHostNotification",
+                    new[] { payment.Booking.Listing.Title },
+                    $"/Bookings/HostDetails/{payment.Booking.Id}"
+                );
             }
         }
 

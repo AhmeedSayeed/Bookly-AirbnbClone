@@ -41,6 +41,16 @@
     string maxAttr = siteMaxPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
     string currentMinAttr = Math.Floor(currentMinPrice).ToString(System.Globalization.CultureInfo.InvariantCulture);
     string currentMaxAttr = Math.Ceiling(currentMaxPrice).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
+    // Helper function to build pagination links while preserving existing query parameters
+    string GetPageUrl(int page)
+    {
+        var query = Context.Request.Query.ToDictionary(k => k.Key, v => v.Value.ToString());
+        query["PageNumber"] = page.ToString(); // Assuming your DTO uses 'PageNumber'
+
+        var queryString = string.Join("&", query.Select(q => $"{q.Key}={Uri.EscapeDataString(q.Value)}"));
+        return $"/Listings?{queryString}";
+    }
 }
 
 @if (isAuthenticated)
@@ -50,8 +60,8 @@
 
 <style>
     /* =========================================
-       Premium Wishlist Button Styling 
-    ========================================= */
+           Premium Wishlist Button Styling
+        ========================================= */
     .wishlist-toggle-btn {
         position: absolute;
         top: var(--space-3);
@@ -73,19 +83,19 @@
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, background 0.2s ease;
     }
 
-    .wishlist-toggle-btn:hover {
-        transform: scale(1.05);
-        background: rgba(255, 255, 255, 0.95);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
+        .wishlist-toggle-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
 
-    .wishlist-toggle-btn:active {
-        transform: scale(0.95);
-    }
+        .wishlist-toggle-btn:active {
+            transform: scale(0.95);
+        }
 
     .wishlist-heart-icon {
         display: block;
-        margin-top: 1.5px; /* التوسيط البصري الدقيق للقلب */
+        margin-top: 1.5px;
         transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
@@ -170,24 +180,6 @@
                 margin-top: -7px;
             }
 
-            .dual-range-container input[type="range"]::-moz-range-track {
-                height: 4px;
-                background: transparent;
-                border: none;
-                border-radius: var(--radius-pill);
-            }
-
-            .dual-range-container input[type="range"]::-moz-range-thumb {
-                pointer-events: auto;
-                width: 18px;
-                height: 18px;
-                border-radius: 50%;
-                background: var(--color-navy);
-                border: 2px solid var(--color-surface);
-                cursor: pointer;
-                box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            }
-
     .range-track {
         position: absolute;
         left: 0;
@@ -228,13 +220,12 @@
 
     <!-- SEARCH SIDEBAR -->
     <aside>
-        <form method="get" asp-action="Index" style="padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); position: sticky; top: 100px; background: var(--color-surface);">
+        <form method="get" asp-action="Index" id="searchFilterForm" style="padding: var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); position: sticky; top: 100px; background: var(--color-surface);">
 
             <h2 class="font-display" style="font-size: var(--fs-md); margin-bottom: var(--space-4);">
                 @Localizer["Filters"]
             </h2>
 
-            <!-- Main Search Term -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
                     @Localizer["WhatAreYouLookingFor"]
@@ -242,7 +233,6 @@
                 <input type="text" name="SearchTerm" value="@currentSearch?.SearchTerm" class="form-control" placeholder="@Localizer["SearchPlaceholderExpressive"]" style="width: 100%; padding: var(--space-2); font-size: 13px; border-radius: var(--radius-sm); border: 1px solid var(--color-border); margin-top: var(--space-2);" />
             </div>
 
-            <!-- Check-In / Check-Out Dates -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
                     @Localizer["Dates"]
@@ -259,7 +249,6 @@
                 </div>
             </div>
 
-            <!-- Dual Price Range Slider -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">
                     @Localizer["PriceRange"]
@@ -269,27 +258,9 @@
                     <div class="dual-range-container" id="price-slider-container">
                         <div class="range-track"></div>
                         <div id="range-highlight" class="range-track-highlight"></div>
-                        <input type="range"
-                               name="MinPrice"
-                               id="min-price-range"
-                               min="@minAttr"
-                               max="@maxAttr"
-                               step="10"
-                               value="@currentMinAttr"
-                               class="custom-range"
-                               oninput="updateRange()" />
-
-                        <input type="range"
-                               name="MaxPrice"
-                               id="max-price-range"
-                               min="@minAttr"
-                               max="@maxAttr"
-                               step="10"
-                               value="@currentMaxAttr"
-                               class="custom-range"
-                               oninput="updateRange()" />
+                        <input type="range" name="MinPrice" id="min-price-range" min="@minAttr" max="@maxAttr" step="10" value="@currentMinAttr" class="custom-range" oninput="updateRange()" />
+                        <input type="range" name="MaxPrice" id="max-price-range" min="@minAttr" max="@maxAttr" step="10" value="@currentMaxAttr" class="custom-range" oninput="updateRange()" />
                     </div>
-
                     <div class="price-values-display">
                         <span>@Localizer["CurrencyEGP"] <span id="min-price-val">@currentMinAttr</span></span>
                         <span>@Localizer["CurrencyEGP"] <span id="max-price-val">@currentMaxAttr</span></span>
@@ -297,7 +268,6 @@
                 </div>
             </div>
 
-            <!-- Guests Range -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Guests"]</label>
                 <div class="pill-group">
@@ -310,7 +280,6 @@
                 </div>
             </div>
 
-            <!-- Bedrooms Range -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Bedrooms"]</label>
                 <div class="pill-group">
@@ -323,7 +292,6 @@
                 </div>
             </div>
 
-            <!-- Property Types -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["PropertyType"]</label>
                 <div class="checkbox-group">
@@ -338,7 +306,6 @@
                 </div>
             </div>
 
-            <!-- Amenities -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["Amenities"]</label>
                 <div class="checkbox-group">
@@ -356,7 +323,6 @@
                 </div>
             </div>
 
-            <!-- Cancellation Policy -->
             <div class="form-group" style="margin-bottom: var(--space-5);">
                 <label style="font-size: var(--fs-xs); text-transform: uppercase; color: var(--color-text-muted);">@Localizer["CancellationPolicy"]</label>
                 <div class="checkbox-group">
@@ -386,7 +352,7 @@
     <div>
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-5); margin-bottom: var(--space-8);">
 
-            @if (Model.Items != null && Model.Items.Any())
+            @if (Model != null && Model.Items != null && Model.Items.Any())
             {
                 foreach (var item in Model.Items)
                 {
@@ -406,11 +372,11 @@
                                         data-listing-id="@item.Id"
                                         title="@Localizer["Wishlist"]"
                                         onclick="event.preventDefault(); event.stopPropagation();">
-                                        
-                                    <svg class="wishlist-heart-icon" 
-                                         xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" 
-                                         fill="@(item.IsWishlisted ? "var(--color-clay)" : "rgba(0,0,0,0.15)")" 
-                                         stroke="@(item.IsWishlisted ? "var(--color-clay)" : "#ffffff")" 
+
+                                    <svg class="wishlist-heart-icon"
+                                         xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                                         fill="@(item.IsWishlisted ? "var(--color-clay)" : "rgba(0,0,0,0.15)")"
+                                         stroke="@(item.IsWishlisted ? "var(--color-clay)" : "#ffffff")"
                                          stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                     </svg>
@@ -466,15 +432,47 @@
             }
 
         </div>
+
+        <!-- ==========================================
+             PAGINATION CONTROLS
+             ========================================== -->
+        @if (Model != null && Model.TotalPages > 1)
+        {
+            <div style="display: flex; justify-content: center; gap: var(--space-2); margin-top: var(--space-6); margin-bottom: var(--space-6);">
+                @if (Model.HasPreviousPage)
+                {
+                    <a href="@GetPageUrl(Model.PageIndex - 1)"
+                       style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); text-decoration: none; color: var(--color-text);">
+                        @Localizer["Previous"]
+                    </a>
+                }
+
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <a href="@GetPageUrl(i)"
+                       style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); text-decoration: none; font-weight: 600;
+                        @(Model.PageIndex == i ? "background-color: var(--color-navy); color: white;" : "background-color: var(--color-surface); color: var(--color-text);")">
+                        @i
+                    </a>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <a href="@GetPageUrl(Model.PageIndex + 1)"
+                       style="padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-pill); text-decoration: none; color: var(--color-text);">
+                        @Localizer["Next"]
+                    </a>
+                }
+            </div>
+        }
+
     </div>
 </div>
 
 @section Scripts {
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // ==========================================
-            // 1. Price Range Slider Logic
-            // ==========================================
+            // Price Range Slider Logic
             function updateRange() {
                 var minInput = document.getElementById('min-price-range');
                 var maxInput = document.getElementById('max-price-range');
@@ -521,41 +519,36 @@
             document.getElementById('max-price-range').addEventListener('input', updateRange);
 
 
-            // ==========================================
-            // 2. Dates Validation Logic
-            // ==========================================
+            // Dates Validation Logic
             var checkinInput = document.getElementById('checkin-date');
             var checkoutInput = document.getElementById('checkout-date');
-
-            // Limit Check-In to today at minimum
             var today = new Date().toISOString().split('T')[0];
-            checkinInput.setAttribute('min', today);
 
-            function updateCheckoutMin() {
-                if (checkinInput.value) {
-                    // Set checkout min to 1 day after checkin
-                    var checkinDate = new Date(checkinInput.value);
-                    checkinDate.setDate(checkinDate.getDate() + 1);
-                    var minCheckout = checkinDate.toISOString().split('T')[0];
+            if (checkinInput && checkoutInput) {
+                checkinInput.setAttribute('min', today);
 
-                    checkoutInput.setAttribute('min', minCheckout);
+                function updateCheckoutMin() {
+                    if (checkinInput.value) {
+                        var checkinDate = new Date(checkinInput.value);
+                        checkinDate.setDate(checkinDate.getDate() + 1);
+                        var minCheckout = checkinDate.toISOString().split('T')[0];
 
-                    // Auto-correct checkout if it falls before the new minimum
-                    if (checkoutInput.value && checkoutInput.value < minCheckout) {
-                        checkoutInput.value = minCheckout;
+                        checkoutInput.setAttribute('min', minCheckout);
+
+                        if (checkoutInput.value && checkoutInput.value < minCheckout) {
+                            checkoutInput.value = minCheckout;
+                        }
+                    } else {
+                        checkoutInput.setAttribute('min', today);
                     }
-                } else {
-                    checkoutInput.setAttribute('min', today);
                 }
+
+                checkinInput.addEventListener('change', updateCheckoutMin);
+                updateCheckoutMin();
             }
 
-            checkinInput.addEventListener('change', updateCheckoutMin);
-            updateCheckoutMin(); // Run on load to set initial state
 
-
-            // ==========================================
-            // 3. Toggleable Radio Pills Logic
-            // ==========================================
+            // Toggleable Radio Pills Logic
             document.querySelectorAll('.toggleable-pill').forEach(function(radio) {
                 radio.addEventListener('click', function(e) {
                     if (this.dataset.wasChecked === 'true') {
@@ -582,9 +575,7 @@
     @if (isAuthenticated)
     {
         <script>
-            // ==========================================
-            // 4. Premium Wishlist SVG Toggle Logic
-            // ==========================================
+            // Premium Wishlist SVG Toggle Logic
             document.querySelectorAll('.wishlist-toggle-btn').forEach(function(btn) {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -593,7 +584,6 @@
                     var listingId = btn.getAttribute('data-listing-id');
                     var icon = btn.querySelector('.wishlist-heart-icon');
 
-                    // تأثير حركي خفيف (نبضة) للقلب من جوه
                     icon.style.transform = 'scale(1.3)';
                     setTimeout(() => icon.style.transform = 'scale(1)', 250);
 

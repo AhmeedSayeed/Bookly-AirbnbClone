@@ -121,9 +121,16 @@ namespace PL.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(string searchTerm = null)
         {
-            var response = await _adminService.GetAllUsersAsync();
+            var response = await _adminService.GetAllUsersAsync(searchTerm);
+
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
+            {
+                return PartialView("_UsersTablePartial", response.Data);
+            }
+
             return View(response.Data);
         }
 
@@ -164,10 +171,15 @@ namespace PL.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Listings()
+        public async Task<IActionResult> Listings(string searchTerm = null)
         {
-            var response =
-                await _adminService.GetAllListingsForModerationAsync();
+            var response = await _adminService.GetAllListingsForModerationAsync(searchTerm);
+
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            if (isAjax)
+            {
+                return PartialView("_ListingsTablePartial", response.Data);
+            }
 
             return View(response.Data);
         }

@@ -13,13 +13,16 @@ namespace BLL.Services.Implementation
     {
         private readonly IRepository<HostVerification> _verificationRepo;
         private readonly IFileUploader _fileUploader;
+        private readonly INotificationService _notificationService;
 
         public VerificationService(
             IRepository<HostVerification> verificationRepo,
-            IFileUploader fileUploader)
+            IFileUploader fileUploader,
+            INotificationService notificationService)
         {
             _verificationRepo = verificationRepo;
             _fileUploader = fileUploader;
+            _notificationService = notificationService;
         }
 
         public async Task<Response<HostVerification>> GetVerificationByUserIdAsync(int userId)
@@ -85,13 +88,20 @@ namespace BLL.Services.Implementation
 
             var saved = await _verificationRepo.SaveAsync();
 
-            return saved > 0
-                ? Response<bool>.SuccessWithKey(
-                    true,
-                    "VerificationSubmittedSuccessfully")
-                : Response<bool>.FailWithKey(
-                    ResponseStatus.Error,
-                    "FailedToSubmitVerification");
+            if (saved > 0)
+            {
+                // Notify the user that their submission was received
+                await _notificationService.SendNotificationAsync(
+                    userId,
+                    "VerificationSubmittedNotification",
+                    null,
+                    "/Account/BecomeAHost"
+                );
+
+                return Response<bool>.SuccessWithKey(true, "VerificationSubmittedSuccessfully");
+            }
+
+            return Response<bool>.FailWithKey(ResponseStatus.Error, "FailedToSubmitVerification");
         }
     }
 }

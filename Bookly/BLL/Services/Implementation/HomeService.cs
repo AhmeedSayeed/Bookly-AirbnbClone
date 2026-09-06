@@ -25,12 +25,12 @@ namespace BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<Response<HomeViewModel>> GetHomeDataAsync()
+        public async Task<Response<HomeViewModel>> GetHomeDataAsync(int page = 1, int pageSize = 12)
         {
             var pagedResult = await _listingRepo.GetAllPaginatedEnhancedAsync<Listing>(
                 selector: l => l,
-                pageNumber: 1,
-                pageSize: 30,
+                pageNumber: page,
+                pageSize: pageSize,
                 filter: l => l.IsActive,
                 expandable: false,
                 orderBy: q => q.OrderByDescending(l => l.CreatedAt),
@@ -43,7 +43,9 @@ namespace BLL.Services
 
             var viewModel = new HomeViewModel
             {
-                FeaturedListings = featuredListingsVm
+                FeaturedListings = featuredListingsVm,
+                CurrentPage = pagedResult.PageIndex,
+                TotalPages = pagedResult.TotalPages
             };
 
             return Response<HomeViewModel>.Success(viewModel);

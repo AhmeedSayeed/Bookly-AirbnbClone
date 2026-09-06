@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Nest;
+using PL.Middlewares;
 using System.Globalization;
 using System.Security.Claims;
 using System.Text;
@@ -90,6 +91,16 @@ namespace PL
                 {
                     OnMessageReceived = context =>
                     {
+                        if (context.Request.Headers.ContainsKey("Authorization"))
+                        {
+                            var authHeader = context.Request.Headers["Authorization"].ToString();
+                            if (authHeader.StartsWith("Bearer "))
+                            {
+                                context.Token = authHeader.Substring("Bearer ".Length);
+                                return Task.CompletedTask;
+                            }
+                        }
+
                         if (context.Request.Cookies.ContainsKey("access_token"))
                         {
                             context.Token = context.Request.Cookies["access_token"];
@@ -250,6 +261,9 @@ namespace PL
 
             app.UseHttpsRedirection();
             app.UseRouting();
+
+            app.UseMiddleware<RefreshTokenMiddleware>();
+
             app.UseAuthentication();
             app.UseAuthorization();
 

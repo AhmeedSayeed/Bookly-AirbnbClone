@@ -6,6 +6,6 @@ namespace BLL.Interfaces
 {
     public interface IHomeService
     {
-        Task<Response<HomeViewModel>> GetHomeDataAsync();
+        Task<Response<HomeViewModel>> GetHomeDataAsync(int page = 1, int pageSize = 12);
     }
 }

@@ -44,10 +44,10 @@
         position: relative;
     }
 
-    .cal-day:hover:not(.cal-day--disabled):not(.cal-day--booked) {
-        border-color: var(--color-brass);
-        transform: scale(1.03);
-    }
+        .cal-day:hover:not(.cal-day--disabled):not(.cal-day--booked) {
+            border-color: var(--color-brass);
+            transform: scale(1.03);
+        }
 
     .cal-day--disabled {
         background: var(--color-surface-sunk);
@@ -221,23 +221,23 @@
 
         let currentDate = new Date();
 
-        // Localized calendar data
+        // تم إضافة Html.Raw.Value لمنع التشفير وعرض النصوص بشكل صحيح
         const monthNames = [
-            "@Localizer["January"]",
-            "@Localizer["February"]",
-            "@Localizer["March"]",
-            "@Localizer["April"]",
-            "@Localizer["May"]",
-            "@Localizer["June"]",
-            "@Localizer["July"]",
-            "@Localizer["August"]",
-            "@Localizer["September"]",
-            "@Localizer["October"]",
-            "@Localizer["November"]",
-            "@Localizer["December"]"
+            "@Html.Raw(Localizer["January"].Value)",
+            "@Html.Raw(Localizer["February"].Value)",
+            "@Html.Raw(Localizer["March"].Value)",
+            "@Html.Raw(Localizer["April"].Value)",
+            "@Html.Raw(Localizer["May"].Value)",
+            "@Html.Raw(Localizer["June"].Value)",
+            "@Html.Raw(Localizer["July"].Value)",
+            "@Html.Raw(Localizer["August"].Value)",
+            "@Html.Raw(Localizer["September"].Value)",
+            "@Html.Raw(Localizer["October"].Value)",
+            "@Html.Raw(Localizer["November"].Value)",
+            "@Html.Raw(Localizer["December"].Value)"
         ];
 
-        const bookedByGuestText = "@Localizer["BookedByGuest"]";
+        const bookedByGuestText = "@Html.Raw(Localizer["BookedByGuest"].Value)";
 
         function renderCalendar() {
             const year = currentDate.getFullYear();
@@ -306,9 +306,7 @@
         }
 
         function updateHiddenInputs() {
-            const container =
-                document.getElementById('hiddenInputsContainer');
-
+            const container = document.getElementById('hiddenInputsContainer');
             container.innerHTML = '';
 
             let index = 0;
@@ -321,7 +319,6 @@
                 input.value = date;
 
                 container.appendChild(input);
-
                 index++;
             });
         }

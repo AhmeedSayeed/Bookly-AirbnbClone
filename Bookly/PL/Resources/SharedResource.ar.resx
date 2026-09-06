@@ -1909,4 +1909,24 @@
 	<data name="AddedToWishlist" xml:space="preserve">
   <value>تمت الإضافة إلى المفضلة</value>
 </data>
+<data name="January" xml:space="preserve"><value>يناير</value></data>
+<data name="February" xml:space="preserve"><value>فبراير</value></data>
+<data name="March" xml:space="preserve"><value>مارس</value></data>
+<data name="April" xml:space="preserve"><value>أبريل</value></data>
+<data name="May" xml:space="preserve"><value>مايو</value></data>
+<data name="June" xml:space="preserve"><value>يونيو</value></data>
+<data name="July" xml:space="preserve"><value>يوليو</value></data>
+<data name="August" xml:space="preserve"><value>أغسطس</value></data>
+<data name="September" xml:space="preserve"><value>سبتمبر</value></data>
+<data name="October" xml:space="preserve"><value>أكتوبر</value></data>
+<data name="November" xml:space="preserve"><value>نوفمبر</value></data>
+<data name="December" xml:space="preserve"><value>ديسمبر</value></data>
+
+<data name="SundayShort" xml:space="preserve"><value>أحد</value></data>
+<data name="MondayShort" xml:space="preserve"><value>إثنين</value></data>
+<data name="TuesdayShort" xml:space="preserve"><value>ثلاثاء</value></data>
+<data name="WednesdayShort" xml:space="preserve"><value>أربعاء</value></data>
+<data name="ThursdayShort" xml:space="preserve"><value>خميس</value></data>
+<data name="FridayShort" xml:space="preserve"><value>جمعة</value></data>
+<data name="SaturdayShort" xml:space="preserve"><value>سبت</value></data>
 </root>

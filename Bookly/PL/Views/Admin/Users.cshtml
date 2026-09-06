@@ -26,98 +26,49 @@
         </div>
     }
 
-    <div style="background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--color-border);">
+    <!-- Search Input -->
+    <div style="margin-bottom: var(--space-4);">
+        <input type="text"
+               id="searchInput"
+               placeholder="Search by name or email..."
+               style="width: 100%; max-width: 400px; padding: var(--space-2); border: 1px solid var(--color-border); border-radius: var(--radius-sm); font-size: var(--fs-sm);" />
+    </div>
 
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-
-            <thead style="background: var(--color-surface-sunk); font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--color-text-muted);">
-                <tr>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["User"]</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["Email"]</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["Role"]</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border);">@Localizer["Status"]</th>
-                    <th style="padding: var(--space-4); border-bottom: 1px solid var(--color-border); text-align: right;">@Localizer["Actions"]</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                @foreach (var user in Model.Users)
-                {
-                    <tr style="border-bottom: 1px solid var(--color-border);">
-
-                        <td style="padding: var(--space-4); font-size: var(--fs-sm); font-weight: 600;">
-                            @user.FullName
-                        </td>
-
-                        <td style="padding: var(--space-4); font-size: var(--fs-sm); color: var(--color-text-muted);">
-                            @user.Email
-                        </td>
-
-                        <td style="padding: var(--space-4); font-size: var(--fs-sm);">
-                            @(user.IsHost ? Localizer["Host"] : Localizer["Guest"])
-                        </td>
-
-                        <td style="padding: var(--space-4); font-size: var(--fs-sm);">
-
-                            @if (user.IsLockedOut)
-                            {
-                                <span style="color: var(--color-danger); font-weight: 600;">
-                                    @Localizer["Suspended"]
-                                </span>
-                            }
-                            else
-                            {
-                                <span style="color: var(--color-success);">
-                                    @Localizer["Active"]
-                                </span>
-                            }
-
-                        </td>
-
-                        <td style="padding: var(--space-4); text-align: right;">
-
-                            @if (user.IsLockedOut)
-                            {
-                                <form asp-action="UnlockUser"
-                                      method="post"
-                                      style="display:inline;">
-
-                                    <input type="hidden" name="id" value="@user.Id" />
-
-                                    <button type="submit"
-                                            class="btn-primary"
-                                            style="background: var(--color-surface); color: var(--color-navy); border: 1px solid var(--color-border-strong); padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-sm);">
-                                        @Localizer["Unlock"]
-                                    </button>
-                                </form>
-                            }
-                            else
-                            {
-                                <form asp-action="LockUser"
-                                      method="post"
-                                      onsubmit="return confirm('@Localizer["ConfirmSuspendUser"]');"
-                                      style="display:inline;">
-
-                                    <input type="hidden" name="id" value="@user.Id" />
-
-                                    <button type="submit"
-                                            class="btn-primary"
-                                            style="background: rgba(155, 59, 52, 0.1); color: var(--color-danger); border: none; padding: var(--space-1) var(--space-3); border-radius: var(--radius-sm); font-size: var(--fs-sm);">
-                                        @Localizer["Suspend"]
-                                    </button>
-                                </form>
-                            }
-
-                        </td>
-
-                    </tr>
-                }
-
-            </tbody>
-
-        </table>
-
+    <!-- Table Container for AJAX Updates -->
+    <div id="tableContainer" style="background: var(--color-surface); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--color-border);">
+        <partial name="_UsersTablePartial" model="Model" />
     </div>
 
 </div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let timeout = null;
+            const searchInput = document.getElementById('searchInput');
+            const tableContainer = document.getElementById('tableContainer');
+
+            searchInput.addEventListener('input', function(e) {
+                clearTimeout(timeout);
+                const searchTerm = e.target.value;
+
+                timeout = setTimeout(() => {
+                    fetch(`@Url.Action("Users", "Admin")?searchTerm=${encodeURIComponent(searchTerm)}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                        .then(response => {
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            return response.text();
+                        })
+                        .then(html => {
+                            tableContainer.innerHTML = html;
+                        })
+                        .catch(error => console.error('Error fetching data:', error));
+                }, 350);
+            });
+        });
+    </script>
+}

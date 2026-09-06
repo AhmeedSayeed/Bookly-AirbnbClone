@@ -18,12 +18,12 @@ namespace BLL.Services.Interfaces
         Task<Response<bool>> RejectVerificationAsync(int verificationId, string reason = null);
 
         // Users uses AdminUsersViewModel
-        Task<Response<AdminUsersViewModel>> GetAllUsersAsync();
+        Task<Response<AdminUsersViewModel>> GetAllUsersAsync(string searchTerm = null);
         Task<Response<bool>> LockUserAsync(int userId, DateTimeOffset lockoutEnd);
         Task<Response<bool>> UnlockUserAsync(int userId);
 
         // Listings uses AdminListingsViewModel
-        Task<Response<AdminListingsViewModel>> GetAllListingsForModerationAsync();
+        Task<Response<AdminListingsViewModel>> GetAllListingsForModerationAsync(string searchTerm = null);
         Task<Response<bool>> ModerateListingAsync(int listingId, bool isActive);
     }
 }

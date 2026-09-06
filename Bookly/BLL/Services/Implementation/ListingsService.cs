@@ -38,13 +38,13 @@ namespace BLL.Services.Implementation
         {
             var pagedListings = await _elasticService.SearchAsync(request);
 
-            // Fetch current ratings for the resulting listings from the database
             var listingIds = pagedListings.Items.Select(i => i.Id).ToList();
 
             var listingsData = await _listingRepo.GetAllAsIQueryable()
                 .Where(l => listingIds.Contains(l.Id))
                 .Include(l => l.Bookings)
                     .ThenInclude(b => b.Review)
+                .AsSplitQuery()
                 .ToListAsync();
 
             var viewModels = new List<ListingCardViewModel>();
@@ -75,12 +75,12 @@ namespace BLL.Services.Implementation
                     Id = item.Id,
                     Title = item.Title,
                     City = item.City,
-                    Country = "", // Elasticsearch currently doesn't map country in DTO
+                    Country = "",
                     PricePerNight = item.PricePerNight,
                     PrimaryPhotoUrl = item.ThumbnailUrl,
                     AverageRating = avgRating,
                     ReviewCount = reviewCount,
-                    IsWishlisted = false // Will be set in the controller
+                    IsWishlisted = false
                 });
             }
 
@@ -105,7 +105,7 @@ namespace BLL.Services.Implementation
 
             if (!hasListings)
             {
-                return (0, 2000);
+                return (0, 10000);
             }
 
             var minPrice = listings.Min(l => l.PricePerNight);
@@ -182,7 +182,8 @@ namespace BLL.Services.Implementation
                 .Include(l => l.BlockedDates)
                 .Include(l => l.Bookings)
                     .ThenInclude(b => b.Review)
-                      .ThenInclude(r => r.HostResponse);
+                      .ThenInclude(r => r.HostResponse)
+                .AsSplitQuery();
 
             var listing = await query.FirstOrDefaultAsync(l => l.Id == id);
 
@@ -194,17 +195,23 @@ namespace BLL.Services.Implementation
             var unavailable = new List<string>();
             var today = DateTime.UtcNow.Date;
 
-            unavailable.AddRange(listing.BlockedDates
-                .Where(bd => bd.Date.Date >= today)
-                .Select(bd => bd.Date.ToString("yyyy-MM-dd")));
-
-            var activeBookings = listing.Bookings
-                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
-                .ToList();
-
-            foreach (var b in activeBookings)
+            if (listing.BlockedDates != null)
             {
-                for (var d = b.CheckInDate.Date; d < b.CheckOutDate.Date; d = d.AddDays(1))
+                unavailable.AddRange(listing.BlockedDates
+                    .Where(bd => bd.Date.Date >= today)
+                    .Select(bd => bd.Date.ToString("yyyy-MM-dd")));
+            }
+
+            var activeBookingsForDates = await _listingRepo.GetAllAsIQueryable()
+                .Where(l => l.Id == id)
+                .SelectMany(l => l.Bookings)
+                .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Rejected)
+                .Select(b => new { b.CheckInDate, b.CheckOutDate })
+                .ToListAsync();
+
+            foreach (var b in activeBookingsForDates)
+            {
+                for (var d = b.CheckInDate.Date; d <= b.CheckOutDate.Date; d = d.AddDays(1))
                 {
                     var str = d.ToString("yyyy-MM-dd");
                     if (!unavailable.Contains(str))
@@ -320,7 +327,8 @@ namespace BLL.Services.Implementation
                 .Include(l => l.Photos)
                 .Include(l => l.Bookings)
                 .Where(l => l.HostId == hostId)
-                .OrderByDescending(l => l.CreatedAt);
+                .OrderByDescending(l => l.CreatedAt)
+                .AsSplitQuery();
 
             var listings = await query.ToListAsync();
             var viewModels = _mapper.Map<List<ListingSummaryViewModel>>(listings);
@@ -351,7 +359,6 @@ namespace BLL.Services.Implementation
         {
             var listing = await _listingRepo.GetAllAsIQueryable()
                 .Include(l => l.BlockedDates)
-                .Include(l => l.Bookings)
                 .FirstOrDefaultAsync(l => l.Id == listingId);
 
             if (listing == null)
@@ -361,13 +368,17 @@ namespace BLL.Services.Implementation
                 return Response<AvailabilityCalendarViewModel>.FailWithKey(ResponseStatus.Forbidden, "CannotManageListing");
 
             var bookedDates = new List<DateTime>();
-            var activeBookings = listing.Bookings
-                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending)
-                .ToList();
 
-            foreach (var booking in activeBookings)
+            var activeBookingsForDates = await _listingRepo.GetAllAsIQueryable()
+                .Where(l => l.Id == listingId)
+                .SelectMany(l => l.Bookings)
+                .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Rejected)
+                .Select(b => new { b.CheckInDate, b.CheckOutDate })
+                .ToListAsync();
+
+            foreach (var b in activeBookingsForDates)
             {
-                for (var date = booking.CheckInDate.Date; date < booking.CheckOutDate.Date; date = date.AddDays(1))
+                for (var date = b.CheckInDate.Date; date <= b.CheckOutDate.Date; date = date.AddDays(1))
                 {
                     if (!bookedDates.Contains(date))
                         bookedDates.Add(date);
@@ -447,7 +458,6 @@ namespace BLL.Services.Implementation
                 .Include(l => l.Photos)
                 .Include(l => l.ListingAmenities)
                 .Include(l => l.BlockedDates)
-                .Include(l => l.Bookings)
                 .FirstOrDefaultAsync(l => l.Id == listingId);
 
             if (listing == null) return;
@@ -475,17 +485,24 @@ namespace BLL.Services.Implementation
             var unavailable = new HashSet<DateTime>();
             var today = DateTime.UtcNow.Date;
 
-            foreach (var bd in listing.BlockedDates.Where(bd => bd.Date.Date >= today))
+            if (listing.BlockedDates != null)
             {
-                unavailable.Add(bd.Date.Date);
+                foreach (var bd in listing.BlockedDates.Where(bd => bd.Date.Date >= today))
+                {
+                    unavailable.Add(bd.Date.Date);
+                }
             }
 
-            var activeBookings = listing.Bookings
-                .Where(b => b.Status == BookingStatus.Confirmed || b.Status == BookingStatus.Pending);
+            var activeBookingsForDates = await _listingRepo.GetAllAsIQueryable()
+                .Where(l => l.Id == listingId)
+                .SelectMany(l => l.Bookings)
+                .Where(b => b.Status != BookingStatus.Cancelled && b.Status != BookingStatus.Rejected)
+                .Select(b => new { b.CheckInDate, b.CheckOutDate })
+                .ToListAsync();
 
-            foreach (var b in activeBookings)
+            foreach (var b in activeBookingsForDates)
             {
-                for (var d = b.CheckInDate.Date; d < b.CheckOutDate.Date; d = d.AddDays(1))
+                for (var d = b.CheckInDate.Date; d <= b.CheckOutDate.Date; d = d.AddDays(1))
                 {
                     unavailable.Add(d);
                 }

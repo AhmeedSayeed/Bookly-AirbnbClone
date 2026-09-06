@@ -19,17 +19,20 @@ namespace BLL.Services.Implementation
         private readonly IRepository<HostResponse> _hostResponseRepo;
         private readonly IRepository<Booking> _bookingRepo;
         private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
 
         public ReviewService(
             IRepository<Review> reviewRepo,
             IRepository<HostResponse> hostResponseRepo,
             IRepository<Booking> bookingRepo,
-            IMapper mapper)
+            IMapper mapper,
+            INotificationService notificationService)
         {
             _reviewRepo = reviewRepo;
             _hostResponseRepo = hostResponseRepo;
             _bookingRepo = bookingRepo;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<Response<CreateReviewViewModel>> GetReviewFormAsync(int bookingId, int guestId)
@@ -40,24 +43,16 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(b => b.Id == bookingId);
 
             if (booking == null)
-                return Response<CreateReviewViewModel>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "BookingNotFound");
+                return Response<CreateReviewViewModel>.FailWithKey(ResponseStatus.NotFound, "BookingNotFound");
 
             if (booking.GuestId != guestId)
-                return Response<CreateReviewViewModel>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "ThisIsNotYourBooking");
+                return Response<CreateReviewViewModel>.FailWithKey(ResponseStatus.Forbidden, "ThisIsNotYourBooking");
 
             if (booking.Status != BookingStatus.Completed)
-                return Response<CreateReviewViewModel>.FailWithKey(
-                    ResponseStatus.ValidationError,
-                    "CanOnlyReviewCompletedStay");
+                return Response<CreateReviewViewModel>.FailWithKey(ResponseStatus.ValidationError, "CanOnlyReviewCompletedStay");
 
             if (booking.Review != null)
-                return Response<CreateReviewViewModel>.FailWithKey(
-                    ResponseStatus.Conflict,
-                    "AlreadyReviewedStay");
+                return Response<CreateReviewViewModel>.FailWithKey(ResponseStatus.Conflict, "AlreadyReviewedStay");
 
             var model = new CreateReviewViewModel
             {
@@ -68,33 +63,24 @@ namespace BLL.Services.Implementation
             return Response<CreateReviewViewModel>.Success(model);
         }
 
-        public async Task<Response<bool>> SubmitReviewAsync(
-            int guestId,
-            CreateReviewViewModel model)
+        public async Task<Response<bool>> SubmitReviewAsync(int guestId, CreateReviewViewModel model)
         {
             var booking = await _bookingRepo.GetAllAsIQueryable()
                 .Include(b => b.Review)
+                .Include(b => b.Listing)
                 .FirstOrDefaultAsync(b => b.Id == model.BookingId);
 
             if (booking == null)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "BookingNotFound");
+                return Response<bool>.FailWithKey(ResponseStatus.NotFound, "BookingNotFound");
 
             if (booking.GuestId != guestId)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "ThisIsNotYourBooking");
+                return Response<bool>.FailWithKey(ResponseStatus.Forbidden, "ThisIsNotYourBooking");
 
             if (booking.Status != BookingStatus.Completed)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.ValidationError,
-                    "CanOnlyReviewCompletedStay");
+                return Response<bool>.FailWithKey(ResponseStatus.ValidationError, "CanOnlyReviewCompletedStay");
 
             if (booking.Review != null)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.Conflict,
-                    "AlreadyReviewedStay");
+                return Response<bool>.FailWithKey(ResponseStatus.Conflict, "AlreadyReviewedStay");
 
             var review = _mapper.Map<Review>(model);
             review.BookingId = booking.Id;
@@ -102,18 +88,22 @@ namespace BLL.Services.Implementation
             await _reviewRepo.AddAsync(review);
             var saved = await _reviewRepo.SaveAsync();
 
-            return saved > 0
-                ? Response<bool>.SuccessWithKey(
-                    true,
-                    "ReviewSubmittedSuccessfully")
-                : Response<bool>.FailWithKey(
-                    ResponseStatus.Error,
-                    "FailedToSubmitReview");
+            if (saved > 0)
+            {
+                await _notificationService.SendNotificationAsync(
+                    booking.Listing.HostId,
+                    "NewReviewNotification",
+                    new[] { booking.Listing.Title },
+                    $"/Listings/Details/{booking.ListingId}"
+                );
+
+                return Response<bool>.SuccessWithKey(true, "ReviewSubmittedSuccessfully");
+            }
+
+            return Response<bool>.FailWithKey(ResponseStatus.Error, "FailedToSubmitReview");
         }
 
-        public async Task<Response<HostResponseViewModel>> GetRespondFormAsync(
-            int reviewId,
-            int hostId)
+        public async Task<Response<HostResponseViewModel>> GetRespondFormAsync(int reviewId, int hostId)
         {
             var review = await _reviewRepo.GetAllAsIQueryable()
                 .Include(r => r.Booking).ThenInclude(b => b.Listing)
@@ -122,19 +112,13 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(r => r.Id == reviewId);
 
             if (review == null)
-                return Response<HostResponseViewModel>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ReviewNotFound");
+                return Response<HostResponseViewModel>.FailWithKey(ResponseStatus.NotFound, "ReviewNotFound");
 
             if (review.Booking.Listing.HostId != hostId)
-                return Response<HostResponseViewModel>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "ReviewNotOnYourListing");
+                return Response<HostResponseViewModel>.FailWithKey(ResponseStatus.Forbidden, "ReviewNotOnYourListing");
 
             if (review.HostResponse != null)
-                return Response<HostResponseViewModel>.FailWithKey(
-                    ResponseStatus.Conflict,
-                    "AlreadyRespondedToReview");
+                return Response<HostResponseViewModel>.FailWithKey(ResponseStatus.Conflict, "AlreadyRespondedToReview");
 
             var model = new HostResponseViewModel
             {
@@ -146,9 +130,7 @@ namespace BLL.Services.Implementation
             return Response<HostResponseViewModel>.Success(model);
         }
 
-        public async Task<Response<bool>> RespondToReviewAsync(
-            int hostId,
-            HostResponseViewModel model)
+        public async Task<Response<bool>> RespondToReviewAsync(int hostId, HostResponseViewModel model)
         {
             var review = await _reviewRepo.GetAllAsIQueryable()
                 .Include(r => r.Booking).ThenInclude(b => b.Listing)
@@ -156,19 +138,13 @@ namespace BLL.Services.Implementation
                 .FirstOrDefaultAsync(r => r.Id == model.ReviewId);
 
             if (review == null)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.NotFound,
-                    "ReviewNotFound");
+                return Response<bool>.FailWithKey(ResponseStatus.NotFound, "ReviewNotFound");
 
             if (review.Booking.Listing.HostId != hostId)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.Forbidden,
-                    "ReviewNotOnYourListing");
+                return Response<bool>.FailWithKey(ResponseStatus.Forbidden, "ReviewNotOnYourListing");
 
             if (review.HostResponse != null)
-                return Response<bool>.FailWithKey(
-                    ResponseStatus.Conflict,
-                    "AlreadyRespondedToReview");
+                return Response<bool>.FailWithKey(ResponseStatus.Conflict, "AlreadyRespondedToReview");
 
             var hostResponse = new HostResponse
             {
@@ -180,13 +156,19 @@ namespace BLL.Services.Implementation
             await _hostResponseRepo.AddAsync(hostResponse);
             var saved = await _hostResponseRepo.SaveAsync();
 
-            return saved > 0
-                ? Response<bool>.SuccessWithKey(
-                    true,
-                    "ReviewResponsePostedSuccessfully")
-                : Response<bool>.FailWithKey(
-                    ResponseStatus.Error,
-                    "FailedToPostResponse");
+            if (saved > 0)
+            {
+                await _notificationService.SendNotificationAsync(
+                    review.Booking.GuestId,
+                    "HostRespondedToReviewNotification",
+                    new[] { review.Booking.Listing.Title },
+                    $"/Listings/Details/{review.Booking.ListingId}"
+                );
+
+                return Response<bool>.SuccessWithKey(true, "ReviewResponsePostedSuccessfully");
+            }
+
+            return Response<bool>.FailWithKey(ResponseStatus.Error, "FailedToPostResponse");
         }
     }
 }
